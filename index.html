@@ -162,8 +162,8 @@
 	const BOSS_ROSTER = []
 
     const TERRAIN_ROSTER = [
-      { id: 'urban',  name: 'Urban (Street)', image: 'https://schaledb.com/images/ui/Terrain_Street.png' },
-      { id: 'field',  name: 'Field (Outdoor)', image: 'https://schaledb.com/images/ui/Terrain_Outdoor.png' },
+      { id: 'street',  name: 'Urban (Street)', image: 'https://schaledb.com/images/ui/Terrain_Street.png' },
+      { id: 'outdoor',  name: 'Field (Outdoor)', image: 'https://schaledb.com/images/ui/Terrain_Outdoor.png' },
       { id: 'indoor', name: 'Indoor',          image: 'https://schaledb.com/images/ui/Terrain_Indoor.png' }
     ];
 
@@ -319,7 +319,7 @@
       } else if (step.target === 'terrain') {
         document.getElementById('grid-title').innerText = "SELECT TERRAIN";
         const activeBoss = gameData[step.game].boss;
-        const allowed = activeBoss ? activeBoss.terrains : ['urban', 'field', 'indoor'];
+        const allowed = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
 
         if (allowed.length === 1 && step.type !== 'roll') {
           gameData[step.game].terrain = TERRAIN_ROSTER.find(t => t.id === allowed[0]);
@@ -384,7 +384,7 @@
     function executeAdminRoll() {
       const step = DRAFT_SEQUENCE[currentStepIndex];
       const activeBoss = gameData[step.game].boss;
-      const allowed = activeBoss ? activeBoss.terrains : ['urban', 'field', 'indoor'];
+      const allowed = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
       const rolledId = allowed[Math.floor(Math.random() * allowed.length)];
       gameData[step.game].terrain = TERRAIN_ROSTER.find(t => t.id === rolledId);
       currentStepIndex++;
