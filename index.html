@@ -403,13 +403,40 @@
     }
 
     function updateGameCardsUI() {
-      for (let g = 1; g <= 3; g++) {
-        const data = gameData[g];
-        document.getElementById(`g${g}-boss-slot`).innerHTML = data.boss ? `<span class="text-xs font-bold text-cyan-300">${data.boss.name}</span>` : `<span class="text-[10px] text-slate-500 uppercase font-bold">Boss</span><span class="text-xs font-bold text-slate-400">Pending</span>`;
-        document.getElementById(`g${g}-terrain-slot`).innerHTML = data.terrain ? `<span class="text-xs font-bold text-amber-300">${data.terrain.name}</span>` : `<span class="text-[10px] text-slate-500 uppercase font-bold">Terrain</span><span class="text-xs font-bold text-slate-400">Pending</span>`;
-        document.getElementById(`g${g}-bans-container`).innerHTML = data.studentBans.length ? data.studentBans.map(s => `<span class="bg-rose-950 border border-rose-800 text-rose-300 text-[10px] font-bold px-1.5 py-0.5 rounded-full">${s.name}</span>`).join('') : `<span class="text-xs text-slate-600 italic">None yet</span>`;
-      }
-    }
+	  for (let g = 1; g <= 3; g++) {
+	    const data = gameData[g];
+	    
+	    // Boss Slot with Portrait Image
+	    document.getElementById(`g${g}-boss-slot`).innerHTML = data.boss ? `
+	      <div class="w-full h-full flex flex-col items-center justify-center p-1">
+	        <img src="${data.boss.image}" class="w-full h-12 object-cover rounded mb-1" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' fill=\'%23334155\'><rect width=\'100%\' height=\'100%\'/></svg>';">
+	        <span class="text-xs font-bold text-cyan-300 truncate w-full text-center">${data.boss.name}</span>
+	      </div>
+	    ` : `
+	      <span class="text-[10px] text-slate-500 uppercase font-bold">Boss</span>
+	      <span class="text-xs font-bold text-slate-400">Pending</span>
+	    `;
+	
+	    // Terrain Slot with Icon Image
+	    document.getElementById(`g${g}-terrain-slot`).innerHTML = data.terrain ? `
+	      <div class="w-full h-full flex flex-col items-center justify-center p-1">
+	        <img src="${data.terrain.image}" class="w-full h-10 object-contain rounded mb-1">
+	        <span class="text-xs font-bold text-amber-300 truncate w-full text-center">${data.terrain.name}</span>
+	      </div>
+	    ` : `
+	      <span class="text-[10px] text-slate-500 uppercase font-bold">Terrain</span>
+	      <span class="text-xs font-bold text-slate-400">Pending</span>
+	    `;
+	
+	    // Banned Student Badges with Mini Circle Portraits
+	    document.getElementById(`g${g}-bans-container`).innerHTML = data.studentBans.length ? data.studentBans.map(s => `
+	      <span class="bg-rose-950/90 border border-rose-800/80 text-rose-300 text-[10px] font-bold pl-1 pr-2 py-0.5 rounded-full flex items-center gap-1">
+	        <img src="${s.image}" class="w-4 h-4 rounded-full object-cover border border-rose-500/50">
+	        ${s.name}
+	      </span>
+	    `).join('') : `<span class="text-xs text-slate-600 italic">None yet</span>`;
+	  }
+	}
 
     function renderCompleteState() {
 	  // FIRST: Force-update the UI so all 4 banned student pills render in Game 3's card!
