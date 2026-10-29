@@ -224,24 +224,47 @@
       3: { boss: null, terrain: null, studentBans: [] }
     };
 
-    window.onload = function() {
-		raid_boss_promise = fetch("https://schaledb.com/data/en/raids.min.json").then(raid_req => {
-			return raid_req.json()
-		}).then(raiddata_json => {
-			raiddata_json.Raid.forEach(x => BOSS_ROSTER.push({id: x.PathName, name: x.Name, terrains: x.Terrain.map(y => y.toLowerCase()), image: 'https://schaledb.com/images/raid/Boss_Portrait_' + x.DevName + '_Lobby.png'}))
-		})
-		
-		student_promise = fetch("https://schaledb.com/data/en/students.min.json").then(stu_req => {
-			return stu_req.json()
-		}).then(student_data_json => {
-			Object.keys(student_data_json).forEach(x => STUDENT_ROSTER.push({id: x, name: student_data_json[x].Name, image: 'https://schaledb.com/images/student/collection/' + x + '.webp'}))
-		})
-		
-		Promise.all([raid_boss_promise, student_promise]).then(z => {
-			updateDraftState()
-		})
+    // Add perma-banned bosses list
+	const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbaka'];
+	
+	window.onload = function() {
+	  const raid_boss_promise = fetch("https://schaledb.com/data/en/raids.min.json")
+	    .then(r => r.json())
+	    .then(data => {
+	      data.Raid.forEach(x => {
+	        const bossId = x.PathName.toLowerCase();
+	        const bossName = x.Name.toLowerCase();
+	
+	        // Skip perma-banned bosses (Geburah, Yesod, Drumbaka)
+	        if (PERMA_BANNED_BOSSES.some(b => bossId.includes(b) || bossName.includes(b))) {
+	          return;
+	        }
+	
+	        BOSS_ROSTER.push({
+	          id: x.PathName,
+	          name: x.Name,
+	          terrains: x.Terrain.map(y => y.toLowerCase()),
+	          image: 'https://schaledb.com/images/raid/Boss_Portrait_' + x.DevName + '_Lobby.png'
+	        });
+	      });
+	    });
+	
+	  const student_promise = fetch("https://schaledb.com/data/en/students.min.json")
+	    .then(r => r.json())
+	    .then(data => {
+	      Object.keys(data).forEach(x => {
+	        STUDENT_ROSTER.push({
+	          id: x,
+	          name: data[x].Name,
+	          image: 'https://schaledb.com/images/student/collection/' + x + '.webp'
+	        });
+	      });
+	    });
+	
+	  Promise.all([raid_boss_promise, student_promise]).then(() => {
+	    updateDraftState();
+	  });
 	};
-
     function changeRole(r) { currentRole = r; updateDraftState(); }
 
     function resetDraft() {
