@@ -57,82 +57,94 @@
       <div class="text-xs text-slate-400 mt-1" id="turn-subtitle">Select 1 boss from the pool to ban</div>
     </div>
 
-    <!-- GAME CARDS -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      
-      <!-- GAME 1 -->
-      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-        <div class="flex justify-between items-center mb-2">
-          <span class="font-orbitron font-bold text-sm text-cyan-400">GAME 1 (HOST PICK)</span>
-          <span class="text-xs bg-slate-800 px-2 py-0.5 rounded text-slate-400">BO3 Match 1</span>
-        </div>
-        <div class="grid grid-cols-2 gap-2 mb-2">
-          <div id="g1-boss-slot" class="bg-slate-950 border border-slate-800 rounded p-2 text-center min-h-[90px] flex flex-col items-center justify-center">
-            <span class="text-[10px] text-slate-500 uppercase font-bold">Boss</span>
-            <span class="text-xs font-bold text-slate-400">Pending</span>
-          </div>
-          <div id="g1-terrain-slot" class="bg-slate-950 border border-slate-800 rounded p-2 text-center min-h-[90px] flex flex-col items-center justify-center">
-            <span class="text-[10px] text-slate-500 uppercase font-bold">Terrain</span>
-            <span class="text-xs font-bold text-slate-400">Pending</span>
-          </div>
-        </div>
-        <div class="bg-slate-950 border border-slate-800 rounded p-2">
-          <div class="text-[10px] uppercase font-bold text-slate-400 mb-1">Guest Student Bans (3):</div>
-          <div id="g1-bans-container" class="flex gap-1 flex-wrap min-h-[24px]">
-            <span class="text-xs text-slate-600 italic">None yet</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- GAME 2 -->
-      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-        <div class="flex justify-between items-center mb-2">
-          <span class="font-orbitron font-bold text-sm text-rose-400">GAME 2 (GUEST PICK)</span>
-          <span class="text-xs bg-slate-800 px-2 py-0.5 rounded text-slate-400">BO3 Match 2</span>
-        </div>
-        <div class="grid grid-cols-2 gap-2 mb-2">
-          <div id="g2-boss-slot" class="bg-slate-950 border border-slate-800 rounded p-2 text-center min-h-[90px] flex flex-col items-center justify-center">
-            <span class="text-[10px] text-slate-500 uppercase font-bold">Boss</span>
-            <span class="text-xs font-bold text-slate-400">Pending</span>
-          </div>
-          <div id="g2-terrain-slot" class="bg-slate-950 border border-slate-800 rounded p-2 text-center min-h-[90px] flex flex-col items-center justify-center">
-            <span class="text-[10px] text-slate-500 uppercase font-bold">Terrain</span>
-            <span class="text-xs font-bold text-slate-400">Pending</span>
-          </div>
-        </div>
-        <div class="bg-slate-950 border border-slate-800 rounded p-2">
-          <div class="text-[10px] uppercase font-bold text-slate-400 mb-1">Host Student Bans (3):</div>
-          <div id="g2-bans-container" class="flex gap-1 flex-wrap min-h-[24px]">
-            <span class="text-xs text-slate-600 italic">None yet</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- GAME 3 -->
-      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-        <div class="flex justify-between items-center mb-2">
-          <span class="font-orbitron font-bold text-sm text-yellow-400">GAME 3 (DECIDER)</span>
-          <span class="text-xs bg-slate-800 px-2 py-0.5 rounded text-slate-400">BO3 Match 3</span>
-        </div>
-        <div class="grid grid-cols-2 gap-2 mb-2">
-          <div id="g3-boss-slot" class="bg-slate-950 border border-slate-800 rounded p-2 text-center min-h-[90px] flex flex-col items-center justify-center">
-            <span class="text-[10px] text-slate-500 uppercase font-bold">Boss</span>
-            <span class="text-xs font-bold text-slate-400">Last Remaining</span>
-          </div>
-          <div id="g3-terrain-slot" class="bg-slate-950 border border-slate-800 rounded p-2 text-center min-h-[90px] flex flex-col items-center justify-center">
-            <span class="text-[10px] text-slate-500 uppercase font-bold">Terrain</span>
-            <span class="text-xs font-bold text-yellow-400/80">Admin Roll</span>
-          </div>
-        </div>
-        <div class="bg-slate-950 border border-slate-800 rounded p-2">
-          <div class="text-[10px] uppercase font-bold text-slate-400 mb-1">Host (2) & Guest (2) Bans:</div>
-          <div id="g3-bans-container" class="flex gap-1 flex-wrap min-h-[24px]">
-            <span class="text-xs text-slate-600 italic">None yet</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
+    <!-- GAME CARDS CONTAINER -->
+	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+	  
+	  <!-- GAME 1 -->
+	  <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+	    <div class="flex justify-between items-center mb-2">
+	      <span class="font-orbitron font-bold text-sm text-cyan-400">GAME 1 (HOST PICK)</span>
+	      <span class="text-xs bg-slate-800 px-2 py-0.5 rounded text-slate-400">BO3 Match 1</span>
+	    </div>
+	
+	    <!-- Boss (2/3 width) & Terrain (1/3 width) -->
+	    <div class="grid grid-cols-3 gap-2 mb-3">
+	      <div id="g1-boss-slot" class="col-span-2 bg-slate-950 border border-slate-800 rounded p-2 text-center min-h-[100px] flex flex-col items-center justify-center">
+	        <span class="text-[10px] text-slate-500 uppercase font-bold">Boss</span>
+	        <span class="text-xs font-bold text-slate-400">Pending</span>
+	      </div>
+	      <div id="g1-terrain-slot" class="col-span-1 bg-slate-950 border border-slate-800 rounded p-2 text-center min-h-[100px] flex flex-col items-center justify-center">
+	        <span class="text-[10px] text-slate-500 uppercase font-bold">Terrain</span>
+	        <span class="text-xs font-bold text-slate-400">Pending</span>
+	      </div>
+	    </div>
+	
+	    <!-- Individual Student Ban Boxes (3 Slots) -->
+	    <div>
+	      <div class="text-[10px] uppercase font-bold text-slate-400 mb-1">Guest Student Bans (3):</div>
+	      <div id="g1-bans-container" class="grid grid-cols-3 gap-1.5 min-h-[64px]">
+	        <!-- Rendered by JS -->
+	      </div>
+	    </div>
+	  </div>
+	
+	  <!-- GAME 2 -->
+	  <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+	    <div class="flex justify-between items-center mb-2">
+	      <span class="font-orbitron font-bold text-sm text-rose-400">GAME 2 (GUEST PICK)</span>
+	      <span class="text-xs bg-slate-800 px-2 py-0.5 rounded text-slate-400">BO3 Match 2</span>
+	    </div>
+	
+	    <!-- Boss (2/3 width) & Terrain (1/3 width) -->
+	    <div class="grid grid-cols-3 gap-2 mb-3">
+	      <div id="g2-boss-slot" class="col-span-2 bg-slate-950 border border-slate-800 rounded p-2 text-center min-h-[100px] flex flex-col items-center justify-center">
+	        <span class="text-[10px] text-slate-500 uppercase font-bold">Boss</span>
+	        <span class="text-xs font-bold text-slate-400">Pending</span>
+	      </div>
+	      <div id="g2-terrain-slot" class="col-span-1 bg-slate-950 border border-slate-800 rounded p-2 text-center min-h-[100px] flex flex-col items-center justify-center">
+	        <span class="text-[10px] text-slate-500 uppercase font-bold">Terrain</span>
+	        <span class="text-xs font-bold text-slate-400">Pending</span>
+	      </div>
+	    </div>
+	
+	    <!-- Individual Student Ban Boxes (3 Slots) -->
+	    <div>
+	      <div class="text-[10px] uppercase font-bold text-slate-400 mb-1">Host Student Bans (3):</div>
+	      <div id="g2-bans-container" class="grid grid-cols-3 gap-1.5 min-h-[64px]">
+	        <!-- Rendered by JS -->
+	      </div>
+	    </div>
+	  </div>
+	
+	  <!-- GAME 3 (DECIDER) -->
+	  <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+	    <div class="flex justify-between items-center mb-2">
+	      <span class="font-orbitron font-bold text-sm text-yellow-400">GAME 3 (DECIDER)</span>
+	      <span class="text-xs bg-slate-800 px-2 py-0.5 rounded text-slate-400">BO3 Match 3</span>
+	    </div>
+	
+	    <!-- Boss (2/3 width) & Terrain (1/3 width) -->
+	    <div class="grid grid-cols-3 gap-2 mb-3">
+	      <div id="g3-boss-slot" class="col-span-2 bg-slate-950 border border-slate-800 rounded p-2 text-center min-h-[100px] flex flex-col items-center justify-center">
+	        <span class="text-[10px] text-slate-500 uppercase font-bold">Boss</span>
+	        <span class="text-xs font-bold text-slate-400">Last Remaining</span>
+	      </div>
+	      <div id="g3-terrain-slot" class="col-span-1 bg-slate-950 border border-slate-800 rounded p-2 text-center min-h-[100px] flex flex-col items-center justify-center">
+	        <span class="text-[10px] text-slate-500 uppercase font-bold">Terrain</span>
+	        <span class="text-xs font-bold text-yellow-400/80">Admin Roll</span>
+	      </div>
+	    </div>
+	
+	    <!-- Individual Student Ban Boxes (4 Slots) -->
+	    <div>
+	      <div class="text-[10px] uppercase font-bold text-slate-400 mb-1">Host (2) & Guest (2) Bans (4):</div>
+	      <div id="g3-bans-container" class="grid grid-cols-4 gap-1 min-h-[64px]">
+	        <!-- Rendered by JS -->
+	      </div>
+	    </div>
+	  </div>
+	
+	</div>
 
     <!-- SELECTION GRID AREA -->
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex-1 flex flex-col min-h-[400px]">
@@ -405,36 +417,64 @@
     function updateGameCardsUI() {
 	  for (let g = 1; g <= 3; g++) {
 	    const data = gameData[g];
-	    
-	    // Boss Slot with Portrait Image
-	    document.getElementById(`g${g}-boss-slot`).innerHTML = data.boss ? `
-	      <div class="w-full h-full flex flex-col items-center justify-center p-1">
-	        <img src="${data.boss.image}" class="w-full h-12 object-cover rounded mb-1" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' fill=\'%23334155\'><rect width=\'100%\' height=\'100%\'/></svg>';">
-	        <span class="text-xs font-bold text-cyan-300 truncate w-full text-center">${data.boss.name}</span>
-	      </div>
-	    ` : `
-	      <span class="text-[10px] text-slate-500 uppercase font-bold">Boss</span>
-	      <span class="text-xs font-bold text-slate-400">Pending</span>
-	    `;
 	
-	    // Terrain Slot with Icon Image
-	    document.getElementById(`g${g}-terrain-slot`).innerHTML = data.terrain ? `
-	      <div class="w-full h-full flex flex-col items-center justify-center p-1">
-	        <img src="${data.terrain.image}" class="w-full h-10 object-contain rounded mb-1">
-	        <span class="text-xs font-bold text-amber-300 truncate w-full text-center">${data.terrain.name}</span>
-	      </div>
-	    ` : `
-	      <span class="text-[10px] text-slate-500 uppercase font-bold">Terrain</span>
-	      <span class="text-xs font-bold text-slate-400">Pending</span>
-	    `;
+	    // Larger Boss Display Slot
+	    const bossSlot = document.getElementById(`g${g}-boss-slot`);
+	    if (data.boss) {
+	      bossSlot.innerHTML = `
+	        <div class="w-full h-full flex flex-col items-center justify-center">
+	          <img src="${data.boss.image}" class="w-full h-16 object-cover rounded mb-1" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' fill=\'%23334155\'><rect width=\'100%\' height=\'100%\'/></svg>';">
+	          <span class="text-xs font-bold text-cyan-300 truncate w-full text-center">${data.boss.name}</span>
+	        </div>
+	      `;
+	    } else {
+	      bossSlot.innerHTML = `
+	        <span class="text-[10px] text-slate-500 uppercase font-bold">Boss</span>
+	        <span class="text-xs font-bold text-slate-400">Pending</span>
+	      `;
+	    }
 	
-	    // Banned Student Badges with Mini Circle Portraits
-	    document.getElementById(`g${g}-bans-container`).innerHTML = data.studentBans.length ? data.studentBans.map(s => `
-	      <span class="bg-rose-950/90 border border-rose-800/80 text-rose-300 text-[10px] font-bold pl-1 pr-2 py-0.5 rounded-full flex items-center gap-1">
-	        <img src="${s.image}" class="w-4 h-4 rounded-full object-cover border border-rose-500/50">
-	        ${s.name}
-	      </span>
-	    `).join('') : `<span class="text-xs text-slate-600 italic">None yet</span>`;
+	    // Smaller Compact Terrain Display Slot
+	    const terrainSlot = document.getElementById(`g${g}-terrain-slot`);
+	    if (data.terrain) {
+	      terrainSlot.innerHTML = `
+	        <div class="w-full h-full flex flex-col items-center justify-center">
+	          <img src="${data.terrain.image}" class="w-8 h-8 object-contain rounded mb-1">
+	          <span class="text-[10px] font-bold text-amber-300 truncate w-full text-center">${data.terrain.name}</span>
+	        </div>
+	      `;
+	    } else {
+	      terrainSlot.innerHTML = `
+	        <span class="text-[10px] text-slate-500 uppercase font-bold">Terrain</span>
+	        <span class="text-xs font-bold text-slate-400">Pending</span>
+	      `;
+	    }
+	
+	    // Individual Split Student Ban Boxes (3 Boxes for G1/G2, 4 Boxes for G3)
+	    const totalSlots = g === 3 ? 4 : 3;
+	    const bansContainer = document.getElementById(`g${g}-bans-container`);
+	    let slotsHTML = '';
+	
+	    for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
+	      const bannedStudent = data.studentBans[slotIndex];
+	
+	      if (bannedStudent) {
+	        slotsHTML += `
+	          <div class="bg-rose-950/80 border border-rose-800/80 rounded p-1 flex flex-col items-center justify-center text-center overflow-hidden">
+	            <img src="${bannedStudent.image}" class="w-8 h-8 rounded-full object-cover border border-rose-500/50 mb-0.5">
+	            <span class="text-[9px] font-bold text-rose-200 truncate w-full">${bannedStudent.name}</span>
+	          </div>
+	        `;
+	      } else {
+	        slotsHTML += `
+	          <div class="bg-slate-950 border border-slate-800/60 rounded p-1 flex flex-col items-center justify-center text-slate-600">
+	            <span class="text-[10px] font-semibold">BAN ${slotIndex + 1}</span>
+	          </div>
+	        `;
+	      }
+	    }
+	
+	    bansContainer.innerHTML = slotsHTML;
 	  }
 	}
 
