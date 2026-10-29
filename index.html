@@ -412,10 +412,30 @@
     }
 
     function renderCompleteState() {
-      document.getElementById('phase-title').innerText = "COMPLETED";
-      document.getElementById('turn-label').innerText = "BO3 DRAFT FINISHED!";
-      document.getElementById('selection-grid').innerHTML = `<div class="col-span-full text-center p-8 bg-slate-950 rounded-xl"><h3 class="text-emerald-400 font-bold text-lg">Match Locked In</h3></div>`;
-    }
+	  // FIRST: Force-update the UI so all 4 banned student pills render in Game 3's card!
+	  updateGameCardsUI();
+	
+	  const banner = document.getElementById('turn-banner');
+	  banner.className = "bg-slate-900 border-2 border-emerald-500 rounded-xl p-4 text-center shadow-lg";
+	  document.getElementById('phase-title').innerText = "COMPLETED";
+	  document.getElementById('turn-label').className = "font-orbitron text-2xl font-black text-emerald-400";
+	  document.getElementById('turn-label').innerText = "BO3 MAP & BAN DRAFT LOCKED IN!";
+	  document.getElementById('turn-subtitle').innerText = "All bosses, terrains, and student bans have been finalized";
+	
+	  const grid = document.getElementById('selection-grid');
+	  document.getElementById('grid-title').innerText = "DRAFT SUMMARY";
+	  document.getElementById('grid-count').innerText = "Finished";
+	
+	  grid.innerHTML = `
+	    <div class="col-span-full bg-slate-950 p-6 rounded-xl border border-slate-800 text-center">
+	      <i class="fa-solid fa-circle-check text-4xl text-emerald-400 mb-3"></i>
+	      <h3 class="font-orbitron font-bold text-lg text-white mb-2">Match Ready to Begin</h3>
+	      <button onclick="resetDraft()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition mt-2">
+	        <i class="fa-solid fa-rotate-left mr-1"></i> Start New Draft
+	      </button>
+	    </div>
+	  `;
+	}
   </script>
 </body>
 </html>
