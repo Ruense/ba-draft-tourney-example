@@ -434,7 +434,7 @@
 	      `;
 	    }
 	
-	    // Smaller Compact Terrain Display Slot
+	    // Compact Terrain Display Slot
 	    const terrainSlot = document.getElementById(`g${g}-terrain-slot`);
 	    if (data.terrain) {
 	      terrainSlot.innerHTML = `
@@ -450,7 +450,7 @@
 	      `;
 	    }
 	
-	    // Full-Card Student Ban Boxes with Overlay Label
+	    // Student Ban Boxes (Centering face with object-contain)
 	    const totalSlots = g === 3 ? 4 : 3;
 	    const bansContainer = document.getElementById(`g${g}-bans-container`);
 	    let slotsHTML = '';
@@ -461,8 +461,8 @@
 	      if (bannedStudent) {
 	        slotsHTML += `
 	          <div class="relative w-full h-20 bg-slate-950 border border-rose-600/80 rounded-lg overflow-hidden flex flex-col justify-between shadow-lg">
-	            <img src="${bannedStudent.image}" class="absolute inset-0 w-full h-full object-cover object-top">
-	            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-rose-950 via-rose-950/80 to-transparent pt-3 pb-1 px-1 text-center z-10">
+	            <img src="${bannedStudent.image}" class="w-full h-full object-contain object-center p-1 pb-4">
+	            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-rose-950 via-rose-950/90 to-transparent pt-3 pb-1 px-1 text-center z-10">
 	              <span class="text-[10px] font-bold text-rose-100 truncate block drop-shadow-md">${bannedStudent.name}</span>
 	            </div>
 	          </div>
