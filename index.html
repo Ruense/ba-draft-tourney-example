@@ -172,7 +172,7 @@
       { id: 'outdoor', name: 'Field (Outdoor)', image: 'https://schaledb.com/images/ui/Terrain_Outdoor.png' },
       { id: 'indoor',  name: 'Indoor',          image: 'https://schaledb.com/images/ui/Terrain_Indoor.png' }
     ];
-    const STUDENT_ROSTER = [];
+    let STUDENT_ROSTER = [];
 
     const DRAFT_SEQUENCE = [
       { team: 'blue', type: 'ban', target: 'boss', label: 'Host Boss Ban 1' },
@@ -208,12 +208,13 @@
       { team: 'red',  type: 'ban', target: 'student', game: 3, label: 'Game 3 Student Ban 2 (Guest)' }
     ];
 
-    const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbaka'];
+    // Updated perma-ban list: Drumbarka
+    const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbarka'];
 
     let currentStepIndex = 0;
     let currentRole = 'admin';
     let bannedBosses = [];
-    let pendingSelection = null; // Holds temporary item before confirm
+    let pendingSelection = null;
     let gameData = {
       1: { boss: null, terrain: null, studentBans: [] },
       2: { boss: null, terrain: null, studentBans: [] },
@@ -248,6 +249,9 @@
               image: 'https://schaledb.com/images/student/collection/' + x + '.webp'
             });
           });
+
+          // Sort students alphabetically by Name
+          STUDENT_ROSTER.sort((a, b) => a.name.localeCompare(b.name));
         });
 
       Promise.all([raid_boss_promise, student_promise]).then(() => {
@@ -303,10 +307,8 @@
 
     function handleCardClick(item) {
       if (pendingSelection && pendingSelection.id === item.id) {
-        // Clicking selected item deselects it
         pendingSelection = null;
       } else {
-        // Select new pending item
         pendingSelection = item;
       }
       const step = DRAFT_SEQUENCE[currentStepIndex];
@@ -342,7 +344,6 @@
       searchBox.classList.add('hidden');
       rollBtn.classList.add('hidden');
 
-      // Show Confirm Button only when an item is currently selected
       if (pendingSelection) {
         confirmBtn.classList.remove('hidden');
       } else {
