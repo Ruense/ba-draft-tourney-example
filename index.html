@@ -6,6 +6,11 @@
   <title>Blue Archive BO3 Draft</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Orbitron:wght@500;700;900&display=swap');
     body { font-family: 'Noto Sans', sans-serif; background: #0b0f19; color: #e2e8f0; }
@@ -54,7 +59,16 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
+      <!-- ROOM & ROLE CONTROLS -->
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center bg-slate-800 p-1 rounded border border-slate-700 text-xs gap-1">
+          <span class="px-1.5 text-slate-400 font-bold">ROOM:</span>
+          <input type="text" id="room-code-input" value="default-room" class="bg-slate-950 px-2 py-1 rounded text-cyan-300 font-bold border border-slate-700 w-28 text-center outline-none">
+          <button onclick="connectToRoom()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-2.5 py-1 rounded">
+            Sync
+          </button>
+        </div>
+
         <div class="flex items-center bg-slate-800 p-1 rounded border border-slate-700 text-xs">
           <span class="px-2 text-slate-400 font-bold">ROLE:</span>
           <select id="role-select" onchange="changeRole(this.value)" class="bg-slate-900 text-cyan-300 font-bold px-2 py-1 rounded outline-none cursor-pointer">
@@ -64,6 +78,7 @@
             <option value="spectator">Spectator (Read Only)</option>
           </select>
         </div>
+
         <button onclick="resetDraft()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-2 rounded border border-slate-700">
           <i class="fa-solid fa-rotate-left mr-1"></i> Reset
         </button>
@@ -228,6 +243,22 @@
   </main>
 
   <script>
+    /* FIREBASE CONFIGURATION */
+    const firebaseConfig = {
+      apiKey: "AIzaSyCCThwp_3-lx7C6MyCWiUiZich_guk4oLk",
+      authDomain: "bluearchivedrafttourney.firebaseapp.com",
+      databaseURL: "https://bluearchivedrafttourney-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "bluearchivedrafttourney",
+      storageBucket: "bluearchivedrafttourney.firebasestorage.app",
+      messagingSenderId: "615654907851",
+      appId: "1:615654907851:web:f2d3b7101e07149faae04e",
+      measurementId: "G-X4XQ1W735V"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    let currentRoomRef = null;
+
     const BOSS_ROSTER = [];
     const TERRAIN_ROSTER = [
       { id: 'street',  name: 'Urban (Street)',  image: 'https://schaledb.com/images/ui/Terrain_Street.png' },
@@ -319,9 +350,45 @@
         });
 
       Promise.all([raid_boss_promise, student_promise]).then(() => {
-        updateDraftState();
+        connectToRoom();
       });
     };
+
+    /* FIREBASE ROOM SYNC LOGIC */
+    function connectToRoom() {
+      const roomCode = document.getElementById('room-code-input').value.trim() || 'default-room';
+      
+      if (currentRoomRef) {
+        currentRoomRef.off();
+      }
+
+      currentRoomRef = db.ref('draft_rooms/' + roomCode);
+
+      currentRoomRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          currentStepIndex = data.currentStepIndex || 0;
+          bannedBosses = data.bannedBosses || [];
+          gameData = data.gameData || {
+            1: { boss: null, terrain: null, studentBans: [] },
+            2: { boss: null, terrain: null, studentBans: [] },
+            3: { boss: null, terrain: null, studentBans: [] }
+          };
+          updateDraftState();
+        } else {
+          pushStateToFirebase();
+        }
+      });
+    }
+
+    function pushStateToFirebase() {
+      if (!currentRoomRef) return;
+      currentRoomRef.set({
+        currentStepIndex: currentStepIndex,
+        bannedBosses: bannedBosses,
+        gameData: gameData
+      });
+    }
 
     function changeRole(r) { 
       currentRole = r; 
@@ -338,7 +405,7 @@
       bannedBosses = [];
       pendingSelection = null;
       gameData = { 1: { boss: null, terrain: null, studentBans: [] }, 2: { boss: null, terrain: null, studentBans: [] }, 3: { boss: null, terrain: null, studentBans: [] } };
-      updateDraftState();
+      pushStateToFirebase();
     }
 
     /* TIMER MANAGEMENT */
@@ -457,7 +524,7 @@
         const rem = BOSS_ROSTER.find(b => !usedIds.includes(b.id));
         if (rem) gameData[3].boss = rem;
         currentStepIndex++;
-        updateDraftState();
+        pushStateToFirebase();
         return;
       }
 
@@ -509,7 +576,7 @@
 
       pendingSelection = null;
       currentStepIndex++;
-      updateDraftState();
+      pushStateToFirebase();
     }
 
     function renderGridForStep(step) {
@@ -578,7 +645,7 @@
         if (allowed.length === 1 && step.type !== 'roll') {
           gameData[step.game].terrain = TERRAIN_ROSTER.find(t => t.id === allowed[0]);
           currentStepIndex++;
-          updateDraftState();
+          pushStateToFirebase();
           return;
         }
 
@@ -645,7 +712,7 @@
       const rolledId = allowed[Math.floor(Math.random() * allowed.length)];
       gameData[step.game].terrain = TERRAIN_ROSTER.find(t => t.id === rolledId);
       currentStepIndex++;
-      updateDraftState();
+      pushStateToFirebase();
     }
 
     function filterStudents(q) {
