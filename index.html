@@ -7,14 +7,19 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap');
-    body { font-family: 'Rajdhani', sans-serif; background: #0b0f19; color: #e2e8f0; }
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Orbitron:wght@500;700;900&display=swap');
+    body { font-family: 'Noto Sans', sans-serif; background: #0b0f19; color: #e2e8f0; }
     .font-orbitron { font-family: 'Orbitron', sans-serif; }
     .glow-blue { box-shadow: 0 0 15px rgba(0, 243, 255, 0.3); border-color: #00f3ff; }
     .glow-red { box-shadow: 0 0 15px rgba(255, 42, 95, 0.3); border-color: #ff2a5f; }
     .glow-yellow { box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); border-color: #facc15; }
     .slot-card { transition: all 0.2s ease-in-out; }
     .slot-card:hover:not(.disabled) { transform: translateY(-3px); }
+    @keyframes pulse-fast {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .animate-pulse-fast { animation: pulse-fast 0.6s infinite; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
@@ -50,11 +55,19 @@
   <!-- MAIN AREA -->
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- TURN STATUS BANNER -->
-    <div id="turn-banner" class="bg-slate-900 border-2 border-cyan-500 rounded-xl p-4 text-center shadow-lg">
-      <div class="text-xs uppercase tracking-widest font-bold text-slate-400 mb-1" id="phase-title">PHASE 1: INITIAL BOSS BANS</div>
-      <div class="font-orbitron text-2xl font-black text-cyan-400" id="turn-label">HOST'S TURN TO BAN A BOSS</div>
-      <div class="text-xs text-slate-400 mt-1" id="turn-subtitle">Select 1 boss from the pool to ban</div>
+    <!-- TURN STATUS BANNER WITH TIMER -->
+    <div id="turn-banner" class="bg-slate-900 border-2 border-cyan-500 rounded-xl p-4 flex items-center justify-between shadow-lg relative overflow-hidden">
+      <div class="text-left flex-1">
+        <div class="text-xs uppercase tracking-widest font-bold text-slate-400 mb-1" id="phase-title">PHASE 1: INITIAL BOSS BANS</div>
+        <div class="font-orbitron text-2xl font-black text-cyan-400" id="turn-label">HOST'S TURN TO BAN A BOSS</div>
+        <div class="text-xs text-slate-400 mt-1" id="turn-subtitle">Select 1 boss from the pool to ban</div>
+      </div>
+
+      <!-- TIMER DISPLAY -->
+      <div id="timer-box" class="flex flex-col items-center justify-center bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 min-w-[100px]">
+        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Time Left</span>
+        <span id="timer-text" class="font-orbitron text-3xl font-black text-cyan-400">00:30</span>
+      </div>
     </div>
 
     <!-- TOP BOSS BANS BAR -->
@@ -244,6 +257,9 @@
     let currentRole = 'admin';
     let bannedBosses = []; // Array of objects: { id, team }
     let pendingSelection = null;
+    let timerInterval = null;
+    let timeRemaining = 30;
+
     let gameData = {
       1: { boss: null, terrain: null, studentBans: [] },
       2: { boss: null, terrain: null, studentBans: [] },
@@ -290,6 +306,7 @@
     function changeRole(r) { currentRole = r; updateDraftState(); }
 
     function resetDraft() {
+      stopTimer();
       currentStepIndex = 0;
       bannedBosses = [];
       pendingSelection = null;
@@ -297,8 +314,95 @@
       updateDraftState();
     }
 
+    /* TIMER MANAGEMENT */
+    function startTimerForStep(step) {
+      stopTimer();
+
+      if (step.type === 'ban' && step.target === 'boss') {
+        timeRemaining = 30;
+      } else if (step.type === 'pick') {
+        timeRemaining = 60;
+      } else if (step.type === 'ban' && step.target === 'student') {
+        timeRemaining = 30;
+      } else {
+        timeRemaining = 30;
+      }
+
+      updateTimerUI();
+
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        updateTimerUI();
+
+        if (timeRemaining <= 0) {
+          stopTimer();
+          autoHandleTimeout();
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+    }
+
+    function updateTimerUI() {
+      const timerText = document.getElementById('timer-text');
+      const timerBox = document.getElementById('timer-box');
+
+      const mins = Math.floor(timeRemaining / 60);
+      const secs = timeRemaining % 60;
+      const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      
+      timerText.innerText = formatted;
+
+      if (timeRemaining <= 10) {
+        timerText.className = "font-orbitron text-3xl font-black text-rose-500 animate-pulse-fast";
+        timerBox.className = "flex flex-col items-center justify-center bg-rose-950/40 px-4 py-2 rounded-xl border border-rose-600/80 min-w-[100px]";
+      } else {
+        timerText.className = "font-orbitron text-3xl font-black text-cyan-400";
+        timerBox.className = "flex flex-col items-center justify-center bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 min-w-[100px]";
+      }
+    }
+
+    function autoHandleTimeout() {
+      if (pendingSelection) {
+        confirmCurrentSelection();
+        return;
+      }
+
+      const step = DRAFT_SEQUENCE[currentStepIndex];
+
+      if (step.target === 'boss') {
+        const usedIds = [...bannedBosses.map(b => b.id), gameData[1].boss?.id, gameData[2].boss?.id].filter(Boolean);
+        const availableBosses = BOSS_ROSTER.filter(b => !usedIds.includes(b.id));
+        if (availableBosses.length > 0) {
+          const randomBoss = availableBosses[Math.floor(Math.random() * availableBosses.length)];
+          pendingSelection = randomBoss;
+          confirmCurrentSelection();
+        }
+      } else if (step.target === 'terrain') {
+        const activeBoss = gameData[step.game].boss;
+        const allowedTerrains = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
+        const availableTerrains = TERRAIN_ROSTER.filter(t => allowedTerrains.includes(t.id));
+        if (availableTerrains.length > 0) {
+          const randomTerrain = availableTerrains[Math.floor(Math.random() * availableTerrains.length)];
+          pendingSelection = randomTerrain;
+          confirmCurrentSelection();
+        }
+      } else if (step.target === 'student') {
+        const activeGameBans = gameData[step.game].studentBans;
+        const availableStudents = STUDENT_ROSTER.filter(s => !activeGameBans.some(b => b.id === s.id));
+        if (availableStudents.length > 0) {
+          const randomStudent = availableStudents[Math.floor(Math.random() * availableStudents.length)];
+          pendingSelection = randomStudent;
+          confirmCurrentSelection();
+        }
+      }
+    }
+
     function updateDraftState() {
       if (currentStepIndex >= DRAFT_SEQUENCE.length) {
+        stopTimer();
         renderCompleteState();
         return;
       }
@@ -319,19 +423,20 @@
       document.getElementById('turn-label').innerText = step.label.toUpperCase();
 
       if (step.team === 'blue') {
-        banner.className = "bg-slate-900 border-2 border-cyan-500 rounded-xl p-4 text-center glow-blue";
+        banner.className = "bg-slate-900 border-2 border-cyan-500 rounded-xl p-4 flex items-center justify-between shadow-lg glow-blue relative overflow-hidden";
         document.getElementById('turn-label').className = "font-orbitron text-2xl font-black text-cyan-400";
       } else if (step.team === 'red') {
-        banner.className = "bg-slate-900 border-2 border-rose-500 rounded-xl p-4 text-center glow-red";
+        banner.className = "bg-slate-900 border-2 border-rose-500 rounded-xl p-4 flex items-center justify-between shadow-lg glow-red relative overflow-hidden";
         document.getElementById('turn-label').className = "font-orbitron text-2xl font-black text-rose-400";
       } else {
-        banner.className = "bg-slate-900 border-2 border-yellow-500 rounded-xl p-4 text-center glow-yellow";
+        banner.className = "bg-slate-900 border-2 border-yellow-500 rounded-xl p-4 flex items-center justify-between shadow-lg glow-yellow relative overflow-hidden";
         document.getElementById('turn-label').className = "font-orbitron text-2xl font-black text-yellow-400";
       }
 
       updateGameCardsUI();
       updateTopBossBansUI();
       renderGridForStep(step);
+      startTimerForStep(step);
     }
 
     function handleCardClick(item) {
@@ -522,9 +627,9 @@
           const bossObj = BOSS_ROSTER.find(x => x.id === banned.id);
           hostHTML += `
             <div class="relative w-20 h-20 bg-slate-950 border border-cyan-500/80 rounded-lg overflow-hidden shadow-lg flex flex-col justify-between">
-              <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-80">
-              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-cyan-950 via-cyan-950/80 to-transparent pt-3 pb-1 px-1 text-center z-10">
-                <span class="text-[9px] font-bold text-cyan-200 truncate block">${bossObj ? bossObj.name : ''}</span>
+              <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-75">
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pt-4 pb-1 px-1 text-center z-10">
+                <span class="text-[9.5px] font-black text-cyan-300 truncate block drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,1)] tracking-wide">${bossObj ? bossObj.name : ''}</span>
               </div>
             </div>
           `;
@@ -547,9 +652,9 @@
           const bossObj = BOSS_ROSTER.find(x => x.id === banned.id);
           guestHTML += `
             <div class="relative w-20 h-20 bg-slate-950 border border-rose-500/80 rounded-lg overflow-hidden shadow-lg flex flex-col justify-between">
-              <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-80">
-              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-rose-950 via-rose-950/80 to-transparent pt-3 pb-1 px-1 text-center z-10">
-                <span class="text-[9px] font-bold text-rose-200 truncate block">${bossObj ? bossObj.name : ''}</span>
+              <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-75">
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pt-4 pb-1 px-1 text-center z-10">
+                <span class="text-[9.5px] font-black text-rose-300 truncate block drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,1)] tracking-wide">${bossObj ? bossObj.name : ''}</span>
               </div>
             </div>
           `;
@@ -600,7 +705,7 @@
           `;
         }
 
-        // Student Ban Slots
+        // High-Visibility Student Ban Cards
         const totalSlots = g === 3 ? 4 : 3;
         const bansContainer = document.getElementById(`g${g}-bans-container`);
         let slotsHTML = '';
@@ -611,9 +716,9 @@
           if (bannedStudent) {
             slotsHTML += `
               <div class="relative w-full h-20 bg-slate-950 border border-rose-600/80 rounded-lg overflow-hidden shadow-lg">
-                <img src="${bannedStudent.image}" class="w-full h-full object-cover object-[50%_50%] scale-105 grayscale opacity-80">
-                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-rose-950 via-rose-950/80 to-transparent pt-3 pb-1 px-1 text-center z-10">
-                  <span class="text-[10px] font-bold text-rose-100 truncate block drop-shadow-md">${bannedStudent.name}</span>
+                <img src="${bannedStudent.image}" class="w-full h-full object-cover object-[50%_50%] scale-105 grayscale opacity-75">
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pt-4 pb-1 px-1 text-center z-10">
+                  <span class="text-[10px] font-black text-rose-200 truncate block drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,1)] tracking-wide">${bannedStudent.name}</span>
                 </div>
               </div>
             `;
@@ -631,15 +736,19 @@
     }
 
     function renderCompleteState() {
+      stopTimer();
       updateGameCardsUI();
       updateTopBossBansUI();
 
       const banner = document.getElementById('turn-banner');
-      banner.className = "bg-slate-900 border-2 border-emerald-500 rounded-xl p-4 text-center shadow-lg";
+      banner.className = "bg-slate-900 border-2 border-emerald-500 rounded-xl p-4 flex items-center justify-between shadow-lg relative overflow-hidden";
       document.getElementById('phase-title').innerText = "COMPLETED";
       document.getElementById('turn-label').className = "font-orbitron text-2xl font-black text-emerald-400";
       document.getElementById('turn-label').innerText = "BO3 MAP & BAN DRAFT LOCKED IN!";
       document.getElementById('turn-subtitle').innerText = "All bosses, terrains, and student bans have been finalized";
+
+      document.getElementById('timer-text').innerText = "00:00";
+      document.getElementById('timer-text').className = "font-orbitron text-3xl font-black text-emerald-400";
 
       const grid = document.getElementById('selection-grid');
       document.getElementById('grid-title').innerText = "DRAFT SUMMARY";
