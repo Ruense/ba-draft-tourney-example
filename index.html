@@ -367,13 +367,21 @@
       currentRoomRef.on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
+          // console.log("Before (currentStepIndex, bannedBosses, gameData)")
+          // console.log(currentStepIndex)
+          // console.log(bannedBosses)
+          // console.log(gameData)
+          // console.log("Received (currentStepIndex, bannedBosses, gameData)")
+          // console.log(data.currentStepIndex)
+          // console.log(data.bannedBosses)
+          // console.log(data.gameData)
           currentStepIndex = data.currentStepIndex || 0;
           bannedBosses = data.bannedBosses || [];
-          gameData = data.gameData || {
-            1: { boss: null, terrain: null, studentBans: [] },
-            2: { boss: null, terrain: null, studentBans: [] },
-            3: { boss: null, terrain: null, studentBans: [] }
-          };
+          gameData = gameData.map((x,z) => data.gameData ? (data.gameData[z] ? {boss: data.gameData[z].boss || x.boss, terrain: data.gameData[z].terrain || x.terrain, studentBans: data.gameData[z].studentBans || x.studentBans } : x) : x)
+          // console.log("After (currentStepIndex, bannedBosses, gameData)")
+          // console.log(currentStepIndex)
+          // console.log(bannedBosses)
+          // console.log(gameData)
           updateDraftState();
         } else {
           pushStateToFirebase();
