@@ -373,7 +373,7 @@
           // console.log(data.gameData)
           currentStepIndex = data.currentStepIndex || 0;
           bannedBosses = data.bannedBosses || [];
-          gameData = gameData.map((x,z) => data.gameData ? (data.gameData[z] ? {boss: data.gameData[z].boss || x.boss, terrain: data.gameData[z].terrain || x.terrain, studentBans: data.gameData[z].studentBans || x.studentBans } : x) : x)
+          gameData = gameData.map((x,z) => data.gameData ? (data.gameData[z] ? {boss: (gameData.map(x => !!x.boss).reduce((acc, cur) => acc + cur, 0) && data.gameData[z].boss) || x.boss, terrain: (gameData.map(x => !!x.terrain).reduce((acc, cur) => acc + cur, 0) && data.gameData[z].terrain) || x.terrain, studentBans: (gameData.map(x => x.studentBans.length).reduce((acc, cur) => acc + cur, 0) && data.gameData[z].studentBans) || x.studentBans } : x) : x)
           // console.log("After (currentStepIndex, bannedBosses, gameData)")
           // console.log(currentStepIndex)
           // console.log(bannedBosses)
@@ -410,6 +410,7 @@
       pendingSelection = null;
       gameData = Array(3).fill(0).map(x => { return {boss: null, terrain: null, studentBans: []} });
       pushStateToFirebase();
+      window.location.reload();
     }
 
     /* TIMER MANAGEMENT */
