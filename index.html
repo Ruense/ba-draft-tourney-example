@@ -79,28 +79,60 @@
           </select>
         </div>
 
-        <button onclick="resetDraft()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-2 rounded border border-slate-700">
+        <button id="header-reset-btn" onclick="resetDraft()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold px-3 py-2 rounded border border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed">
           <i class="fa-solid fa-rotate-left mr-1"></i> Reset
         </button>
       </div>
     </div>
   </header>
 
+  <!-- LOBBY & READINESS BAR -->
+  <div id="lobby-bar" class="bg-slate-950 border-b border-slate-800 px-6 py-2.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center gap-6">
+        <!-- Host Ready Status -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-cyan-400 uppercase font-orbitron">Host (Blue):</span>
+          <span id="host-ready-badge" class="bg-slate-800 text-slate-400 text-[10px] font-black px-2 py-0.5 rounded uppercase">NOT READY</span>
+          <button id="host-ready-btn" onclick="toggleReady('host')" class="hidden bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded font-orbitron">
+            READY UP
+          </button>
+        </div>
+
+        <!-- Guest Ready Status -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-rose-400 uppercase font-orbitron">Guest (Red):</span>
+          <span id="guest-ready-badge" class="bg-slate-800 text-slate-400 text-[10px] font-black px-2 py-0.5 rounded uppercase">NOT READY</span>
+          <button id="guest-ready-btn" onclick="toggleReady('guest')" class="hidden bg-rose-500 hover:bg-rose-400 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded font-orbitron">
+            READY UP
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Start Draft Button -->
+      <div>
+        <button id="admin-start-btn" onclick="startDraftByAdmin()" disabled class="bg-emerald-600/50 text-slate-400 cursor-not-allowed text-xs font-black font-orbitron px-4 py-1.5 rounded border border-emerald-500/30 transition">
+          <i class="fa-solid fa-play mr-1.5"></i> START DRAFT (WAITING FOR READINESS)
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MAIN AREA -->
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
     <!-- TURN STATUS BANNER WITH TIMER -->
-    <div id="turn-banner" class="bg-slate-900 border-2 border-cyan-500 rounded-xl p-4 flex items-center justify-between shadow-lg relative overflow-hidden">
+    <div id="turn-banner" class="bg-slate-900 border-2 border-slate-700 rounded-xl p-4 flex items-center justify-between shadow-lg relative overflow-hidden">
       <div class="text-left flex-1">
-        <div class="text-xs uppercase tracking-widest font-bold text-slate-400 mb-1" id="phase-title">PHASE 1: INITIAL BOSS BANS</div>
-        <div class="font-orbitron text-2xl font-black text-cyan-400" id="turn-label">HOST'S TURN TO BAN A BOSS</div>
-        <div class="text-xs text-slate-400 mt-1" id="turn-subtitle">Select 1 boss from the pool to ban</div>
+        <div class="text-xs uppercase tracking-widest font-bold text-slate-400 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
+        <div class="font-orbitron text-2xl font-black text-slate-300" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
+        <div class="text-xs text-slate-400 mt-1" id="turn-subtitle">Host and Guest must ready up before Admin can start the draft.</div>
       </div>
 
       <!-- TIMER DISPLAY -->
       <div id="timer-box" class="flex flex-col items-center justify-center bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 min-w-[100px]">
         <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Time Left</span>
-        <span id="timer-text" class="font-orbitron text-3xl font-black text-cyan-400">00:30</span>
+        <span id="timer-text" class="font-orbitron text-3xl font-black text-slate-500">--:--</span>
       </div>
     </div>
 
@@ -306,6 +338,10 @@
     let currentStepIndex = 0;
     let currentTimerStepIndex = -1;
     let currentRole = 'admin';
+    let draftStarted = false;
+    let hostReady = false;
+    let guestReady = false;
+
     let bannedBosses = [];
     let pendingSelection = null;
     let timerInterval = null;
@@ -372,6 +408,9 @@
         const data = snapshot.val();
         if (data) {
           currentStepIndex = data.currentStepIndex || 0;
+          draftStarted = !!data.draftStarted;
+          hostReady = !!data.hostReady;
+          guestReady = !!data.guestReady;
           bannedBosses = data.bannedBosses || [];
           
           const rawGameData = data.gameData || [];
@@ -395,6 +434,9 @@
       if (!currentRoomRef) return;
       currentRoomRef.set({
         currentStepIndex: currentStepIndex,
+        draftStarted: draftStarted,
+        hostReady: hostReady,
+        guestReady: guestReady,
         bannedBosses: bannedBosses,
         gameData: gameData
       });
@@ -402,28 +444,92 @@
 
     function changeRole(r) { 
       currentRole = r; 
+      updateRoleControls();
       const step = DRAFT_SEQUENCE[currentStepIndex];
       if (step) {
         renderGridForStep(step);
       }
     }
 
+    function toggleReady(role) {
+      if (role === 'host' && (currentRole === 'host' || currentRole === 'admin')) {
+        hostReady = !hostReady;
+      } else if (role === 'guest' && (currentRole === 'guest' || currentRole === 'admin')) {
+        guestReady = !guestReady;
+      }
+      pushStateToFirebase();
+    }
+
+    function startDraftByAdmin() {
+      if (currentRole !== 'admin') return;
+      if (!hostReady || !guestReady) return;
+      draftStarted = true;
+      pushStateToFirebase();
+    }
+
     function resetDraft() {
+      if (currentRole !== 'admin') return;
       stopTimer();
       currentTimerStepIndex = -1;
       currentStepIndex = 0;
+      draftStarted = false;
+      hostReady = false;
+      guestReady = false;
       bannedBosses = [];
       pendingSelection = null;
       gameData = getEmptyGameData();
       pushStateToFirebase();
-      window.location.reload();
+    }
+
+    function updateRoleControls() {
+      // Header reset button (Admin Only)
+      const resetBtn = document.getElementById('header-reset-btn');
+      if (currentRole === 'admin') {
+        resetBtn.disabled = false;
+        resetBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+      } else {
+        resetBtn.disabled = true;
+        resetBtn.classList.add('opacity-40', 'cursor-not-allowed');
+      }
+
+      // Ready buttons visibility
+      const hostReadyBtn = document.getElementById('host-ready-btn');
+      const guestReadyBtn = document.getElementById('guest-ready-btn');
+
+      if (!draftStarted && (currentRole === 'host' || currentRole === 'admin')) {
+        hostReadyBtn.classList.remove('hidden');
+      } else {
+        hostReadyBtn.classList.add('hidden');
+      }
+
+      if (!draftStarted && (currentRole === 'guest' || currentRole === 'admin')) {
+        guestReadyBtn.classList.remove('hidden');
+      } else {
+        guestReadyBtn.classList.add('hidden');
+      }
+
+      // Admin Start Button state
+      const adminStartBtn = document.getElementById('admin-start-btn');
+      if (currentRole === 'admin' && !draftStarted) {
+        adminStartBtn.classList.remove('hidden');
+        if (hostReady && guestReady) {
+          adminStartBtn.disabled = false;
+          adminStartBtn.className = "bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black font-orbitron px-4 py-1.5 rounded border border-emerald-400 transition cursor-pointer shadow-lg";
+          adminStartBtn.innerHTML = '<i class="fa-solid fa-play mr-1.5"></i> START DRAFT NOW';
+        } else {
+          adminStartBtn.disabled = true;
+          adminStartBtn.className = "bg-emerald-600/30 text-slate-500 text-xs font-black font-orbitron px-4 py-1.5 rounded border border-emerald-500/20 cursor-not-allowed transition";
+          adminStartBtn.innerHTML = '<i class="fa-solid fa-hourglass-start mr-1.5"></i> START DRAFT (WAITING FOR READINESS)';
+        }
+      } else {
+        adminStartBtn.classList.add('hidden');
+      }
     }
 
     /* TIMER MANAGEMENT */
     function startTimerForStep(step) {
-      if (currentTimerStepIndex === currentStepIndex) {
-        return;
-      }
+      if (!draftStarted) return;
+      if (currentTimerStepIndex === currentStepIndex) return;
 
       stopTimer();
       currentTimerStepIndex = currentStepIndex;
@@ -459,6 +565,13 @@
       const timerText = document.getElementById('timer-text');
       const timerBox = document.getElementById('timer-box');
 
+      if (!draftStarted) {
+        timerText.innerText = "--:--";
+        timerText.className = "font-orbitron text-3xl font-black text-slate-500";
+        timerBox.className = "flex flex-col items-center justify-center bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 min-w-[100px]";
+        return;
+      }
+
       const mins = Math.floor(timeRemaining / 60);
       const secs = timeRemaining % 60;
       const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
@@ -475,6 +588,8 @@
     }
 
     function autoHandleTimeout() {
+      if (!draftStarted) return;
+
       if (pendingSelection) {
         confirmCurrentSelection();
         return;
@@ -522,6 +637,44 @@
     }
 
     function updateDraftState() {
+      // Update Ready badges
+      const hostBadge = document.getElementById('host-ready-badge');
+      const guestBadge = document.getElementById('guest-ready-badge');
+
+      if (hostReady) {
+        hostBadge.innerText = "READY";
+        hostBadge.className = "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 text-[10px] font-black px-2 py-0.5 rounded uppercase";
+      } else {
+        hostBadge.innerText = "NOT READY";
+        hostBadge.className = "bg-slate-800 text-slate-400 text-[10px] font-black px-2 py-0.5 rounded uppercase";
+      }
+
+      if (guestReady) {
+        guestBadge.innerText = "READY";
+        guestBadge.className = "bg-rose-500/20 text-rose-400 border border-rose-500/50 text-[10px] font-black px-2 py-0.5 rounded uppercase";
+      } else {
+        guestBadge.innerText = "NOT READY";
+        guestBadge.className = "bg-slate-800 text-slate-400 text-[10px] font-black px-2 py-0.5 rounded uppercase";
+      }
+
+      updateRoleControls();
+
+      // If pre-draft lobby state
+      if (!draftStarted) {
+        stopTimer();
+        const banner = document.getElementById('turn-banner');
+        banner.className = "bg-slate-900 border-2 border-slate-700 rounded-xl p-4 flex items-center justify-between shadow-lg relative overflow-hidden";
+        document.getElementById('phase-title').innerText = "PRE-DRAFT LOBBY";
+        document.getElementById('turn-label').className = "font-orbitron text-2xl font-black text-slate-300";
+        document.getElementById('turn-label').innerText = "WAITING FOR READINESS & ADMIN START";
+        document.getElementById('turn-subtitle').innerText = "Host and Guest must ready up before Admin can start the draft.";
+
+        updateGameCardsUI();
+        updateTopBossBansUI();
+        renderLobbyGrid();
+        return;
+      }
+
       if (currentStepIndex >= DRAFT_SEQUENCE.length) {
         stopTimer();
         renderCompleteState();
@@ -561,7 +714,24 @@
       startTimerForStep(step);
     }
 
+    function renderLobbyGrid() {
+      const grid = document.getElementById('selection-grid');
+      document.getElementById('grid-title').innerText = "PRE-DRAFT PREVIEW";
+      document.getElementById('grid-count').innerText = "Waiting";
+      document.getElementById('confirm-selection-btn').classList.add('hidden');
+      document.getElementById('admin-roll-btn').classList.add('hidden');
+
+      grid.innerHTML = `
+        <div class="col-span-full bg-slate-950 p-8 rounded-xl border border-slate-800 text-center flex flex-col items-center justify-center my-6">
+          <i class="fa-solid fa-users text-4xl text-slate-500 mb-3"></i>
+          <h3 class="font-orbitron font-bold text-lg text-white mb-1">Lobby In Progress</h3>
+          <p class="text-xs text-slate-400 max-w-md">Both Host and Guest must click <b>READY UP</b> above. The Admin can then initiate Step 1 of the BO3 Draft.</p>
+        </div>
+      `;
+    }
+
     function handleCardClick(item) {
+      if (!draftStarted) return;
       if (pendingSelection && pendingSelection.id === item.id) {
         pendingSelection = null;
       } else {
@@ -572,7 +742,7 @@
     }
 
     function confirmCurrentSelection() {
-      if (!pendingSelection) return;
+      if (!pendingSelection || !draftStarted) return;
 
       const step = DRAFT_SEQUENCE[currentStepIndex];
       if (step.type === 'ban' && step.target === 'boss') {
@@ -661,7 +831,10 @@
           return;
         }
 
-        if (step.type === 'roll') rollBtn.classList.remove('hidden');
+        // STRICT ADMIN CHECK: Only show terrain randomize button to Admin role
+        if (step.type === 'roll' && currentRole === 'admin') {
+          rollBtn.classList.remove('hidden');
+        }
 
         TERRAIN_ROSTER.forEach(terrain => {
           const isAllowed = allowed.includes(terrain.id);
@@ -718,6 +891,7 @@
     }
 
     function executeAdminRoll() {
+      if (currentRole !== 'admin') return; // Strict Admin check
       const step = DRAFT_SEQUENCE[currentStepIndex];
       const activeBoss = gameData[step.game - 1].boss;
       const allowed = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
@@ -739,7 +913,7 @@
     }
 
     function updateTopBossBansUI() {
-      const step = DRAFT_SEQUENCE[currentStepIndex];
+      const step = draftStarted ? DRAFT_SEQUENCE[currentStepIndex] : null;
       const hostBans = bannedBosses.filter(b => b.team === 'blue');
       const guestBans = bannedBosses.filter(b => b.team === 'red');
 
@@ -800,7 +974,7 @@
     }
 
     function updateGameCardsUI() {
-      const step = DRAFT_SEQUENCE[currentStepIndex];
+      const step = draftStarted ? DRAFT_SEQUENCE[currentStepIndex] : null;
 
       for (let g = 1; g <= 3; g++) {
         const data = gameData[g - 1] || { boss: null, terrain: null, studentBans: [] };
@@ -909,9 +1083,11 @@
         <div class="col-span-full bg-slate-950 p-6 rounded-xl border border-slate-800 text-center">
           <i class="fa-solid fa-circle-check text-4xl text-emerald-400 mb-3"></i>
           <h3 class="font-orbitron font-bold text-lg text-white mb-2">Match Ready to Begin</h3>
-          <button onclick="resetDraft()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition mt-2">
-            <i class="fa-solid fa-rotate-left mr-1"></i> Start New Draft
-          </button>
+          ${currentRole === 'admin' ? `
+            <button onclick="resetDraft()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition mt-2">
+              <i class="fa-solid fa-rotate-left mr-1"></i> Start New Draft
+            </button>
+          ` : ''}
         </div>
       `;
     }
