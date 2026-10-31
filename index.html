@@ -311,7 +311,15 @@
     let timerInterval = null;
     let timeRemaining = 30;
 
-    let gameData = Array(3).fill(0).map(x => { return {boss: null, terrain: null, studentBans: []} })
+    function getEmptyGameData() {
+      return [
+        { boss: null, terrain: null, studentBans: [] },
+        { boss: null, terrain: null, studentBans: [] },
+        { boss: null, terrain: null, studentBans: [] }
+      ];
+    }
+
+    let gameData = getEmptyGameData();
 
     window.onload = function() {
       const raid_boss_promise = fetch("https://schaledb.com/data/en/raids.min.json")
@@ -363,21 +371,19 @@
       currentRoomRef.on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
-          // console.log("Before (currentStepIndex, bannedBosses, gameData)")
-          // console.log(currentStepIndex)
-          // console.log(bannedBosses)
-          // console.log(gameData)
-          // console.log("Received (currentStepIndex, bannedBosses, gameData)")
-          // console.log(data.currentStepIndex)
-          // console.log(data.bannedBosses)
-          // console.log(data.gameData)
           currentStepIndex = data.currentStepIndex || 0;
           bannedBosses = data.bannedBosses || [];
-          gameData = gameData.map((x,z) => data.gameData ? (data.gameData[z] ? {boss: (gameData.map(x => !!x.boss).reduce((acc, cur) => acc + cur, 0) && data.gameData[z].boss) || x.boss, terrain: (gameData.map(x => !!x.terrain).reduce((acc, cur) => acc + cur, 0) && data.gameData[z].terrain) || x.terrain, studentBans: (gameData.map(x => x.studentBans.length).reduce((acc, cur) => acc + cur, 0) && data.gameData[z].studentBans) || x.studentBans } : x) : x)
-          // console.log("After (currentStepIndex, bannedBosses, gameData)")
-          // console.log(currentStepIndex)
-          // console.log(bannedBosses)
-          // console.log(gameData)
+          
+          const rawGameData = data.gameData || [];
+          gameData = [0, 1, 2].map(idx => {
+            const raw = rawGameData[idx] || {};
+            return {
+              boss: raw.boss || null,
+              terrain: raw.terrain || null,
+              studentBans: raw.studentBans || []
+            };
+          });
+          
           updateDraftState();
         } else {
           pushStateToFirebase();
@@ -408,9 +414,8 @@
       currentStepIndex = 0;
       bannedBosses = [];
       pendingSelection = null;
-      gameData = Array(3).fill(0).map(x => { return {boss: null, terrain: null, studentBans: []} });
+      gameData = getEmptyGameData();
       pushStateToFirebase();
-      window.location.reload();
     }
 
     /* TIMER MANAGEMENT */
@@ -576,6 +581,7 @@
       } else if (step.type === 'pick' && step.target === 'terrain') {
         gameData[step.game - 1].terrain = pendingSelection;
       } else if (step.type === 'ban' && step.target === 'student') {
+        if (!gameData[step.game - 1].studentBans) gameData[step.game - 1].studentBans = [];
         gameData[step.game - 1].studentBans.push(pendingSelection);
       }
 
@@ -682,7 +688,7 @@
         document.getElementById('grid-title').innerText = `GAME ${step.game} STUDENT BANS`;
         searchBox.classList.remove('hidden');
 
-        const activeGameBans = gameData[step.game - 1].studentBans;
+        const activeGameBans = gameData[step.game - 1].studentBans || [];
 
         STUDENT_ROSTER.forEach(student => {
           const isBanned = activeGameBans.some(s => s.id === student.id);
@@ -796,7 +802,7 @@
       const step = DRAFT_SEQUENCE[currentStepIndex];
 
       for (let g = 1; g <= 3; g++) {
-        const data = gameData[g - 1];
+        const data = gameData[g - 1] || { boss: null, terrain: null, studentBans: [] };
 
         // Boss Slot
         const bossSlot = document.getElementById(`g${g}-boss-slot`);
@@ -849,10 +855,11 @@
         const totalSlots = g === 3 ? 4 : 3;
         const bansContainer = document.getElementById(`g${g}-bans-container`);
         let slotsHTML = '';
+        const currentBans = data.studentBans || [];
 
         for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
-          const bannedStudent = data.studentBans[slotIndex];
-          const isStudentSlotActive = (step?.game === g && step?.target === 'student' && data.studentBans.length === slotIndex);
+          const bannedStudent = currentBans[slotIndex];
+          const isStudentSlotActive = (step?.game === g && step?.target === 'student' && currentBans.length === slotIndex);
           const studentPulseClass = isStudentSlotActive ? (step.team === 'blue' ? 'active-slot-blue' : 'active-slot-red') : '';
 
           if (bannedStudent) {
