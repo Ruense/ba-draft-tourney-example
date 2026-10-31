@@ -540,31 +540,33 @@
           return;
         }
       }
-
+    
       if (selectedRole === 'host') {
         if (hostSessionId && hostSessionId !== clientSessionId) {
           alert(`Host role is already held by ${hostName || 'another player'}. You are forced to Spectator mode.`);
           document.getElementById('role-select').value = 'spectator';
           currentRole = 'spectator';
+          updateRoleControls();
           return;
         }
         hostSessionId = clientSessionId;
         const currentInput = document.getElementById('player-name-input').value.trim();
         if (currentInput) hostName = currentInput;
       }
-
+    
       if (selectedRole === 'guest') {
         if (guestSessionId && guestSessionId !== clientSessionId) {
           alert(`Guest role is already held by ${guestName || 'another player'}. You are forced to Spectator mode.`);
           document.getElementById('role-select').value = 'spectator';
           currentRole = 'spectator';
+          updateRoleControls();
           return;
         }
         guestSessionId = clientSessionId;
         const currentInput = document.getElementById('player-name-input').value.trim();
         if (currentInput) guestName = currentInput;
       }
-
+    
       if (currentRole === 'host' && selectedRole !== 'host' && hostSessionId === clientSessionId) {
         hostSessionId = null;
         hostName = '';
@@ -575,9 +577,12 @@
         guestName = '';
         guestReady = false;
       }
-
+    
+      // Update currentRole state BEFORE updating UI and pushing to Firebase
       currentRole = selectedRole;
       pendingSelection = null;
+      
+      updateRoleControls();
       pushStateToFirebase();
     }
 
