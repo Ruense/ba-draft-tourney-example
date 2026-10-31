@@ -91,8 +91,8 @@
 
       <!-- ROOM, ROLE & NAME CONTROLS -->
       <div class="flex flex-wrap items-center gap-3">
-        <!-- Name Input -->
-        <div id="name-input-container" class="flex items-center bg-sky-50/80 px-2.5 py-1 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
+        <!-- Name Input (Hidden by default for Spectator/Admin) -->
+        <div id="name-input-container" class="hidden flex items-center bg-sky-50/80 px-2.5 py-1 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
           <span class="text-sky-700 font-bold uppercase tracking-wider text-[10px]">NAME:</span>
           <input type="text" id="player-name-input" placeholder="Your Name..." onblur="updatePlayerName(this.value)" onkeydown="if(event.key==='Enter') this.blur()" class="bg-white px-2 py-1 rounded text-sky-800 font-bold border border-sky-300 w-28 text-center outline-none focus:border-sky-500 shadow-sm text-xs">
         </div>
@@ -341,7 +341,6 @@
     const db = firebase.database();
     let currentRoomRef = null;
 
-    // Session-based unique identifier for anti-sabotage role locking
     const clientSessionId = 'sess_' + Math.random().toString(36).substring(2, 9);
     const ADMIN_PASSWORD = "Senseihood1234";
 
@@ -638,6 +637,17 @@
       } else {
         resetBtn.disabled = true;
         resetBtn.classList.add('opacity-40', 'cursor-not-allowed');
+      }
+
+      // Hide or show the Name Input container depending on whether role is Host or Guest
+      const nameContainer = document.getElementById('name-input-container');
+      const nameInput = document.getElementById('player-name-input');
+      if (currentRole === 'host' || currentRole === 'guest') {
+        nameContainer.classList.remove('hidden');
+        if (currentRole === 'host') nameInput.value = hostName || '';
+        if (currentRole === 'guest') nameInput.value = guestName || '';
+      } else {
+        nameContainer.classList.add('hidden');
       }
 
       const hostReadyBtn = document.getElementById('host-ready-btn');
