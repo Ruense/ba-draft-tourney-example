@@ -336,16 +336,15 @@
     const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbarka'];
 
     let currentStepIndex = 0;
-    let currentTimerStepIndex = -1;
     let currentRole = 'admin';
     let draftStarted = false;
     let hostReady = false;
     let guestReady = false;
+    let stepDeadline = 0; // Server-Side Timestamp
 
     let bannedBosses = [];
     let pendingSelection = null;
     let timerInterval = null;
-    let timeRemaining = 30;
 
     function getEmptyGameData() {
       return [
@@ -407,10 +406,12 @@
       currentRoomRef.on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
+          const prevStep = currentStepIndex;
           currentStepIndex = data.currentStepIndex || 0;
           draftStarted = !!data.draftStarted;
           hostReady = !!data.hostReady;
           guestReady = !!data.guestReady;
+          stepDeadline = data.stepDeadline || 0;
           bannedBosses = data.bannedBosses || [];
           
           const rawGameData = data.gameData || [];
@@ -430,13 +431,14 @@
       });
     }
 
-    function pushStateToFirebase() {
+    function pushStateToFirebase(newDeadline = null) {
       if (!currentRoomRef) return;
       currentRoomRef.set({
         currentStepIndex: currentStepIndex,
         draftStarted: draftStarted,
         hostReady: hostReady,
         guestReady: guestReady,
+        stepDeadline: newDeadline !== null ? newDeadline : stepDeadline,
         bannedBosses: bannedBosses,
         gameData: gameData
       });
@@ -444,9 +446,10 @@
 
     function changeRole(r) { 
       currentRole = r; 
+      pendingSelection = null;
       updateRoleControls();
       const step = DRAFT_SEQUENCE[currentStepIndex];
-      if (step) {
+      if (step && draftStarted) {
         renderGridForStep(step);
       }
     }
@@ -464,25 +467,27 @@
       if (currentRole !== 'admin') return;
       if (!hostReady || !guestReady) return;
       draftStarted = true;
-      pushStateToFirebase();
+
+      // Set initial 30s deadline timestamp for step 1
+      const initialDeadline = Date.now() + 30000;
+      pushStateToFirebase(initialDeadline);
     }
 
     function resetDraft() {
       if (currentRole !== 'admin') return;
       stopTimer();
-      currentTimerStepIndex = -1;
       currentStepIndex = 0;
       draftStarted = false;
       hostReady = false;
       guestReady = false;
+      stepDeadline = 0;
       bannedBosses = [];
       pendingSelection = null;
       gameData = getEmptyGameData();
-      pushStateToFirebase();
+      pushStateToFirebase(0);
     }
 
     function updateRoleControls() {
-      // Header reset button (Admin Only)
       const resetBtn = document.getElementById('header-reset-btn');
       if (currentRole === 'admin') {
         resetBtn.disabled = false;
@@ -492,7 +497,6 @@
         resetBtn.classList.add('opacity-40', 'cursor-not-allowed');
       }
 
-      // Ready buttons visibility
       const hostReadyBtn = document.getElementById('host-ready-btn');
       const guestReadyBtn = document.getElementById('guest-ready-btn');
 
@@ -508,7 +512,6 @@
         guestReadyBtn.classList.add('hidden');
       }
 
-      // Admin Start Button state
       const adminStartBtn = document.getElementById('admin-start-btn');
       if (currentRole === 'admin' && !draftStarted) {
         adminStartBtn.classList.remove('hidden');
@@ -526,42 +529,37 @@
       }
     }
 
-    /* TIMER MANAGEMENT */
-    function startTimerForStep(step) {
-      if (!draftStarted) return;
-      if (currentTimerStepIndex === currentStepIndex) return;
-
+    /* SERVER-SIDE TIMESTAMP TIMER LOGIC */
+    function syncServerTimer() {
       stopTimer();
-      currentTimerStepIndex = currentStepIndex;
-
-      if (step.type === 'ban' && step.target === 'boss') {
-        timeRemaining = 30;
-      } else if (step.type === 'pick') {
-        timeRemaining = 60;
-      } else if (step.type === 'ban' && step.target === 'student') {
-        timeRemaining = 30;
-      } else {
-        timeRemaining = 30;
+      if (!draftStarted || stepDeadline <= 0) {
+        updateTimerDisplay(0);
+        return;
       }
 
-      updateTimerUI();
+      updateTimerDisplay(getRemainingSeconds());
 
       timerInterval = setInterval(() => {
-        timeRemaining--;
-        updateTimerUI();
+        const remaining = getRemainingSeconds();
+        updateTimerDisplay(remaining);
 
-        if (timeRemaining <= 0) {
+        if (remaining <= 0) {
           stopTimer();
           autoHandleTimeout();
         }
-      }, 1000);
+      }, 500);
+    }
+
+    function getRemainingSeconds() {
+      if (!stepDeadline) return 0;
+      return Math.max(0, Math.ceil((stepDeadline - Date.now()) / 1000));
     }
 
     function stopTimer() {
       if (timerInterval) clearInterval(timerInterval);
     }
 
-    function updateTimerUI() {
+    function updateTimerDisplay(sec) {
       const timerText = document.getElementById('timer-text');
       const timerBox = document.getElementById('timer-box');
 
@@ -572,13 +570,13 @@
         return;
       }
 
-      const mins = Math.floor(timeRemaining / 60);
-      const secs = timeRemaining % 60;
-      const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      const mins = Math.floor(sec / 60);
+      const remainingSecs = sec % 60;
+      const formatted = `${String(mins).padStart(2, '0')}:${String(remainingSecs).padStart(2, '0')}`;
       
       timerText.innerText = formatted;
 
-      if (timeRemaining <= 10) {
+      if (sec <= 10) {
         timerText.className = "font-orbitron text-3xl font-black text-rose-500 animate-pulse-fast";
         timerBox.className = "flex flex-col items-center justify-center bg-rose-950/40 px-4 py-2 rounded-xl border border-rose-600/80 min-w-[100px]";
       } else {
@@ -588,21 +586,27 @@
     }
 
     function autoHandleTimeout() {
-      if (!draftStarted) return;
+      if (!draftStarted || currentStepIndex >= DRAFT_SEQUENCE.length) return;
+
+      const step = DRAFT_SEQUENCE[currentStepIndex];
+
+      // Only active turn owner or Admin performs timeout commit to prevent duplicate writes
+      const isMyTurnToCommit = (step.team === 'blue' && currentRole === 'host') || 
+                               (step.team === 'red' && currentRole === 'guest') || 
+                               (currentRole === 'admin');
+
+      if (!isMyTurnToCommit) return;
 
       if (pendingSelection) {
         confirmCurrentSelection();
         return;
       }
 
-      const step = DRAFT_SEQUENCE[currentStepIndex];
-
       if (step.target === 'boss') {
         const usedIds = [...bannedBosses.map(b => b.id), gameData[0].boss?.id, gameData[1].boss?.id].filter(Boolean);
         const availableBosses = BOSS_ROSTER.filter(b => !usedIds.includes(b.id));
         if (availableBosses.length > 0) {
-          const randomBoss = availableBosses[Math.floor(Math.random() * availableBosses.length)];
-          pendingSelection = randomBoss;
+          pendingSelection = availableBosses[Math.floor(Math.random() * availableBosses.length)];
           confirmCurrentSelection();
         }
       } else if (step.target === 'terrain') {
@@ -610,16 +614,14 @@
         const allowedTerrains = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
         const availableTerrains = TERRAIN_ROSTER.filter(t => allowedTerrains.includes(t.id));
         if (availableTerrains.length > 0) {
-          const randomTerrain = availableTerrains[Math.floor(Math.random() * availableTerrains.length)];
-          pendingSelection = randomTerrain;
+          pendingSelection = availableTerrains[Math.floor(Math.random() * availableTerrains.length)];
           confirmCurrentSelection();
         }
       } else if (step.target === 'student') {
-        const activeGameBans = gameData[step.game - 1].studentBans;
+        const activeGameBans = gameData[step.game - 1].studentBans || [];
         const availableStudents = STUDENT_ROSTER.filter(s => !activeGameBans.some(b => b.id === s.id));
         if (availableStudents.length > 0) {
-          const randomStudent = availableStudents[Math.floor(Math.random() * availableStudents.length)];
-          pendingSelection = randomStudent;
+          pendingSelection = availableStudents[Math.floor(Math.random() * availableStudents.length)];
           confirmCurrentSelection();
         }
       }
@@ -637,7 +639,6 @@
     }
 
     function updateDraftState() {
-      // Update Ready badges
       const hostBadge = document.getElementById('host-ready-badge');
       const guestBadge = document.getElementById('guest-ready-badge');
 
@@ -659,7 +660,6 @@
 
       updateRoleControls();
 
-      // If pre-draft lobby state
       if (!draftStarted) {
         stopTimer();
         const banner = document.getElementById('turn-banner');
@@ -688,7 +688,8 @@
         const rem = BOSS_ROSTER.find(b => !usedIds.includes(b.id));
         if (rem) gameData[2].boss = rem;
         currentStepIndex++;
-        pushStateToFirebase();
+        const nextDuration = 30000;
+        pushStateToFirebase(Date.now() + nextDuration);
         return;
       }
 
@@ -711,7 +712,7 @@
       updateGameCardsUI();
       updateTopBossBansUI();
       renderGridForStep(step);
-      startTimerForStep(step);
+      syncServerTimer();
     }
 
     function renderLobbyGrid() {
@@ -758,7 +759,13 @@
 
       pendingSelection = null;
       currentStepIndex++;
-      pushStateToFirebase();
+
+      // Calculate next step duration (60s for boss pick, 30s for bans/terrain)
+      const nextStep = DRAFT_SEQUENCE[currentStepIndex];
+      const duration = (nextStep && nextStep.type === 'pick' && nextStep.target === 'boss') ? 60000 : 30000;
+      const nextDeadline = Date.now() + duration;
+
+      pushStateToFirebase(nextDeadline);
     }
 
     function renderGridForStep(step) {
@@ -777,7 +784,9 @@
         confirmBtn.classList.add('hidden');
       }
 
-      const isAllowedRole = currentRole === 'admin' || (step.team === 'blue' && currentRole === 'host') || (step.team === 'red' && currentRole === 'guest');
+      // STRICT ROLE PERMISSION: Admin CANNOT ban/pick. Only Host or Guest during their turn.
+      const isAllowedRole = (step.team === 'blue' && currentRole === 'host') || 
+                            (step.team === 'red' && currentRole === 'guest');
 
       if (step.target === 'boss') {
         document.getElementById('grid-title').innerText = "SELECTABLE BOSS POOL";
@@ -827,11 +836,10 @@
         if (allowed.length === 1 && step.type !== 'roll') {
           gameData[step.game - 1].terrain = TERRAIN_ROSTER.find(t => t.id === allowed[0]);
           currentStepIndex++;
-          pushStateToFirebase();
+          pushStateToFirebase(Date.now() + 30000);
           return;
         }
 
-        // STRICT ADMIN CHECK: Only show terrain randomize button to Admin role
         if (step.type === 'roll' && currentRole === 'admin') {
           rollBtn.classList.remove('hidden');
         }
@@ -891,14 +899,14 @@
     }
 
     function executeAdminRoll() {
-      if (currentRole !== 'admin') return; // Strict Admin check
+      if (currentRole !== 'admin') return;
       const step = DRAFT_SEQUENCE[currentStepIndex];
       const activeBoss = gameData[step.game - 1].boss;
       const allowed = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
       const rolledId = allowed[Math.floor(Math.random() * allowed.length)];
       gameData[step.game - 1].terrain = TERRAIN_ROSTER.find(t => t.id === rolledId);
       currentStepIndex++;
-      pushStateToFirebase();
+      pushStateToFirebase(Date.now() + 30000);
     }
 
     function filterStudents(q) {
