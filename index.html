@@ -15,7 +15,7 @@
     
     * { font-family: 'Noto Sans', sans-serif !important; }
     
-    /* Arona Light & Sky Blue Theme */
+    /* Arona Light & Sky Blue Base */
     body { 
       background-color: #edf5fa; 
       background-image: 
@@ -26,7 +26,7 @@
       color: #1e293b; 
     }
 
-    /* Halo Glows for Light Mode */
+    /* Halo Glows */
     .glow-halo-cyan { box-shadow: 0 4px 20px rgba(18, 180, 255, 0.35); border-color: #00a2ff !important; }
     .glow-halo-rose { box-shadow: 0 4px 20px rgba(244, 63, 94, 0.35); border-color: #f43f5e !important; }
     .glow-halo-gold { box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35); border-color: #f59e0b !important; }
@@ -38,9 +38,11 @@
       box-shadow: 0 4px 16px rgba(18, 180, 255, 0.08);
     }
 
+    /* Darkened Inner Slot Backgrounds for Clear Contrast */
     .schale-card-inner {
-      background: #f4f9fd;
-      border: 1px solid #d8ecfd;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      color: #f8fafc;
     }
 
     .slot-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -55,7 +57,7 @@
     }
     .animate-pulse-fast { animation: pulse-fast 0.6s infinite; }
 
-    /* Active Turn Animations */
+    /* Active Turn Pulse Animations */
     @keyframes slot-pulse-cyan {
       0%, 100% { box-shadow: 0 0 16px rgba(18, 180, 255, 0.8); border-color: #00a2ff !important; transform: scale(1.02); }
       50% { box-shadow: 0 0 6px rgba(18, 180, 255, 0.3); border-color: #7dd3fc !important; transform: scale(1); }
@@ -80,11 +82,9 @@
   <header class="bg-white/90 border-b border-sky-200 px-6 py-3 sticky top-0 z-50 backdrop-blur-md shadow-sm">
     <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
       <div class="flex items-center gap-3">
-        <!-- CUSTOM EMBLEM LOGO -->
+        <!-- CUSTOM REVERTED EMBLEM LOGO -->
         <div class="w-10 h-10 rounded-xl bg-sky-500 border border-sky-400 flex items-center justify-center shadow-md overflow-hidden p-1">
-        <svg class="w-full h-full text-white fill-current" viewBox="0 0 1000 1000">
-          <!-- Star Emblem Center -->
-          <path d="M500 200 L530 470 L800 500
+          <img src="sh_logo_norm_white.png" alt="Senseihood Emblem" class="w-full h-full object-contain">
         </div>
         <div>
           <h1 class="text-lg font-black text-slate-800 tracking-widest uppercase flex items-center gap-2">
@@ -171,9 +171,9 @@
       </div>
 
       <!-- TIMER DISPLAY -->
-      <div id="timer-box" class="flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-200 min-w-[110px]">
-        <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">TIME LEFT</span>
-        <span id="timer-text" class="text-3xl font-black text-slate-400 tracking-wider">--:--</span>
+      <div id="timer-box" class="flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-400 min-w-[110px]">
+        <span class="text-[9px] font-black text-sky-400 uppercase tracking-widest">TIME LEFT</span>
+        <span id="timer-text" class="text-3xl font-black text-slate-300 tracking-wider">--:--</span>
       </div>
     </div>
 
@@ -220,11 +220,11 @@
 
           <div class="grid grid-cols-3 gap-2 mb-3">
             <div id="g1-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center">
-              <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Boss</span>
+              <span class="text-[9px] text-sky-400 uppercase font-black tracking-widest">Boss</span>
               <span class="text-xs font-bold text-slate-400">Pending</span>
             </div>
             <div id="g1-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center">
-              <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Terrain</span>
+              <span class="text-[9px] text-sky-400 uppercase font-black tracking-widest">Terrain</span>
               <span class="text-xs font-bold text-slate-400">Pending</span>
             </div>
           </div>
@@ -246,11 +246,11 @@
 
           <div class="grid grid-cols-3 gap-2 mb-3">
             <div id="g2-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center">
-              <span class="text-[9px] text-rose-600 uppercase font-black tracking-widest">Boss</span>
+              <span class="text-[9px] text-rose-400 uppercase font-black tracking-widest">Boss</span>
               <span class="text-xs font-bold text-slate-400">Pending</span>
             </div>
             <div id="g2-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center">
-              <span class="text-[9px] text-rose-600 uppercase font-black tracking-widest">Terrain</span>
+              <span class="text-[9px] text-rose-400 uppercase font-black tracking-widest">Terrain</span>
               <span class="text-xs font-bold text-slate-400">Pending</span>
             </div>
           </div>
@@ -272,12 +272,12 @@
 
           <div class="grid grid-cols-3 gap-2 mb-3">
             <div id="g3-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center">
-              <span class="text-[9px] text-amber-600 uppercase font-black tracking-widest">Boss</span>
+              <span class="text-[9px] text-amber-400 uppercase font-black tracking-widest">Boss</span>
               <span class="text-xs font-bold text-slate-400">Last Remaining</span>
             </div>
             <div id="g3-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center">
-              <span class="text-[9px] text-amber-600 uppercase font-black tracking-widest">Terrain</span>
-              <span class="text-xs font-bold text-amber-600">Admin Roll</span>
+              <span class="text-[9px] text-amber-400 uppercase font-black tracking-widest">Terrain</span>
+              <span class="text-xs font-bold text-amber-400">Admin Roll</span>
             </div>
           </div>
         </div>
@@ -299,7 +299,7 @@
         </div>
 
         <div id="student-search-box" class="hidden flex-1 max-w-xs">
-          <input type="text" id="student-search-input" oninput="filterStudents(this.value)" placeholder="Search student name..." class="w-full bg-white border border-sky-300 text-slate-800 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-sky-500 shadow-inner">
+          <input type="text" id="student-search-input" oninput="filterStudents(this.value)" placeholder="Search student name..." class="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-1.5 outline-none focus:border-sky-500 shadow-inner">
         </div>
 
         <div class="flex items-center gap-2">
@@ -627,7 +627,7 @@
       if (!draftStarted) {
         timerText.innerText = "--:--";
         timerText.className = "text-3xl font-black text-slate-400";
-        timerBox.className = "flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-200 min-w-[110px]";
+        timerBox.className = "flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-400 min-w-[110px]";
         return;
       }
 
@@ -639,10 +639,10 @@
 
       if (sec <= 10) {
         timerText.className = "text-3xl font-black text-rose-500 animate-pulse-fast";
-        timerBox.className = "flex flex-col items-center justify-center bg-rose-50 px-5 py-2 rounded-xl border border-rose-300 min-w-[110px] glow-halo-rose";
+        timerBox.className = "flex flex-col items-center justify-center bg-rose-950 px-5 py-2 rounded-xl border border-rose-500 min-w-[110px] glow-halo-rose";
       } else {
-        timerText.className = "text-3xl font-black text-sky-600";
-        timerBox.className = "flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-300 min-w-[110px]";
+        timerText.className = "text-3xl font-black text-sky-400";
+        timerBox.className = "flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-400 min-w-[110px]";
       }
     }
 
@@ -725,7 +725,7 @@
         const banner = document.getElementById('turn-banner');
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden";
         document.getElementById('phase-title').innerText = "PRE-DRAFT LOBBY";
-        document.getElementById('turn-label').className = "text-2xl font-black text-slate-700 tracking-wide";
+        document.getElementById('turn-label').className = "text-2xl font-black text-slate-800 tracking-wide";
         document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
         document.getElementById('turn-subtitle').innerText = "Host and Guest must ready up before Admin can start the draft.";
 
@@ -783,12 +783,12 @@
       document.getElementById('admin-roll-btn').classList.add('hidden');
 
       grid.innerHTML = `
-        <div class="col-span-full schale-card-inner p-8 rounded-xl border border-sky-200 text-center flex flex-col items-center justify-center my-6">
+        <div class="col-span-full schale-card-inner p-8 rounded-xl border border-slate-800 text-center flex flex-col items-center justify-center my-6">
           <svg class="w-10 h-10 text-sky-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
           </svg>
-          <h3 class="font-bold text-lg text-slate-800 mb-1 tracking-wide">Lobby In Progress</h3>
-          <p class="text-xs text-slate-500 max-w-md">Host and Guest must click <b>READY UP</b> in their respective roles. The Admin can then initiate Step 1 of the BO3 Draft.</p>
+          <h3 class="font-bold text-lg text-white mb-1 tracking-wide">Lobby In Progress</h3>
+          <p class="text-xs text-slate-300 max-w-md">Host and Guest must click <b>READY UP</b> in their respective roles. The Admin can then initiate Step 1 of the BO3 Draft.</p>
         </div>
       `;
     }
@@ -859,7 +859,7 @@
           const isPending = pendingSelection?.id === boss.id;
 
           const card = document.createElement('div');
-          let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (isAvailable ? 'border-sky-200 hover:border-sky-500' : 'border-slate-200 opacity-40 cursor-not-allowed');
+          let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (isAvailable ? 'border-slate-800 hover:border-sky-500' : 'border-slate-900 opacity-40 cursor-not-allowed');
 
           let banBadge = '';
           if (isBanned) {
@@ -872,11 +872,11 @@
 
           card.className = `slot-card schale-card-inner border rounded-xl p-2 text-center relative flex flex-col justify-between items-center ${borderStyle}`;
           card.innerHTML = `
-            <div class="w-full h-16 bg-slate-100 rounded-lg mb-1 overflow-hidden relative">
-              <img src="${boss.image}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' fill=\'%23e2e8f0\'><rect width=\'100%\' height=\'100%\'/></svg>';">
+            <div class="w-full h-16 bg-slate-950 rounded-lg mb-1 overflow-hidden relative">
+              <img src="${boss.image}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' fill=\'%231e293b\'><rect width=\'100%\' height=\'100%\'/></svg>';">
             </div>
-            <span class="font-bold text-xs text-slate-800">${boss.name}</span>
-            <span class="text-[10px] text-sky-600 font-semibold">${boss.terrains.length} Terrains</span>
+            <span class="font-bold text-xs text-white">${boss.name}</span>
+            <span class="text-[10px] text-sky-400 font-semibold">${boss.terrains.length} Terrains</span>
             ${banBadge}
             ${isPicked ? '<span class="absolute top-1 right-1 bg-emerald-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow">PICKED</span>' : ''}
             ${isPending ? '<span class="absolute top-1 left-1 bg-amber-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow">SELECTED</span>' : ''}
@@ -909,14 +909,14 @@
           const isPending = pendingSelection?.id === terrain.id;
           const card = document.createElement('div');
 
-          let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (isAllowed ? 'border-sky-200 hover:border-amber-500' : 'border-slate-200 opacity-20 cursor-not-allowed');
+          let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (isAllowed ? 'border-slate-800 hover:border-amber-500' : 'border-slate-900 opacity-20 cursor-not-allowed');
 
           card.className = `slot-card schale-card-inner border rounded-xl p-2 text-center relative ${borderStyle}`;
           card.innerHTML = `
-            <div class="w-full h-12 bg-slate-100 rounded-lg mb-1 overflow-hidden">
+            <div class="w-full h-12 bg-slate-950 rounded-lg mb-1 overflow-hidden">
               <img src="${terrain.image}" class="w-full h-full object-contain">
             </div>
-            <span class="font-bold text-xs text-slate-800">${terrain.name}</span>
+            <span class="font-bold text-xs text-white">${terrain.name}</span>
             ${isPending ? '<span class="absolute top-1 left-1 bg-amber-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow">SELECTED</span>' : ''}
           `;
 
@@ -937,15 +937,15 @@
           const isPending = pendingSelection?.id === student.id;
           const card = document.createElement('div');
 
-          let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (!isBanned ? 'border-sky-200 hover:border-rose-500' : 'border-slate-200 opacity-40 cursor-not-allowed');
+          let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (!isBanned ? 'border-slate-800 hover:border-rose-500' : 'border-slate-900 opacity-40 cursor-not-allowed');
 
           card.className = `student-card slot-card schale-card-inner border rounded-xl p-2 text-center relative ${borderStyle}`;
           card.setAttribute('data-name', student.name.toLowerCase());
           card.innerHTML = `
-            <div class="w-12 h-12 bg-slate-100 rounded-full mx-auto mb-1 overflow-hidden border border-sky-200">
+            <div class="w-12 h-12 bg-slate-950 rounded-full mx-auto mb-1 overflow-hidden border border-sky-400/30">
               <img src="${student.image}" class="w-full h-full object-cover">
             </div>
-            <span class="font-bold text-[10px] text-slate-800 block truncate">${student.name}</span>
+            <span class="font-bold text-[10px] text-white block truncate">${student.name}</span>
             ${isBanned ? '<span class="absolute top-1 right-1 bg-rose-600 text-white text-[8px] font-black px-1 rounded">BANNED</span>' : ''}
             ${isPending ? '<span class="absolute top-1 left-1 bg-amber-500 text-white text-[8px] font-black px-1 rounded">SELECTED</span>' : ''}
           `;
@@ -997,14 +997,14 @@
           hostHTML += `
             <div class="relative w-20 h-20 schale-card-inner border border-sky-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
               <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-75">
-              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
                 <span class="text-[9.5px] font-black text-sky-200 truncate block tracking-wide">${bossObj ? bossObj.name : ''}</span>
               </div>
             </div>
           `;
         } else {
           hostHTML += `
-            <div class="w-20 h-20 schale-card-inner border border-sky-200 rounded-xl flex items-center justify-center text-sky-400 font-black text-sm ${activeClass}">
+            <div class="w-20 h-20 schale-card-inner border border-sky-900/60 rounded-xl flex items-center justify-center text-sky-400 font-black text-sm ${activeClass}">
               ${i + 1}
             </div>
           `;
@@ -1025,14 +1025,14 @@
           guestHTML += `
             <div class="relative w-20 h-20 schale-card-inner border border-rose-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
               <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-75">
-              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
                 <span class="text-[9.5px] font-black text-rose-200 truncate block tracking-wide">${bossObj ? bossObj.name : ''}</span>
               </div>
             </div>
           `;
         } else {
           guestHTML += `
-            <div class="w-20 h-20 schale-card-inner border border-rose-200 rounded-xl flex items-center justify-center text-rose-400 font-black text-sm ${activeClass}">
+            <div class="w-20 h-20 schale-card-inner border border-rose-900/60 rounded-xl flex items-center justify-center text-rose-400 font-black text-sm ${activeClass}">
               ${guestLabels[i]}
             </div>
           `;
@@ -1053,22 +1053,22 @@
         const bossPulseClass = isBossActive ? (step.team === 'blue' ? 'active-slot-blue' : 'active-slot-red') : '';
 
         if (data.boss) {
-          bossSlot.className = "col-span-2 schale-card-inner border border-sky-300 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative";
+          bossSlot.className = "col-span-2 schale-card-inner border border-sky-400 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative";
           bossSlot.innerHTML = `
             <div class="w-full h-full flex flex-col items-center justify-center">
-              <img src="${data.boss.image}" class="w-full h-16 object-cover rounded-lg mb-1" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' fill=\'%23e2e8f0\'><rect width=\'100%\' height=\'100%\'/></svg>';">
-              <span class="text-xs font-bold text-sky-700 truncate w-full text-center">${data.boss.name}</span>
+              <img src="${data.boss.image}" class="w-full h-16 object-cover rounded-lg mb-1" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' fill=\'%231e293b\'><rect width=\'100%\' height=\'100%\'/></svg>';">
+              <span class="text-xs font-bold text-sky-300 truncate w-full text-center">${data.boss.name}</span>
             </div>
           `;
         } else {
-          bossSlot.className = `col-span-2 schale-card-inner border border-sky-200 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative ${bossPulseClass}`;
+          bossSlot.className = `col-span-2 schale-card-inner border border-slate-800 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative ${bossPulseClass}`;
           bossSlot.innerHTML = `
-            <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Boss</span>
+            <span class="text-[9px] text-sky-400 uppercase font-black tracking-widest">Boss</span>
             <span class="text-xs font-bold text-slate-400">${g === 3 ? 'Last Remaining' : 'Pending'}</span>
           `;
         }
 
-        // Terrain Slot
+        // Terrain Slot (Dark backdrop + vivid text contrast)
         const terrainSlot = document.getElementById(`g${g}-terrain-slot`);
         const isTerrainActive = (step?.game === g && step?.target === 'terrain');
         let terrainPulseClass = '';
@@ -1079,18 +1079,18 @@
         }
 
         if (data.terrain) {
-          terrainSlot.className = "col-span-1 schale-card-inner border border-amber-300 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative";
+          terrainSlot.className = "col-span-1 schale-card-inner border border-amber-400 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative bg-slate-950";
           terrainSlot.innerHTML = `
             <div class="w-full h-full flex flex-col items-center justify-center">
-              <img src="${data.terrain.image}" class="w-8 h-8 object-contain rounded mb-1">
-              <span class="text-[10px] font-bold text-amber-700 truncate w-full text-center">${data.terrain.name}</span>
+              <img src="${data.terrain.image}" class="w-9 h-9 object-contain rounded mb-1 filter drop-shadow">
+              <span class="text-[10px] font-black text-amber-300 truncate w-full text-center tracking-wide drop-shadow">${data.terrain.name}</span>
             </div>
           `;
         } else {
-          terrainSlot.className = `col-span-1 schale-card-inner border border-sky-200 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative ${terrainPulseClass}`;
+          terrainSlot.className = `col-span-1 schale-card-inner border border-slate-800 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative ${terrainPulseClass}`;
           terrainSlot.innerHTML = `
-            <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Terrain</span>
-            <span class="text-xs font-bold ${g === 3 ? 'text-amber-600' : 'text-slate-400'}">${g === 3 ? 'Admin Roll' : 'Pending'}</span>
+            <span class="text-[9px] text-sky-400 uppercase font-black tracking-widest">Terrain</span>
+            <span class="text-xs font-bold ${g === 3 ? 'text-amber-400' : 'text-slate-400'}">${g === 3 ? 'Admin Roll' : 'Pending'}</span>
           `;
         }
 
@@ -1107,17 +1107,17 @@
 
           if (bannedStudent) {
             slotsHTML += `
-              <div class="relative w-full h-20 schale-card-inner border border-rose-300 rounded-xl overflow-hidden shadow-md">
+              <div class="relative w-full h-20 schale-card-inner border border-rose-500 rounded-xl overflow-hidden shadow-md">
                 <img src="${bannedStudent.image}" class="w-full h-full object-cover object-[50%_50%] scale-105 grayscale opacity-75">
-                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pt-4 pb-1 px-1 text-center z-10">
                   <span class="text-[10px] font-black text-rose-200 truncate block tracking-wide">${bannedStudent.name}</span>
                 </div>
               </div>
             `;
           } else {
             slotsHTML += `
-              <div class="w-full h-20 schale-card-inner border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 ${studentPulseClass}">
-                <span class="text-[9px] font-bold tracking-widest text-slate-400">BAN ${slotIndex + 1}</span>
+              <div class="w-full h-20 schale-card-inner border border-slate-800 rounded-xl flex items-center justify-center text-slate-500 ${studentPulseClass}">
+                <span class="text-[9px] font-bold tracking-widest text-slate-500">BAN ${slotIndex + 1}</span>
               </div>
             `;
           }
@@ -1148,11 +1148,11 @@
       document.getElementById('confirm-selection-btn').classList.add('hidden');
 
       grid.innerHTML = `
-        <div class="col-span-full schale-card-inner p-6 rounded-xl border border-emerald-300 text-center">
-          <svg class="w-10 h-10 text-emerald-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="col-span-full schale-card-inner p-6 rounded-xl border border-emerald-400 text-center">
+          <svg class="w-10 h-10 text-emerald-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          <h3 class="font-bold text-lg text-slate-800 mb-2">Match Ready to Begin</h3>
+          <h3 class="font-bold text-lg text-white mb-2">Match Ready to Begin</h3>
           ${currentRole === 'admin' ? `
             <button onclick="resetDraft()" class="bg-sky-500 hover:bg-sky-400 text-white font-black text-xs px-5 py-2 rounded-lg transition mt-2 tracking-wider flex items-center justify-center gap-1.5 mx-auto shadow-md">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
