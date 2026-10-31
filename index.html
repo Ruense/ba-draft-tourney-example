@@ -255,7 +255,7 @@
 
     let currentStepIndex = 0;
     let currentRole = 'admin';
-    let bannedBosses = []; // Array of objects: { id, team }
+    let bannedBosses = [];
     let pendingSelection = null;
     let timerInterval = null;
     let timeRemaining = 30;
@@ -303,7 +303,10 @@
       });
     };
 
-    function changeRole(r) { currentRole = r; updateDraftState(); }
+    function changeRole(r) { 
+      currentRole = r; 
+      updateDraftState(); 
+    }
 
     function resetDraft() {
       stopTimer();
@@ -400,6 +403,17 @@
       }
     }
 
+    function getStepSubtitle(step) {
+      if (step.target === 'boss') {
+        return step.type === 'ban' ? 'Select 1 boss from the pool to ban' : 'Select 1 boss from the pool to pick';
+      } else if (step.target === 'terrain') {
+        return step.type === 'roll' ? 'Randomizing decider terrain...' : `Select terrain for Game ${step.game}`;
+      } else if (step.target === 'student') {
+        return `Select 1 student to ban for Game ${step.game}`;
+      }
+      return '';
+    }
+
     function updateDraftState() {
       if (currentStepIndex >= DRAFT_SEQUENCE.length) {
         stopTimer();
@@ -421,6 +435,7 @@
       const banner = document.getElementById('turn-banner');
       document.getElementById('phase-title').innerText = `STEP ${currentStepIndex + 1} OF ${DRAFT_SEQUENCE.length}`;
       document.getElementById('turn-label').innerText = step.label.toUpperCase();
+      document.getElementById('turn-subtitle').innerText = getStepSubtitle(step);
 
       if (step.team === 'blue') {
         banner.className = "bg-slate-900 border-2 border-cyan-500 rounded-xl p-4 flex items-center justify-between shadow-lg glow-blue relative overflow-hidden";
