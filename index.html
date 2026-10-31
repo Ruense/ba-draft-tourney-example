@@ -368,19 +368,19 @@
       const searchBox = document.getElementById('student-search-box');
       const rollBtn = document.getElementById('admin-roll-btn');
       const confirmBtn = document.getElementById('confirm-selection-btn');
-
+    
       grid.innerHTML = '';
       searchBox.classList.add('hidden');
       rollBtn.classList.add('hidden');
-
+    
       if (pendingSelection) {
         confirmBtn.classList.remove('hidden');
       } else {
         confirmBtn.classList.add('hidden');
       }
-
+    
       const isAllowedRole = currentRole === 'admin' || (step.team === 'blue' && currentRole === 'host') || (step.team === 'red' && currentRole === 'guest');
-
+    
       if (step.target === 'boss') {
         document.getElementById('grid-title').innerText = "SELECTABLE BOSS POOL";
         
@@ -390,10 +390,12 @@
           const isPicked = gameData[1].boss?.id === boss.id || gameData[2].boss?.id === boss.id;
           const isAvailable = !isBanned && !isPicked;
           const isPending = pendingSelection?.id === boss.id;
-
+    
           const card = document.createElement('div');
-          let borderStyle = isPending ? 'border-amber-400 ring-2 ring-amber-400 scale-105' : (isAvailable ? 'border-slate-800 hover:border-cyan-400' : 'border-slate-900 opacity-30 cursor-not-allowed');
-
+    
+          // Add grayscale and reduced opacity if banned or already picked
+          let borderStyle = isPending ? 'border-amber-400 ring-2 ring-amber-400 scale-105' : (isAvailable ? 'border-slate-800 hover:border-cyan-400' : 'border-slate-900 opacity-40 grayscale cursor-not-allowed');
+    
           let banBadge = '';
           if (isBanned) {
             if (banRecord.team === 'blue') {
@@ -402,7 +404,7 @@
               banBadge = '<span class="absolute top-1 right-1 bg-rose-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow">GUEST BAN</span>';
             }
           }
-
+    
           card.className = `slot-card bg-slate-950 border rounded-xl p-2 text-center relative flex flex-col justify-between items-center ${borderStyle}`;
           card.innerHTML = `
             <div class="w-full h-16 bg-slate-900 rounded mb-1 overflow-hidden relative">
@@ -414,34 +416,34 @@
             ${isPicked ? '<span class="absolute top-1 right-1 bg-emerald-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow">PICKED</span>' : ''}
             ${isPending ? '<span class="absolute top-1 left-1 bg-amber-500 text-slate-950 text-[8px] font-black px-1 rounded">SELECTED</span>' : ''}
           `;
-
+    
           if (isAvailable && isAllowedRole) {
             card.onclick = () => handleCardClick(boss);
           }
           grid.appendChild(card);
         });
-
+    
       } else if (step.target === 'terrain') {
         document.getElementById('grid-title').innerText = "SELECT TERRAIN";
         const activeBoss = gameData[step.game].boss;
         const allowed = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
-
+    
         if (allowed.length === 1 && step.type !== 'roll') {
           gameData[step.game].terrain = TERRAIN_ROSTER.find(t => t.id === allowed[0]);
           currentStepIndex++;
           updateDraftState();
           return;
         }
-
+    
         if (step.type === 'roll') rollBtn.classList.remove('hidden');
-
+    
         TERRAIN_ROSTER.forEach(terrain => {
           const isAllowed = allowed.includes(terrain.id);
           const isPending = pendingSelection?.id === terrain.id;
           const card = document.createElement('div');
-
-          let borderStyle = isPending ? 'border-amber-400 ring-2 ring-amber-400 scale-105' : (isAllowed ? 'border-slate-800 hover:border-amber-400' : 'border-slate-900 opacity-20 cursor-not-allowed');
-
+    
+          let borderStyle = isPending ? 'border-amber-400 ring-2 ring-amber-400 scale-105' : (isAllowed ? 'border-slate-800 hover:border-amber-400' : 'border-slate-900 opacity-20 grayscale cursor-not-allowed');
+    
           card.className = `slot-card bg-slate-950 border rounded-xl p-2 text-center relative ${borderStyle}`;
           card.innerHTML = `
             <div class="w-full h-12 bg-slate-900 rounded mb-1 overflow-hidden">
@@ -450,26 +452,27 @@
             <span class="font-bold text-xs text-slate-200">${terrain.name}</span>
             ${isPending ? '<span class="absolute top-1 left-1 bg-amber-500 text-slate-950 text-[8px] font-black px-1 rounded">SELECTED</span>' : ''}
           `;
-
+    
           if (isAllowed && step.type !== 'roll' && isAllowedRole) {
             card.onclick = () => handleCardClick(terrain);
           }
           grid.appendChild(card);
         });
-
+    
       } else if (step.target === 'student') {
         document.getElementById('grid-title').innerText = `GAME ${step.game} STUDENT BANS`;
         searchBox.classList.remove('hidden');
-
+    
         const activeGameBans = gameData[step.game].studentBans;
-
+    
         STUDENT_ROSTER.forEach(student => {
           const isBanned = activeGameBans.some(s => s.id === student.id);
           const isPending = pendingSelection?.id === student.id;
           const card = document.createElement('div');
-
-          let borderStyle = isPending ? 'border-amber-400 ring-2 ring-amber-400 scale-105' : (!isBanned ? 'border-slate-800 hover:border-rose-400' : 'border-slate-900 opacity-20 cursor-not-allowed');
-
+    
+          // Add grayscale and reduced opacity if the student is already banned in this game
+          let borderStyle = isPending ? 'border-amber-400 ring-2 ring-amber-400 scale-105' : (!isBanned ? 'border-slate-800 hover:border-rose-400' : 'border-slate-900 opacity-40 grayscale cursor-not-allowed');
+    
           card.className = `student-card slot-card bg-slate-950 border rounded-xl p-2 text-center relative ${borderStyle}`;
           card.setAttribute('data-name', student.name.toLowerCase());
           card.innerHTML = `
@@ -477,9 +480,10 @@
               <img src="${student.image}" class="w-full h-full object-cover">
             </div>
             <span class="font-bold text-[10px] text-slate-200">${student.name}</span>
+            ${isBanned ? '<span class="absolute top-1 right-1 bg-rose-600 text-white text-[8px] font-black px-1 rounded">BANNED</span>' : ''}
             ${isPending ? '<span class="absolute top-1 left-1 bg-amber-500 text-slate-950 text-[8px] font-black px-1 rounded">SELECTED</span>' : ''}
           `;
-
+    
           if (!isBanned && isAllowedRole) {
             card.onclick = () => handleCardClick(student);
           }
