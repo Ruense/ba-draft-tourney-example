@@ -340,7 +340,7 @@
     let draftStarted = false;
     let hostReady = false;
     let guestReady = false;
-    let stepDeadline = 0; // Server-Side Timestamp
+    let stepDeadline = 0;
 
     let bannedBosses = [];
     let pendingSelection = null;
@@ -406,7 +406,6 @@
       currentRoomRef.on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
-          const prevStep = currentStepIndex;
           currentStepIndex = data.currentStepIndex || 0;
           draftStarted = !!data.draftStarted;
           hostReady = !!data.hostReady;
@@ -454,13 +453,15 @@
       }
     }
 
+    // STRICT PERMISSION FIX: Host can only toggle Host ready; Guest can only toggle Guest ready. Admin CANNOT toggle player readiness.
     function toggleReady(role) {
-      if (role === 'host' && (currentRole === 'host' || currentRole === 'admin')) {
+      if (role === 'host' && currentRole === 'host') {
         hostReady = !hostReady;
-      } else if (role === 'guest' && (currentRole === 'guest' || currentRole === 'admin')) {
+        pushStateToFirebase();
+      } else if (role === 'guest' && currentRole === 'guest') {
         guestReady = !guestReady;
+        pushStateToFirebase();
       }
-      pushStateToFirebase();
     }
 
     function startDraftByAdmin() {
@@ -468,7 +469,6 @@
       if (!hostReady || !guestReady) return;
       draftStarted = true;
 
-      // Set initial 30s deadline timestamp for step 1
       const initialDeadline = Date.now() + 30000;
       pushStateToFirebase(initialDeadline);
     }
@@ -500,13 +500,15 @@
       const hostReadyBtn = document.getElementById('host-ready-btn');
       const guestReadyBtn = document.getElementById('guest-ready-btn');
 
-      if (!draftStarted && (currentRole === 'host' || currentRole === 'admin')) {
+      // Only show Host Ready button to Host
+      if (!draftStarted && currentRole === 'host') {
         hostReadyBtn.classList.remove('hidden');
       } else {
         hostReadyBtn.classList.add('hidden');
       }
 
-      if (!draftStarted && (currentRole === 'guest' || currentRole === 'admin')) {
+      // Only show Guest Ready button to Guest
+      if (!draftStarted && currentRole === 'guest') {
         guestReadyBtn.classList.remove('hidden');
       } else {
         guestReadyBtn.classList.add('hidden');
@@ -590,7 +592,6 @@
 
       const step = DRAFT_SEQUENCE[currentStepIndex];
 
-      // Only active turn owner or Admin performs timeout commit to prevent duplicate writes
       const isMyTurnToCommit = (step.team === 'blue' && currentRole === 'host') || 
                                (step.team === 'red' && currentRole === 'guest') || 
                                (currentRole === 'admin');
@@ -726,7 +727,7 @@
         <div class="col-span-full bg-slate-950 p-8 rounded-xl border border-slate-800 text-center flex flex-col items-center justify-center my-6">
           <i class="fa-solid fa-users text-4xl text-slate-500 mb-3"></i>
           <h3 class="font-orbitron font-bold text-lg text-white mb-1">Lobby In Progress</h3>
-          <p class="text-xs text-slate-400 max-w-md">Both Host and Guest must click <b>READY UP</b> above. The Admin can then initiate Step 1 of the BO3 Draft.</p>
+          <p class="text-xs text-slate-400 max-w-md">Host and Guest must click <b>READY UP</b> in their respective roles. The Admin can then initiate Step 1 of the BO3 Draft.</p>
         </div>
       `;
     }
@@ -760,7 +761,6 @@
       pendingSelection = null;
       currentStepIndex++;
 
-      // Calculate next step duration (60s for boss pick, 30s for bans/terrain)
       const nextStep = DRAFT_SEQUENCE[currentStepIndex];
       const duration = (nextStep && nextStep.type === 'pick' && nextStep.target === 'boss') ? 60000 : 30000;
       const nextDeadline = Date.now() + duration;
@@ -784,7 +784,6 @@
         confirmBtn.classList.add('hidden');
       }
 
-      // STRICT ROLE PERMISSION: Admin CANNOT ban/pick. Only Host or Guest during their turn.
       const isAllowedRole = (step.team === 'blue' && currentRole === 'host') || 
                             (step.team === 'red' && currentRole === 'guest');
 
