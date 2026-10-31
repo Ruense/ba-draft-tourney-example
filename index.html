@@ -38,7 +38,7 @@
       box-shadow: 0 4px 16px rgba(18, 180, 255, 0.08);
     }
 
-    /* Soft Light Blue Inner Slots for High Readability */
+    /* Soft Light Blue Inner Slots */
     .schale-card-inner {
       background: #f0f7ff;
       border: 1px solid #d3e6f9;
@@ -377,7 +377,7 @@
 
       { team: 'blue', type: 'ban', target: 'student', game: 2, label: 'Game 2 Student Ban 1 (Host)' },
       { team: 'blue', type: 'ban', target: 'student', game: 2, label: 'Game 2 Student Ban 2 (Host)' },
-      { team: 'blue', type: 'ban', target: 'student', game: 3, label: 'Game 2 Student Ban 3 (Host)' },
+      { team: 'blue', type: 'ban', target: 'student', game: 2, label: 'Game 2 Student Ban 3 (Host)' },
 
       { team: 'blue', type: 'ban', target: 'student', game: 3, label: 'Game 3 Student Ban 1 (Host)' },
       { team: 'blue', type: 'ban', target: 'student', game: 3, label: 'Game 3 Student Ban 2 (Host)' },
@@ -913,8 +913,8 @@
 
           card.className = `slot-card schale-card-inner border rounded-xl p-2 text-center relative ${borderStyle}`;
           card.innerHTML = `
-            <div class="w-full h-12 bg-slate-200/80 rounded-lg mb-1 overflow-hidden">
-              <img src="${terrain.image}" class="w-full h-full object-contain">
+            <div class="w-full h-12 bg-slate-900 rounded-lg mb-1 overflow-hidden p-1 flex items-center justify-center">
+              <img src="${terrain.image}" class="w-full h-full object-contain filter brightness-0 invert">
             </div>
             <span class="font-bold text-xs text-slate-800">${terrain.name}</span>
             ${isPending ? '<span class="absolute top-1 left-1 bg-amber-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow">SELECTED</span>' : ''}
@@ -1068,7 +1068,7 @@
           `;
         }
 
-        // Terrain Slot (Clean light backdrop with high-contrast text)
+        // Terrain Slot (Dark navy backdrop so white terrain icons display clearly)
         const terrainSlot = document.getElementById(`g${g}-terrain-slot`);
         const isTerrainActive = (step?.game === g && step?.target === 'terrain');
         let terrainPulseClass = '';
@@ -1079,11 +1079,11 @@
         }
 
         if (data.terrain) {
-          terrainSlot.className = "col-span-1 schale-card-inner border border-amber-300 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative bg-amber-50/60";
+          terrainSlot.className = "col-span-1 border border-amber-400 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative bg-slate-900";
           terrainSlot.innerHTML = `
             <div class="w-full h-full flex flex-col items-center justify-center">
-              <img src="${data.terrain.image}" class="w-9 h-9 object-contain rounded mb-1 filter drop-shadow-sm">
-              <span class="text-[10px] font-black text-amber-700 truncate w-full text-center tracking-wide">${data.terrain.name}</span>
+              <img src="${data.terrain.image}" class="w-8 h-8 object-contain rounded mb-1 filter brightness-0 invert">
+              <span class="text-[10px] font-black text-amber-300 truncate w-full text-center tracking-wide">${data.terrain.name}</span>
             </div>
           `;
         } else {
