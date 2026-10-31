@@ -311,11 +311,7 @@
     let timerInterval = null;
     let timeRemaining = 30;
 
-    let gameData = {
-      1: { boss: null, terrain: null, studentBans: [] },
-      2: { boss: null, terrain: null, studentBans: [] },
-      3: { boss: null, terrain: null, studentBans: [] }
-    };
+    let gameData = Array(3).fill(0).map(x => { return {boss: null, terrain: null, studentBans: []} })
 
     window.onload = function() {
       const raid_boss_promise = fetch("https://schaledb.com/data/en/raids.min.json")
@@ -412,7 +408,7 @@
       currentStepIndex = 0;
       bannedBosses = [];
       pendingSelection = null;
-      gameData = { 1: { boss: null, terrain: null, studentBans: [] }, 2: { boss: null, terrain: null, studentBans: [] }, 3: { boss: null, terrain: null, studentBans: [] } };
+      gameData = Array(3).fill(0).map(x => { return {boss: null, terrain: null, studentBans: []} });
       pushStateToFirebase();
     }
 
@@ -480,7 +476,7 @@
       const step = DRAFT_SEQUENCE[currentStepIndex];
 
       if (step.target === 'boss') {
-        const usedIds = [...bannedBosses.map(b => b.id), gameData[1].boss?.id, gameData[2].boss?.id].filter(Boolean);
+        const usedIds = [...bannedBosses.map(b => b.id), gameData[0].boss?.id, gameData[1].boss?.id].filter(Boolean);
         const availableBosses = BOSS_ROSTER.filter(b => !usedIds.includes(b.id));
         if (availableBosses.length > 0) {
           const randomBoss = availableBosses[Math.floor(Math.random() * availableBosses.length)];
@@ -488,7 +484,7 @@
           confirmCurrentSelection();
         }
       } else if (step.target === 'terrain') {
-        const activeBoss = gameData[step.game].boss;
+        const activeBoss = gameData[step.game - 1].boss;
         const allowedTerrains = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
         const availableTerrains = TERRAIN_ROSTER.filter(t => allowedTerrains.includes(t.id));
         if (availableTerrains.length > 0) {
@@ -497,7 +493,7 @@
           confirmCurrentSelection();
         }
       } else if (step.target === 'student') {
-        const activeGameBans = gameData[step.game].studentBans;
+        const activeGameBans = gameData[step.game - 1].studentBans;
         const availableStudents = STUDENT_ROSTER.filter(s => !activeGameBans.some(b => b.id === s.id));
         if (availableStudents.length > 0) {
           const randomStudent = availableStudents[Math.floor(Math.random() * availableStudents.length)];
@@ -528,9 +524,9 @@
       const step = DRAFT_SEQUENCE[currentStepIndex];
 
       if (step.type === 'decider' && step.target === 'boss') {
-        const usedIds = [...bannedBosses.map(b => b.id), gameData[1].boss?.id, gameData[2].boss?.id].filter(Boolean);
+        const usedIds = [...bannedBosses.map(b => b.id), gameData[0].boss?.id, gameData[1].boss?.id].filter(Boolean);
         const rem = BOSS_ROSTER.find(b => !usedIds.includes(b.id));
-        if (rem) gameData[3].boss = rem;
+        if (rem) gameData[2].boss = rem;
         currentStepIndex++;
         pushStateToFirebase();
         return;
@@ -575,11 +571,11 @@
       if (step.type === 'ban' && step.target === 'boss') {
         bannedBosses.push({ id: pendingSelection.id, team: step.team });
       } else if (step.type === 'pick' && step.target === 'boss') {
-        gameData[step.game].boss = pendingSelection;
+        gameData[step.game - 1].boss = pendingSelection;
       } else if (step.type === 'pick' && step.target === 'terrain') {
-        gameData[step.game].terrain = pendingSelection;
+        gameData[step.game - 1].terrain = pendingSelection;
       } else if (step.type === 'ban' && step.target === 'student') {
-        gameData[step.game].studentBans.push(pendingSelection);
+        gameData[step.game - 1].studentBans.push(pendingSelection);
       }
 
       pendingSelection = null;
@@ -611,7 +607,7 @@
         BOSS_ROSTER.forEach(boss => {
           const banRecord = bannedBosses.find(b => b.id === boss.id);
           const isBanned = !!banRecord;
-          const isPicked = gameData[1].boss?.id === boss.id || gameData[2].boss?.id === boss.id;
+          const isPicked = gameData[0].boss?.id === boss.id || gameData[1].boss?.id === boss.id;
           const isAvailable = !isBanned && !isPicked;
           const isPending = pendingSelection?.id === boss.id;
 
@@ -647,11 +643,11 @@
 
       } else if (step.target === 'terrain') {
         document.getElementById('grid-title').innerText = "SELECT TERRAIN";
-        const activeBoss = gameData[step.game].boss;
+        const activeBoss = gameData[step.game - 1].boss;
         const allowed = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
 
         if (allowed.length === 1 && step.type !== 'roll') {
-          gameData[step.game].terrain = TERRAIN_ROSTER.find(t => t.id === allowed[0]);
+          gameData[step.game - 1].terrain = TERRAIN_ROSTER.find(t => t.id === allowed[0]);
           currentStepIndex++;
           pushStateToFirebase();
           return;
@@ -685,7 +681,7 @@
         document.getElementById('grid-title').innerText = `GAME ${step.game} STUDENT BANS`;
         searchBox.classList.remove('hidden');
 
-        const activeGameBans = gameData[step.game].studentBans;
+        const activeGameBans = gameData[step.game - 1].studentBans;
 
         STUDENT_ROSTER.forEach(student => {
           const isBanned = activeGameBans.some(s => s.id === student.id);
@@ -715,10 +711,10 @@
 
     function executeAdminRoll() {
       const step = DRAFT_SEQUENCE[currentStepIndex];
-      const activeBoss = gameData[step.game].boss;
+      const activeBoss = gameData[step.game - 1].boss;
       const allowed = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
       const rolledId = allowed[Math.floor(Math.random() * allowed.length)];
-      gameData[step.game].terrain = TERRAIN_ROSTER.find(t => t.id === rolledId);
+      gameData[step.game - 1].terrain = TERRAIN_ROSTER.find(t => t.id === rolledId);
       currentStepIndex++;
       pushStateToFirebase();
     }
@@ -799,7 +795,7 @@
       const step = DRAFT_SEQUENCE[currentStepIndex];
 
       for (let g = 1; g <= 3; g++) {
-        const data = gameData[g];
+        const data = gameData[g - 1];
 
         // Boss Slot
         const bossSlot = document.getElementById(`g${g}-boss-slot`);
