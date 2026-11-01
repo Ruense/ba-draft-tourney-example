@@ -516,44 +516,44 @@
 
     function confirmModalRole() {
       const inputVal = document.getElementById('modal-role-input').value.trim();
-
+    
       if (modalSelectedRole === 'admin') {
         if (inputVal !== ADMIN_PASSWORD) {
           alert("Incorrect Admin Password!");
           return;
         }
       }
-
-      // Locate host validation inside confirmModalRole():
+    
       if (modalSelectedRole === 'host') {
         if (!inputVal) {
           alert("Please enter a name for Host!");
           return;
         }
-        // Allow re-entry if the name matches the existing hostName OR if session IDs match
-        if (hostSessionId && hostSessionId !== clientSessionId && hostName.toLowerCase() !== inputVal.toLowerCase()) {
-          alert(`Host role is already held by ${hostName || 'another player'}.`);
+        // STRICT NAME CHECK:
+        // If a Host is already registered and the name entered doesn't match, block it.
+        if (hostName && hostName.toLowerCase() !== inputVal.toLowerCase()) {
+          alert(`Host role is already claimed by "${hostName}". You cannot join with a different name!`);
           return;
         }
         hostSessionId = clientSessionId;
         hostName = inputVal;
       }
-      
-      // Locate guest validation inside confirmModalRole():
+    
       if (modalSelectedRole === 'guest') {
         if (!inputVal) {
           alert("Please enter a name for Guest!");
           return;
         }
-        // Allow re-entry if the name matches the existing guestName OR if session IDs match
-        if (guestSessionId && guestSessionId !== clientSessionId && guestName.toLowerCase() !== inputVal.toLowerCase()) {
-          alert(`Guest role is already held by ${guestName || 'another player'}.`);
+        // STRICT NAME CHECK:
+        // If a Guest is already registered and the name entered doesn't match, block it.
+        if (guestName && guestName.toLowerCase() !== inputVal.toLowerCase()) {
+          alert(`Guest role is already claimed by "${guestName}". You cannot join with a different name!`);
           return;
         }
         guestSessionId = clientSessionId;
         guestName = inputVal;
       }
-
+    
       currentRole = modalSelectedRole;
       roleConfirmed = true;
       pendingSelection = null;
