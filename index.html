@@ -667,33 +667,36 @@
 
     function updateRoleControls() {
       document.getElementById('current-role-display').innerText = currentRole.toUpperCase();
+      
       const changeBtn = document.getElementById('change-role-btn');
-      if (roleConfirmed && currentRole !== 'admin') {
-        changeBtn.disabled = true;
-        changeBtn.classList.add('opacity-40', 'cursor-not-allowed');
-      } else {
+      const resetBtn = document.getElementById('header-reset-btn');
+    
+      if (currentRole === 'admin') {
+        // Show CHANGE and RESET buttons for Admin only
+        changeBtn.classList.remove('hidden');
         changeBtn.disabled = false;
         changeBtn.classList.remove('opacity-40', 'cursor-not-allowed');
-      }
-
-      const resetBtn = document.getElementById('header-reset-btn');
-      if (currentRole === 'admin') {
+    
+        resetBtn.classList.remove('hidden');
         resetBtn.disabled = false;
         resetBtn.classList.remove('opacity-40', 'cursor-not-allowed');
       } else {
-        resetBtn.disabled = true;
-        resetBtn.classList.add('opacity-40', 'cursor-not-allowed');
+        // Hide CHANGE and RESET buttons completely for Host & Guest
+        changeBtn.classList.add('hidden');
+        resetBtn.classList.add('hidden');
       }
-
+    
+      // Handle Host & Guest Ready buttons
       const hostReadyBtn = document.getElementById('host-ready-btn');
       const guestReadyBtn = document.getElementById('guest-ready-btn');
-
+    
       if (!draftStarted && currentRole === 'host') hostReadyBtn.classList.remove('hidden');
       else hostReadyBtn.classList.add('hidden');
-
+    
       if (!draftStarted && currentRole === 'guest') guestReadyBtn.classList.remove('hidden');
       else guestReadyBtn.classList.add('hidden');
-
+    
+      // Handle Admin Start Draft button
       const adminStartBtn = document.getElementById('admin-start-btn');
       if (currentRole === 'admin' && !draftStarted) {
         adminStartBtn.classList.remove('hidden');
@@ -710,7 +713,6 @@
         adminStartBtn.classList.add('hidden');
       }
     }
-
     function syncServerTimer() {
       stopTimer();
       if (!draftStarted || stepDeadline <= 0) {
