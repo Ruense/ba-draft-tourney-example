@@ -384,6 +384,7 @@
 
     const clientSessionId = 'sess_' + Math.random().toString(36).substring(2, 9);
     const ADMIN_PASSWORD = "Senseihood1234";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwexc3_lsvhadskAmSTKe65PWZnxU65h-xGO_6JlxcKrxse6bB65Bd6zXIDTrc1bqIJqw/exec";
 
     const BOSS_ROSTER = [];
     const TERRAIN_ROSTER = [
@@ -1327,33 +1328,6 @@
       updateGameCardsUI();
       updateTopBossBansUI();
 
-      // AUTOMATED GOOGLE SPREADSHEET LOGGING (TRIGGERED BY ADMIN)
-      if (currentRole === 'admin') {
-        const webAppUrl = 'https://script.google.com/macros/s/AKfycbwexc3_lsvhadskAmSTKe65PWZnxU65h-xGO_6JlxcKrxse6bB65Bd6zXIDTrc1bqIJqw/exec';
-      
-        const hostBannedBosses = bannedBosses
-          .filter(b => b.team === 'blue')
-          .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
-      
-        const guestBannedBosses = bannedBosses
-          .filter(b => b.team === 'red')
-          .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
-      
-        fetch(webAppUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            roomCode: document.getElementById('room-code-input').value,
-            hostName: hostName,
-            guestName: guestName,
-            hostBossBans: hostBannedBosses,
-            guestBossBans: guestBannedBosses,
-            games: gameData.map((g, idx) => ({ gameNumber: idx + 1, ...g }))
-          })
-        }).catch(err => console.error('Error logging draft to Google Sheet:', err));
-      }
-
       const banner = document.getElementById('turn-banner');
       banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-emerald relative overflow-hidden";
       document.getElementById('phase-title').innerText = "STATUS: COMPLETED";
@@ -1375,16 +1349,97 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <h3 class="font-bold text-lg text-slate-800 mb-2">Match Ready to Begin</h3>
+
           ${currentRole === 'admin' ? `
-            <button onclick="resetDraft()" class="bg-sky-500 hover:bg-sky-400 text-white font-black text-xs px-5 py-2 rounded-lg transition mt-2 tracking-wider flex items-center justify-center gap-1.5 mx-auto shadow-md">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-              </svg>
-              START NEW DRAFT
-            </button>
+            <div class="flex flex-wrap items-center justify-center gap-3 mt-4">
+              <button id="submit-sheet-btn" onclick="submitResultsToSheet()" class="bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs px-5 py-2.5 rounded-lg transition tracking-wider flex items-center justify-center gap-1.5 shadow-md glow-halo-emerald">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                SUBMIT RESULTS TO SHEET
+              </button>
+
+              <button onclick="resetDraft()" class="bg-sky-500 hover:bg-sky-400 text-white font-black text-xs px-5 py-2.5 rounded-lg transition tracking-wider flex items-center justify-center gap-1.5 shadow-md">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                START NEW DRAFT
+              </button>
+            </div>
+            <div id="submit-status-msg" class="text-xs font-bold text-emerald-600 mt-2 hidden"></div>
           ` : ''}
         </div>
       `;
+    }
+
+    /* MANUAL SUBMIT FUNCTION FOR ADMIN */
+    function submitResultsToSheet() {
+      if (currentRole !== 'admin') return;
+
+      const submitBtn = document.getElementById('submit-sheet-btn');
+      const statusMsg = document.getElementById('submit-status-msg');
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        submitBtn.innerHTML = `
+          <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          SUBMITTING...
+        `;
+      }
+
+      const hostBannedBosses = bannedBosses
+        .filter(b => b.team === 'blue')
+        .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
+
+      const guestBannedBosses = bannedBosses
+        .filter(b => b.team === 'red')
+        .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
+
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomCode: document.getElementById('room-code-input').value,
+          hostName: hostName,
+          guestName: guestName,
+          hostBossBans: hostBannedBosses,
+          guestBossBans: guestBannedBosses,
+          games: gameData.map((g, idx) => ({ gameNumber: idx + 1, ...g }))
+        })
+      })
+      .then(() => {
+        if (submitBtn) {
+          submitBtn.innerHTML = `
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+            </svg>
+            SUBMITTED TO SHEET!
+          `;
+          submitBtn.className = "bg-emerald-600 text-white font-black text-xs px-5 py-2.5 rounded-lg tracking-wider flex items-center justify-center gap-1.5 shadow-md";
+        }
+        if (statusMsg) {
+          statusMsg.innerText = "Draft results successfully logged into Google Sheet!";
+          statusMsg.classList.remove('hidden');
+        }
+      })
+      .catch(err => {
+        console.error('Error logging draft to Google Sheet:', err);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          submitBtn.innerText = "RETRY SUBMIT";
+        }
+        if (statusMsg) {
+          statusMsg.innerText = "Failed to submit. Please try again.";
+          statusMsg.className = "text-xs font-bold text-rose-600 mt-2";
+          statusMsg.classList.remove('hidden');
+        }
+      });
     }
   </script>
 </body>
