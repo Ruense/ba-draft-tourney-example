@@ -395,6 +395,15 @@
       localStorage.setItem('sh_draft_session_id', clientSessionId);
     }
 
+    // RESTORE SAVED ROLE ON PAGE LOAD
+    let currentRole = 'host';
+    let modalSelectedRole = 'host';
+    const savedRole = localStorage.getItem('sh_draft_current_role');
+    if (savedRole) {
+      currentRole = savedRole;
+      modalSelectedRole = savedRole;
+    }
+
     const ADMIN_PASSWORD = "Senseihood1234";
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwexc3_lsvhadskAmSTKe65PWZnxU65h-xGO_6JlxcKrxse6bB65Bd6zXIDTrc1bqIJqw/exec";
 
@@ -450,8 +459,6 @@
     const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbarka'];
 
     let currentStepIndex = 0;
-    let currentRole = 'host';
-    let modalSelectedRole = 'host';
     let roleConfirmed = false;
     let draftStarted = false;
     let hostReady = false;
@@ -639,6 +646,10 @@
       currentRole = modalSelectedRole;
       roleConfirmed = true;
       pendingSelection = null;
+
+      // SAVE ROLE TO LOCALSTORAGE
+      localStorage.setItem('sh_draft_current_role', currentRole);
+
       document.getElementById('role-modal').classList.add('hidden');
       
       updateRoleControls();
@@ -750,6 +761,8 @@
       hostName = '';
       guestName = '';
       gameData = getEmptyGameData();
+
+      localStorage.removeItem('sh_draft_current_role');
       pushStateToFirebase(0);
     }
 
@@ -1100,7 +1113,8 @@
       }
 
       const isAllowedRole = (step.team === 'blue' && currentRole === 'host') || 
-                            (step.team === 'red' && currentRole === 'guest');
+                            (step.team === 'red' && currentRole === 'guest') ||
+                            (currentRole === 'admin');
 
       if (step.target === 'boss') {
         document.getElementById('grid-title').innerText = "SELECTABLE BOSS POOL";
@@ -1183,11 +1197,6 @@
         searchBox.classList.remove('hidden');
 
         const searchInput = document.getElementById('student-search-input');
-        if (searchInput) {
-          searchInput.value = '';
-          filterStudents('');
-        }
-
         const activeGameBans = gameData[step.game - 1].studentBans || [];
 
         STUDENT_ROSTER.forEach(student => {
@@ -1213,6 +1222,11 @@
           }
           grid.appendChild(card);
         });
+
+        // RE-APPLY SEARCH FILTER SO GRID STAYS FILTERED ON CARD CLICK
+        if (searchInput && searchInput.value) {
+          filterStudents(searchInput.value);
+        }
       }
     }
 
