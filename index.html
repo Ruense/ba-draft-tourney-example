@@ -1005,11 +1005,20 @@
 
       pendingSelection = null;
       currentStepIndex++;
-
+      
       const nextStep = DRAFT_SEQUENCE[currentStepIndex];
-      const duration = (nextStep && nextStep.type === 'pick' && nextStep.target === 'boss') ? 60000 : 30000;
+      
+      let duration = 30000;
+      if (nextStep) {
+        if (nextStep.target === 'boss' && nextStep.type === 'pick') {
+          duration = 45000; // 45s for Boss Pick
+        } else if (nextStep.target === 'terrain' && nextStep.type === 'pick') {
+          duration = 15000; // 15s for Terrain Pick
+        }
+      }
+      
       pushStateToFirebase(Date.now() + duration);
-    }
+      }
 
     function renderGridForStep(step) {
       const grid = document.getElementById('selection-grid');
