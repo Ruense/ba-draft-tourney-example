@@ -117,30 +117,34 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-        <div class="flex items-center bg-sky-50/80 px-2.5 py-1 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
+        <!-- ROOM CONTAINER -->
+        <div class="flex items-center bg-sky-50/80 px-2.5 py-1.5 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
           <span class="text-sky-700 font-bold uppercase tracking-wider text-[10px]">ROOM:</span>
           <input type="text" id="room-code-input" value="default-room" class="bg-white px-2 py-1 rounded text-sky-800 font-black border border-sky-300 w-28 text-center outline-none focus:border-sky-500 shadow-sm">
           <button onclick="connectToRoom()" class="bg-sky-500 hover:bg-sky-400 text-white font-black px-3 py-1 rounded transition tracking-wider shadow">
             SYNC
           </button>
         </div>
-
-        <div class="flex items-center bg-sky-50/80 px-2.5 py-1 rounded-lg border border-sky-200 text-xs gap-2">
+      
+        <!-- ROLE CONTAINER (Updated padding & shadow to match Room container) -->
+        <div class="flex items-center bg-sky-50/80 px-2.5 py-1.5 rounded-lg border border-sky-200 text-xs gap-2 shadow-inner">
           <span class="text-sky-700 font-bold uppercase tracking-wider text-[10px]">ROLE:</span>
           <span id="current-role-display" class="font-black text-sky-800 uppercase text-xs">UNASSIGNED</span>
           <button id="change-role-btn" onclick="openRoleModal()" class="bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold text-[10px] px-2 py-0.5 rounded border border-sky-300 transition">
             CHANGE
           </button>
         </div>
-
-        <a href="spectator.html" target="_blank" class="bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-bold px-3 py-2 rounded-lg border border-sky-200 transition flex items-center gap-1.5 shadow-sm">
+      
+        <!-- SPECTATOR LINK (Added id="header-spectator-btn") -->
+        <a id="header-spectator-btn" href="spectator.html" target="_blank" class="bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-bold px-3 py-2 rounded-lg border border-sky-200 transition flex items-center gap-1.5 shadow-sm">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
           </svg>
           SPECTATOR VIEW
         </a>
-
+      
+        <!-- RESET BUTTON -->
         <button id="header-reset-btn" onclick="resetDraft()" class="bg-white hover:bg-rose-50 text-rose-600 text-xs font-bold px-3 py-2 rounded-lg border border-rose-200 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1.5 shadow-sm">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -667,23 +671,31 @@
 
     function updateRoleControls() {
       document.getElementById('current-role-display').innerText = currentRole.toUpperCase();
-      
+    
       const changeBtn = document.getElementById('change-role-btn');
       const resetBtn = document.getElementById('header-reset-btn');
+      const spectatorBtn = document.getElementById('header-spectator-btn');
     
       if (currentRole === 'admin') {
-        // Show CHANGE and RESET buttons for Admin only
-        changeBtn.classList.remove('hidden');
-        changeBtn.disabled = false;
-        changeBtn.classList.remove('opacity-40', 'cursor-not-allowed');
-    
-        resetBtn.classList.remove('hidden');
-        resetBtn.disabled = false;
-        resetBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+        // Show CHANGE, RESET, and SPECTATOR VIEW for Admin only
+        if (changeBtn) {
+          changeBtn.classList.remove('hidden');
+          changeBtn.disabled = false;
+          changeBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+        }
+        if (resetBtn) {
+          resetBtn.classList.remove('hidden');
+          resetBtn.disabled = false;
+          resetBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+        }
+        if (spectatorBtn) {
+          spectatorBtn.classList.remove('hidden');
+        }
       } else {
-        // Hide CHANGE and RESET buttons completely for Host & Guest
-        changeBtn.classList.add('hidden');
-        resetBtn.classList.add('hidden');
+        // Hide CHANGE, RESET, and SPECTATOR VIEW completely for Host & Guest
+        if (changeBtn) changeBtn.classList.add('hidden');
+        if (resetBtn) resetBtn.classList.add('hidden');
+        if (spectatorBtn) spectatorBtn.classList.add('hidden');
       }
     
       // Handle Host & Guest Ready buttons
