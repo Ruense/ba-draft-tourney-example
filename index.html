@@ -803,27 +803,66 @@
       }
       return '';
     }
+    // Web Audio API Chime Generator
+    function playTurnChime() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+    
+        // Pleasant dual-tone synth chime (SCHALE style)
+        const now = ctx.currentTime;
+        
+        // Note 1 (High tone)
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(880, now); // A5 note
+        gain1.gain.setValueAtTime(0.15, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.6);
+    
+        // Note 2 (Harmonic burst slightly delayed)
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1318.51, now + 0.08); // E6 note
+        gain2.gain.setValueAtTime(0.2, now + 0.08);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(now + 0.08);
+        osc2.stop(now + 0.8);
+      } catch (e) {
+        console.log("Audio playback error:", e);
+      }
+    }
+    
+    let lastNotifiedStep = -1;
 
     function updateDraftState() {
       const hostDisplay = hostName ? `${hostName} (Blue)` : 'Host (Blue)';
       const guestDisplay = guestName ? `${guestName} (Red)` : 'Guest (Red)';
-
+    
       document.getElementById('bar-host-label').innerText = hostDisplay + ':';
       document.getElementById('bar-guest-label').innerText = guestDisplay + ':';
-
+    
       document.getElementById('host-ban-header-title').innerText = hostName ? `${hostName} Boss Bans` : 'Host Boss Bans';
       document.getElementById('guest-ban-header-title').innerText = guestName ? `${guestName} Boss Bans` : 'Guest Boss Bans';
-
+    
       document.getElementById('g1-title').innerText = hostName ? `GAME 1 (${hostName.toUpperCase()} PICK)` : 'GAME 1 (HOST PICK)';
       document.getElementById('g2-title').innerText = guestName ? `GAME 2 (${guestName.toUpperCase()} PICK)` : 'GAME 2 (GUEST PICK)';
       
       document.getElementById('g1-bans-label').innerText = guestName ? `${guestName} Student Bans (3):` : 'Guest Student Bans (3):';
       document.getElementById('g2-bans-label').innerText = hostName ? `${hostName} Student Bans (3):` : 'Host Student Bans (3):';
       document.getElementById('g3-bans-label').innerText = `${hostName || 'Host'} (2) & ${guestName || 'Guest'} (2) Bans (4):`;
-
+    
       const hostBadge = document.getElementById('host-ready-badge');
       const guestBadge = document.getElementById('guest-ready-badge');
-
+    
       if (hostReady) {
         hostBadge.innerText = "READY";
         hostBadge.className = "bg-sky-100 text-sky-700 border border-sky-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-cyan";
@@ -831,7 +870,7 @@
         hostBadge.innerText = "NOT READY";
         hostBadge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
       }
-
+    
       if (guestReady) {
         guestBadge.innerText = "READY";
         guestBadge.className = "bg-rose-100 text-rose-700 border border-rose-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-rose";
@@ -839,32 +878,33 @@
         guestBadge.innerText = "NOT READY";
         guestBadge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
       }
-
+    
       updateRoleControls();
-
+    
       if (!draftStarted) {
         stopTimer();
+        lastNotifiedStep = -1;
         const banner = document.getElementById('turn-banner');
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden";
         document.getElementById('phase-title').innerText = "PRE-DRAFT LOBBY";
         document.getElementById('turn-label').className = "text-2xl font-black text-slate-800 tracking-wide";
         document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
         document.getElementById('turn-subtitle').innerText = "Host and Guest must ready up before Admin can start the draft.";
-
+    
         updateGameCardsUI();
         updateTopBossBansUI();
         renderLobbyGrid();
         return;
       }
-
+    
       if (currentStepIndex >= DRAFT_SEQUENCE.length) {
         stopTimer();
         renderCompleteState();
         return;
       }
-
+    
       const step = DRAFT_SEQUENCE[currentStepIndex];
-
+    
       if (step.type === 'decider' && step.target === 'boss') {
         const usedIds = [...bannedBosses.map(b => b.id), gameData[0].boss?.id, gameData[1].boss?.id].filter(Boolean);
         const rem = BOSS_ROSTER.find(b => !usedIds.includes(b.id));
@@ -873,12 +913,21 @@
         pushStateToFirebase(Date.now() + 30000);
         return;
       }
-
+    
+      // SOUND NOTIFICATION LOGIC
+      const isMyTurn = (step.team === 'blue' && currentRole === 'host') || 
+                       (step.team === 'red' && currentRole === 'guest');
+    
+      if (isMyTurn && lastNotifiedStep !== currentStepIndex) {
+        playTurnChime();
+        lastNotifiedStep = currentStepIndex;
+      }
+    
       const banner = document.getElementById('turn-banner');
       document.getElementById('phase-title').innerText = `STEP ${currentStepIndex + 1} OF ${DRAFT_SEQUENCE.length}`;
       document.getElementById('turn-label').innerText = step.label.toUpperCase();
       document.getElementById('turn-subtitle').innerText = getStepSubtitle(step);
-
+    
       if (step.team === 'blue') {
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-cyan relative overflow-hidden";
         document.getElementById('turn-label').className = "text-2xl font-black text-sky-600 tracking-wide";
@@ -889,13 +938,12 @@
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-gold relative overflow-hidden";
         document.getElementById('turn-label').className = "text-2xl font-black text-amber-600 tracking-wide";
       }
-
+    
       updateGameCardsUI();
       updateTopBossBansUI();
       renderGridForStep(step);
       syncServerTimer();
     }
-
     function renderLobbyGrid() {
       const grid = document.getElementById('selection-grid');
       document.getElementById('grid-title').innerText = "PRE-DRAFT PREVIEW";
