@@ -350,7 +350,11 @@
     const db = firebase.database();
     let currentRoomRef = null;
 
-    const clientSessionId = 'sess_' + Math.random().toString(36).substring(2, 9);
+    let clientSessionId = localStorage.getItem('sh_draft_session_id');
+    if (!clientSessionId) {
+      clientSessionId = 'sess_' + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem('sh_draft_session_id', clientSessionId);
+    }
     const ADMIN_PASSWORD = "Senseihood1234";
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwexc3_lsvhadskAmSTKe65PWZnxU65h-xGO_6JlxcKrxse6bB65Bd6zXIDTrc1bqIJqw/exec";
 
@@ -520,25 +524,29 @@
         }
       }
 
+      // Locate host validation inside confirmModalRole():
       if (modalSelectedRole === 'host') {
         if (!inputVal) {
           alert("Please enter a name for Host!");
           return;
         }
-        if (hostSessionId && hostSessionId !== clientSessionId) {
+        // Allow re-entry if the name matches the existing hostName OR if session IDs match
+        if (hostSessionId && hostSessionId !== clientSessionId && hostName.toLowerCase() !== inputVal.toLowerCase()) {
           alert(`Host role is already held by ${hostName || 'another player'}.`);
           return;
         }
         hostSessionId = clientSessionId;
         hostName = inputVal;
       }
-
+      
+      // Locate guest validation inside confirmModalRole():
       if (modalSelectedRole === 'guest') {
         if (!inputVal) {
           alert("Please enter a name for Guest!");
           return;
         }
-        if (guestSessionId && guestSessionId !== clientSessionId) {
+        // Allow re-entry if the name matches the existing guestName OR if session IDs match
+        if (guestSessionId && guestSessionId !== clientSessionId && guestName.toLowerCase() !== inputVal.toLowerCase()) {
           alert(`Guest role is already held by ${guestName || 'another player'}.`);
           return;
         }
