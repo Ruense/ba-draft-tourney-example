@@ -635,7 +635,6 @@
             };
           });
 
-          // Enforce role locks when room is reset
           if (!hostSessionId && !guestSessionId && !draftStarted && currentRole !== 'admin') {
             roleConfirmed = false;
           }
@@ -1327,6 +1326,35 @@
       stopTimer();
       updateGameCardsUI();
       updateTopBossBansUI();
+
+      // AUTOMATED GOOGLE SPREADSHEET LOGGING (TRIGGERED BY ADMIN)
+      if (currentRole === 'admin') {
+        const webAppUrl = 'PASTE_YOUR_WEB_APP_URL_HERE'; // Replace with your Google Apps Script Web App URL
+
+        if (webAppUrl && webAppUrl !== 'PASTE_YOUR_WEB_APP_URL_HERE') {
+          const hostBannedBosses = bannedBosses
+            .filter(b => b.team === 'blue')
+            .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
+
+          const guestBannedBosses = bannedBosses
+            .filter(b => b.team === 'red')
+            .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
+
+          fetch(webAppUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              roomCode: document.getElementById('room-code-input').value,
+              hostName: hostName,
+              guestName: guestName,
+              hostBossBans: hostBannedBosses,
+              guestBossBans: guestBannedBosses,
+              games: gameData.map((g, idx) => ({ gameNumber: idx + 1, ...g }))
+            })
+          }).catch(err => console.error('Error logging draft to Google Sheet:', err));
+        }
+      }
 
       const banner = document.getElementById('turn-banner');
       banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-emerald relative overflow-hidden";
