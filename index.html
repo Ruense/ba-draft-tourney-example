@@ -457,6 +457,7 @@
     }
 
     const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbarka'];
+    const PERMA_BANNED_STUDENTS = ['10099', '10144']; // Perma-banned 2-in-1 students
 
     let currentStepIndex = 0;
     let roleConfirmed = false;
@@ -507,13 +508,16 @@
         .then(r => r.json())
         .then(data => {
           Object.keys(data).forEach(x => {
+            // SKIP PERMA-BANNED STUDENT IDs
+            if (PERMA_BANNED_STUDENTS.includes(x)) return;
+      
             STUDENT_ROSTER.push({
               id: x,
               name: data[x].Name,
               image: 'https://schaledb.com/images/student/collection/' + x + '.webp'
             });
           });
-
+      
           STUDENT_ROSTER.sort((a, b) => a.name.localeCompare(b.name));
         });
 
