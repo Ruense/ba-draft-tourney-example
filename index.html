@@ -1008,17 +1008,24 @@
       
       const nextStep = DRAFT_SEQUENCE[currentStepIndex];
       
+      // Check if next step is a Boss Pick (Start new 60s block)
+      // Or if it's Terrain Pick (Keep the EXACT remaining time left from Boss Pick)
       let duration = 30000;
+      
       if (nextStep) {
         if (nextStep.target === 'boss' && nextStep.type === 'pick') {
-          duration = 40000; // 40s for Boss Pick
+          // Start 60s timer for Boss + Terrain sequence
+          pushStateToFirebase(Date.now() + 60000);
+          return;
         } else if (nextStep.target === 'terrain' && nextStep.type === 'pick') {
-          duration = 20000; // 20s for Terrain Pick
+          // Keep existing stepDeadline so time remaining rolls over directly
+          pushStateToFirebase(stepDeadline);
+          return;
         }
       }
       
+      // Default 30s timer for all ban steps and admin rolls
       pushStateToFirebase(Date.now() + duration);
-      }
 
     function renderGridForStep(step) {
       const grid = document.getElementById('selection-grid');
