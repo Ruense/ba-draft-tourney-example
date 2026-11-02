@@ -1032,21 +1032,31 @@
 
     function handleCardClick(item) {
       if (!draftStarted) return;
+      
+      // Capture current search filter before re-render
+      const searchInput = document.getElementById('student-search-input');
+      const currentQuery = searchInput ? searchInput.value : '';
+    
       if (pendingSelection && pendingSelection.id === item.id) {
         pendingSelection = null;
       } else {
         pendingSelection = item;
       }
+      
       const step = DRAFT_SEQUENCE[currentStepIndex];
       renderGridForStep(step);
+    
+      // Restore search query & focus if searching students
+      if (step.target === 'student' && searchInput) {
+        searchInput.value = currentQuery;
+        filterStudents(currentQuery);
+        searchInput.focus();
+      }
     }
 
-    function confirmCurrentSelection() {
+   function confirmCurrentSelection() {
       if (!pendingSelection || !draftStarted) return;
-
-      const searchInput = document.getElementById('student-search-input');
-      if (searchInput) { searchInput.value = ''; filterStudents(''); }
-
+    
       const step = DRAFT_SEQUENCE[currentStepIndex];
       if (step.type === 'ban' && step.target === 'boss') {
         bannedBosses.push({ id: pendingSelection.id, team: step.team });
@@ -1058,11 +1068,18 @@
         if (!gameData[step.game - 1].studentBans) gameData[step.game - 1].studentBans = [];
         gameData[step.game - 1].studentBans.push(pendingSelection);
       }
-
-      pendingSelection = null;
-      currentStepIndex++;
-      pushStateToFirebase(Date.now() + 30000);
-    }
+    
+      // Clear search field after locking in turn
+      const searchInput = document.getElementById('student-search-input');
+      if (searchInput) { 
+        searchInput.value = ''; 
+        filterStudents(''); 
+      }
+  
+    pendingSelection = null;
+    currentStepIndex++;
+    pushStateToFirebase(Date.now() + 30000);
+  }
 
     function renderGridForStep(step) {
       const grid = document.getElementById('selection-grid');
@@ -1141,30 +1158,40 @@
         });
 
       } else if (step.target === 'student') {
-        document.getElementById('grid-title').innerText = `GAME ${step.game} STUDENT BANS`;
-        searchBox.classList.remove('hidden');
-        const activeGameBans = gameData[step.game - 1].studentBans || [];
-
-        STUDENT_ROSTER.forEach(student => {
-          const isBanned = activeGameBans.some(s => s.id === student.id);
-          const isPending = pendingSelection?.id === student.id;
-          const card = document.createElement('div');
-          let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (!isBanned ? 'border-sky-200 hover:border-rose-500' : 'border-slate-200 opacity-40 cursor-not-allowed');
-
-          card.className = `student-card slot-card schale-card-inner border rounded-xl p-2 text-center relative ${borderStyle}`;
-          card.setAttribute('data-name', student.name.toLowerCase());
-          card.innerHTML = `
-            <div class="w-12 h-12 bg-slate-200/80 rounded-full mx-auto mb-1 overflow-hidden border border-sky-200">
-              <img src="${student.image}" class="w-full h-full object-cover">
-            </div>
-            <span class="font-bold text-[10px] text-slate-800 block truncate">${student.name}</span>
-            ${isBanned ? '<span class="absolute top-1 right-1 bg-rose-600 text-white text-[8px] font-black px-1 rounded">BANNED</span>' : ''}
-          `;
-
-          if (!isBanned && isAllowedRole) card.onclick = () => handleCardClick(student);
-          grid.appendChild(card);
-        });
-      }
+          document.getElementById('grid-title').innerText = `GAME ${step.game} STUDENT BANS`;
+          searchBox.classList.remove('hidden');
+        
+          const searchInput = document.getElementById('student-search-input');
+          const activeQuery = searchInput ? searchInput.value.trim() : '';
+        
+          const activeGameBans = gameData[step.game - 1].studentBans || [];
+        
+          STUDENT_ROSTER.forEach(student => {
+            const isBanned = activeGameBans.some(s => s.id === student.id);
+            const isPending = pendingSelection?.id === student.id;
+            const card = document.createElement('div');
+            let borderStyle = isPending 
+              ? 'border-amber-500 ring-2 ring-amber-400 scale-105' 
+              : (!isBanned ? 'border-sky-200 hover:border-rose-500' : 'border-slate-200 opacity-40 cursor-not-allowed');
+        
+            // Hide card immediately if it doesn't match active search query
+            const matchesQuery = student.name.toLowerCase().includes(activeQuery.toLowerCase());
+            const visibilityClass = (activeQuery && !matchesQuery) ? 'hidden' : '';
+        
+            card.className = `student-card slot-card schale-card-inner border rounded-xl p-2 text-center relative ${borderStyle} ${visibilityClass}`;
+            card.setAttribute('data-name', student.name.toLowerCase());
+            card.innerHTML = `
+              <div class="w-12 h-12 bg-slate-200/80 rounded-full mx-auto mb-1 overflow-hidden border border-sky-200">
+                <img src="${student.image}" class="w-full h-full object-cover">
+              </div>
+              <span class="font-bold text-[10px] text-slate-800 block truncate">${student.name}</span>
+              ${isBanned ? '<span class="absolute top-1 right-1 bg-rose-600 text-white text-[8px] font-black px-1 rounded">BANNED</span>' : ''}
+            `;
+        
+            if (!isBanned && isAllowedRole) card.onclick = () => handleCardClick(student);
+            grid.appendChild(card);
+          });
+        }
     }
 
     function executeAdminRoll() {
