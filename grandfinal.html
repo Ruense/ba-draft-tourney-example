@@ -485,9 +485,10 @@
         { team: 'red',  type: 'pick', target: 'terrain', game: 4, label: `Game 4 Terrain (${gName} Pick)` },
 
         // PHASE 5: FINAL BAN & GAME 5 DECIDER BOSS
-        { team: 'blue', type: 'ban', target: 'boss', label: `Game 5 Boss (${hName} Final Veto)` },
-        { team: 'red',  type: 'ban', target: 'boss', label: `Game 5 Boss (${gName} Final Veto)` },
-        { team: 'admin',   type: 'roll', target: 'terrain', game: 5, label: 'Game 5 Terrain (Admin Randomize)' },
+        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Final Veto` },
+        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Final Veto` },
+        { team: 'neutral', type: 'decider', target: 'boss', game: 5, label: 'Game 5 Boss (Decider Auto-Pick)' },
+        { team: 'admin',   type: 'roll',    target: 'terrain', game: 5, label: 'Game 5 Terrain (Admin Randomize)' },
 
         // PHASE 6: STUDENT BANS (GAMES 1-5)
         { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 1 (${gName})` },
@@ -984,6 +985,24 @@
       }
 
       const step = DRAFT_SEQUENCE[currentStepIndex];
+      
+      if (step.type === 'decider' && step.target === 'boss') {
+        const usedIds = [
+          ...bannedBosses.map(b => b.id),
+          gameData[0].boss?.id,
+          gameData[1].boss?.id,
+          gameData[2].boss?.id,
+          gameData[3].boss?.id
+        ].filter(Boolean);
+
+        const lastBoss = BOSS_ROSTER.find(b => !usedIds.includes(b.id));
+        if (lastBoss) {
+          gameData[4].boss = lastBoss;
+        }
+        currentStepIndex++;
+        pushStateToFirebase(Date.now() + 30000);
+        return;
+      }
 
       const isMyTurn = (step.team === 'blue' && currentRole === 'host') || 
                        (step.team === 'red' && currentRole === 'guest');
