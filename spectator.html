@@ -9,7 +9,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&display=swap');
+    
     * { font-family: 'Noto Sans', sans-serif !important; }
     
     body { 
@@ -35,119 +36,119 @@
     }
   </style>
 </head>
-<body class="p-4 flex flex-col justify-start gap-3">
+<body class="p-6 min-h-screen flex flex-col justify-between">
 
   <!-- SPECTATOR TOP HEADER BAR -->
-  <header class="bg-white/90 border border-sky-200 rounded-2xl p-3 flex justify-between items-center shadow-sm backdrop-blur-md">
+  <header class="bg-white/90 border border-sky-200 rounded-2xl p-4 mb-6 flex justify-between items-center shadow-sm backdrop-blur-md">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-sky-500 border border-sky-400 flex items-center justify-center shadow-md overflow-hidden p-1">
+      <div class="w-10 h-10 rounded-xl bg-sky-500 border border-sky-400 flex items-center justify-center shadow-md overflow-hidden p-1">
         <img src="sh_logo_norm_white.png" alt="Senseihood Emblem" class="w-full h-full object-contain">
       </div>
       <div>
-        <h1 class="text-base font-black text-slate-800 tracking-widest uppercase flex items-center gap-2">
+        <h1 class="text-lg font-black text-slate-800 tracking-widest uppercase flex items-center gap-2">
           SENSEIHOOD <span class="text-sky-500">BO3 SPECTATOR VIEW</span>
         </h1>
-        <p class="text-[10px] text-sky-600 font-bold tracking-wider" id="match-pair-title">WAITING FOR ROOM SYNC...</p>
+        <p class="text-[11px] text-sky-600 font-bold tracking-wider" id="match-pair-title">WAITING FOR ROOM SYNC...</p>
       </div>
     </div>
 
     <!-- ROOM CODE INPUT -->
-    <div class="flex items-center bg-sky-50/80 px-2.5 py-1 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
+    <div class="flex items-center bg-sky-50/80 px-2.5 py-1.5 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
       <span class="text-sky-700 font-bold uppercase tracking-wider text-[10px]">ROOM:</span>
-      <input type="text" id="room-input" value="default-room" class="bg-white px-2 py-0.5 rounded text-sky-800 font-black border border-sky-300 w-28 text-center outline-none focus:border-sky-500 shadow-sm text-xs">
-      <button onclick="syncRoom()" class="bg-sky-500 hover:bg-sky-400 text-white font-black px-3 py-0.5 rounded transition tracking-wider shadow text-xs">SYNC</button>
+      <input type="text" id="room-input" value="default-room" class="bg-white px-2 py-1 rounded text-sky-800 font-black border border-sky-300 w-28 text-center outline-none focus:border-sky-500 shadow-sm">
+      <button onclick="syncRoom()" class="bg-sky-500 hover:bg-sky-400 text-white font-black px-3 py-1 rounded transition tracking-wider shadow">SYNC</button>
     </div>
   </header>
 
   <!-- TOP BANS SUMMARY -->
-  <div class="schale-card rounded-2xl p-3 flex flex-col md:flex-row items-center justify-between gap-4 shadow-md">
+  <div class="schale-card rounded-2xl p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-md">
     <!-- HOST BANS -->
-    <div class="flex flex-col items-center md:items-start gap-1">
+    <div class="flex flex-col items-center md:items-start gap-1.5">
       <div class="flex items-center gap-2">
         <span class="text-xs font-black text-sky-600 uppercase tracking-widest" id="spec-host-header">Host Boss Bans</span>
       </div>
-      <div id="spec-host-bans" class="flex gap-1.5"></div>
+      <div id="spec-host-bans" class="flex gap-2"></div>
     </div>
 
     <!-- CENTER LABEL -->
     <div class="text-center px-4">
-      <div class="w-8 h-8 mx-auto mb-1 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center">
-        <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="w-10 h-10 mx-auto mb-1 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center">
+        <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
         </svg>
       </div>
-      <h2 class="text-[11px] font-black text-slate-800 tracking-widest uppercase">BOSS BAN POOL</h2>
-      <p class="text-[9px] text-sky-600 font-bold">4 HOST • 4 GUEST</p>
+      <h2 class="text-xs font-black text-slate-800 tracking-widest uppercase">BOSS BAN POOL</h2>
+      <p class="text-[10px] text-sky-600 font-bold">4 HOST • 4 GUEST</p>
     </div>
 
     <!-- GUEST BANS -->
-    <div class="flex flex-col items-center md:items-end gap-1">
+    <div class="flex flex-col items-center md:items-end gap-1.5">
       <div class="flex items-center gap-2">
         <span class="text-xs font-black text-rose-600 uppercase tracking-widest" id="spec-guest-header">Guest Boss Bans</span>
       </div>
-      <div id="spec-guest-bans" class="flex gap-1.5"></div>
+      <div id="spec-guest-bans" class="flex gap-2"></div>
     </div>
   </div>
 
-  <!-- 3 GAME CARDS DISPLAY (TIGHTENED VERTICAL GAP) -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+  <!-- 3 GAME CARDS DISPLAY -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
     <!-- G1 -->
-    <div class="schale-card rounded-2xl p-3 flex flex-col justify-between">
+    <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
       <div>
-        <div class="flex justify-between items-center mb-2 pb-1 border-b border-sky-100">
+        <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-sky-100">
           <span class="font-black text-xs text-sky-600 tracking-wider" id="spec-g1-title">GAME 1 (HOST PICK)</span>
-          <span class="text-[9px] bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded text-sky-700 font-bold">MATCH 1</span>
+          <span class="text-[10px] bg-sky-50 border border-sky-200 px-2 py-0.5 rounded text-sky-700 font-bold">MATCH 1</span>
         </div>
 
-        <div class="grid grid-cols-3 gap-1.5 mb-3">
-          <div id="spec-g1-boss" class="col-span-2 schale-card-inner rounded-xl p-1.5 text-center h-[72px] flex flex-col items-center justify-center"></div>
-          <div id="spec-g1-terrain" class="col-span-1 schale-card-inner rounded-xl p-1.5 text-center h-[72px] flex flex-col items-center justify-center"></div>
+        <div class="grid grid-cols-3 gap-2 mb-3">
+          <div id="spec-g1-boss" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center"></div>
+          <div id="spec-g1-terrain" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center"></div>
         </div>
       </div>
 
       <div>
-        <div class="text-[9px] uppercase font-bold text-slate-500 tracking-wider mb-1" id="spec-g1-bans-label">Guest Student Bans (3):</div>
-        <div id="spec-g1-student-bans" class="grid grid-cols-3 gap-1"></div>
+        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1.5" id="spec-g1-bans-label">Guest Student Bans (3):</div>
+        <div id="spec-g1-student-bans" class="grid grid-cols-3 gap-1.5 min-h-[64px]"></div>
       </div>
     </div>
 
     <!-- G2 -->
-    <div class="schale-card rounded-2xl p-3 flex flex-col justify-between">
+    <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
       <div>
-        <div class="flex justify-between items-center mb-2 pb-1 border-b border-rose-100">
+        <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-rose-100">
           <span class="font-black text-xs text-rose-600 tracking-wider" id="spec-g2-title">GAME 2 (GUEST PICK)</span>
-          <span class="text-[9px] bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded text-rose-700 font-bold">MATCH 2</span>
+          <span class="text-[10px] bg-rose-50 border border-rose-200 px-2 py-0.5 rounded text-rose-700 font-bold">MATCH 2</span>
         </div>
 
-        <div class="grid grid-cols-3 gap-1.5 mb-3">
-          <div id="spec-g2-boss" class="col-span-2 schale-card-inner rounded-xl p-1.5 text-center h-[72px] flex flex-col items-center justify-center"></div>
-          <div id="spec-g2-terrain" class="col-span-1 schale-card-inner rounded-xl p-1.5 text-center h-[72px] flex flex-col items-center justify-center"></div>
+        <div class="grid grid-cols-3 gap-2 mb-3">
+          <div id="spec-g2-boss" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center"></div>
+          <div id="spec-g2-terrain" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center"></div>
         </div>
       </div>
 
       <div>
-        <div class="text-[9px] uppercase font-bold text-slate-500 tracking-wider mb-1" id="spec-g2-bans-label">Host Student Bans (3):</div>
-        <div id="spec-g2-student-bans" class="grid grid-cols-3 gap-1"></div>
+        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1.5" id="spec-g2-bans-label">Host Student Bans (3):</div>
+        <div id="spec-g2-student-bans" class="grid grid-cols-3 gap-1.5 min-h-[64px]"></div>
       </div>
     </div>
 
     <!-- G3 DECIDER -->
-    <div class="schale-card rounded-2xl p-3 flex flex-col justify-between">
+    <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
       <div>
-        <div class="flex justify-between items-center mb-2 pb-1 border-b border-amber-100">
+        <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-amber-100">
           <span class="font-black text-xs text-amber-600 tracking-wider">GAME 3 (DECIDER)</span>
-          <span class="text-[9px] bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded text-amber-700 font-bold">MATCH 3</span>
+          <span class="text-[10px] bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-amber-700 font-bold">MATCH 3</span>
         </div>
 
-        <div class="grid grid-cols-3 gap-1.5 mb-3">
-          <div id="spec-g3-boss" class="col-span-2 schale-card-inner rounded-xl p-1.5 text-center h-[72px] flex flex-col items-center justify-center"></div>
-          <div id="spec-g3-terrain" class="col-span-1 schale-card-inner rounded-xl p-1.5 text-center h-[72px] flex flex-col items-center justify-center"></div>
+        <div class="grid grid-cols-3 gap-2 mb-3">
+          <div id="spec-g3-boss" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center"></div>
+          <div id="spec-g3-terrain" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center"></div>
         </div>
       </div>
 
       <div>
-        <div class="text-[9px] uppercase font-bold text-slate-500 tracking-wider mb-1" id="spec-g3-bans-label">Host (2) & Guest (2) Bans (4):</div>
-        <div id="spec-g3-student-bans" class="grid grid-cols-4 gap-1"></div>
+        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1.5" id="spec-g3-bans-label">Host (2) & Guest (2) Bans (4):</div>
+        <div id="spec-g3-student-bans" class="grid grid-cols-4 gap-1 min-h-[64px]"></div>
       </div>
     </div>
   </div>
@@ -198,50 +199,50 @@
       const hostBans = bannedBosses.filter(b => b.team === 'blue');
       const guestBans = bannedBosses.filter(b => b.team === 'red');
 
-      let hostBansHTML = '';
+      let hostHTML = '';
       for (let i = 0; i < 4; i++) {
-        const b = hostBans[i];
-        if (b) {
-          hostBansHTML += `
-            <div class="relative w-14 h-14 schale-card-inner border border-sky-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
-              <img src="${b.image || ''}" class="w-full h-full object-cover grayscale opacity-75">
-              <div class="absolute inset-x-0 bottom-0 bg-slate-900/80 p-0.5 text-center z-10">
-                <span class="text-[8px] font-black text-sky-200 truncate block">${b.name || ''}</span>
+        const banned = hostBans[i];
+        if (banned) {
+          hostHTML += `
+            <div class="relative w-20 h-20 schale-card-inner border border-sky-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
+              <img src="${banned.image || ''}" class="w-full h-full object-cover grayscale opacity-75">
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
+                <span class="text-[9.5px] font-black text-sky-200 truncate block tracking-wide">${banned.name || ''}</span>
               </div>
             </div>
           `;
         } else {
-          hostBansHTML += `
-            <div class="w-14 h-14 schale-card-inner border border-sky-200 rounded-xl flex items-center justify-center text-sky-600 font-black text-xs">
+          hostHTML += `
+            <div class="w-20 h-20 schale-card-inner border border-sky-200 rounded-xl flex items-center justify-center text-sky-600 font-black text-sm">
               ${i + 1}
             </div>
           `;
         }
       }
-      document.getElementById('spec-host-bans').innerHTML = hostBansHTML;
+      document.getElementById('spec-host-bans').innerHTML = hostHTML;
 
-      let guestBansHTML = '';
+      let guestHTML = '';
       const guestLabels = [4, 3, 2, 1];
       for (let i = 0; i < 4; i++) {
-        const b = guestBans[i];
-        if (b) {
-          guestBansHTML += `
-            <div class="relative w-14 h-14 schale-card-inner border border-rose-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
-              <img src="${b.image || ''}" class="w-full h-full object-cover grayscale opacity-75">
-              <div class="absolute inset-x-0 bottom-0 bg-slate-900/80 p-0.5 text-center z-10">
-                <span class="text-[8px] font-black text-rose-200 truncate block">${b.name || ''}</span>
+        const banned = guestBans[i];
+        if (banned) {
+          guestHTML += `
+            <div class="relative w-20 h-20 schale-card-inner border border-rose-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
+              <img src="${banned.image || ''}" class="w-full h-full object-cover grayscale opacity-75">
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
+                <span class="text-[9.5px] font-black text-rose-200 truncate block tracking-wide">${banned.name || ''}</span>
               </div>
             </div>
           `;
         } else {
-          guestBansHTML += `
-            <div class="w-14 h-14 schale-card-inner border border-rose-200 rounded-xl flex items-center justify-center text-rose-600 font-black text-xs">
+          guestHTML += `
+            <div class="w-20 h-20 schale-card-inner border border-rose-200 rounded-xl flex items-center justify-center text-rose-600 font-black text-sm">
               ${guestLabels[i]}
             </div>
           `;
         }
       }
-      document.getElementById('spec-guest-bans').innerHTML = guestBansHTML;
+      document.getElementById('spec-guest-bans').innerHTML = guestHTML;
 
       // Render 3 Games
       const games = data.gameData || [];
@@ -252,29 +253,33 @@
         const bossContainer = document.getElementById(`spec-g${g}-boss`);
         if (game.boss) {
           bossContainer.innerHTML = `
-            <img src="${game.boss.image}" class="w-full h-11 object-cover rounded mb-0.5">
-            <span class="text-[10px] font-bold text-sky-700 truncate w-full text-center">${game.boss.name}</span>
+            <div class="w-full h-full flex flex-col items-center justify-center">
+              <img src="${game.boss.image}" class="w-full h-16 object-cover rounded-lg mb-1">
+              <span class="text-xs font-bold text-sky-700 truncate w-full text-center">${game.boss.name}</span>
+            </div>
           `;
         } else {
           bossContainer.innerHTML = `
-            <span class="text-[8px] text-sky-600 uppercase font-black">Boss</span>
-            <span class="text-[10px] font-bold text-slate-500">${g === 3 ? 'Last Remaining' : 'Pending'}</span>
+            <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Boss</span>
+            <span class="text-xs font-bold text-slate-500">${g === 3 ? 'Last Remaining' : 'Pending'}</span>
           `;
         }
 
         // Terrain Slot
         const terrainContainer = document.getElementById(`spec-g${g}-terrain`);
         if (game.terrain) {
-          terrainContainer.className = "col-span-1 border border-amber-400 rounded-xl p-1.5 text-center h-[72px] flex flex-col items-center justify-center relative bg-slate-900";
+          terrainContainer.className = "col-span-1 border border-amber-400 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative bg-slate-900";
           terrainContainer.innerHTML = `
-            <img src="${game.terrain.image}" class="w-6 h-6 object-contain rounded mb-0.5 filter brightness-0 invert">
-            <span class="text-[8px] font-black text-amber-300 truncate w-full text-center">${game.terrain.name}</span>
+            <div class="w-full h-full flex flex-col items-center justify-center">
+              <img src="${game.terrain.image}" class="w-8 h-8 object-contain rounded mb-1 filter brightness-0 invert">
+              <span class="text-[10px] font-black text-amber-300 truncate w-full text-center tracking-wide">${game.terrain.name}</span>
+            </div>
           `;
         } else {
-          terrainContainer.className = "col-span-1 schale-card-inner border border-sky-200 rounded-xl p-1.5 text-center h-[72px] flex flex-col items-center justify-center relative";
+          terrainContainer.className = "col-span-1 schale-card-inner border border-sky-200 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative";
           terrainContainer.innerHTML = `
-            <span class="text-[8px] text-sky-600 uppercase font-black">Terrain</span>
-            <span class="text-[10px] font-bold ${g === 3 ? 'text-amber-600' : 'text-slate-500'}">${g === 3 ? 'Admin Roll' : 'Pending'}</span>
+            <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Terrain</span>
+            <span class="text-xs font-bold ${g === 3 ? 'text-amber-600' : 'text-slate-500'}">${g === 3 ? 'Admin Roll' : 'Pending'}</span>
           `;
         }
 
@@ -287,17 +292,17 @@
           const sb = bans[i];
           if (sb) {
             studentHTML += `
-              <div class="relative w-full h-12 schale-card-inner border border-rose-300 rounded-lg overflow-hidden shadow-sm">
+              <div class="relative w-full h-20 schale-card-inner border border-rose-300 rounded-xl overflow-hidden shadow-md">
                 <img src="${sb.image}" class="w-full h-full object-cover grayscale opacity-75">
-                <div class="absolute inset-x-0 bottom-0 bg-slate-900/80 p-0.5 text-center z-10">
-                  <span class="text-[8px] font-black text-rose-200 truncate block">${sb.name}</span>
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
+                  <span class="text-[10px] font-black text-rose-200 truncate block tracking-wide">${sb.name}</span>
                 </div>
               </div>
             `;
           } else {
             studentHTML += `
-              <div class="w-full h-12 schale-card-inner border border-slate-200 rounded-lg flex items-center justify-center text-slate-400">
-                <span class="text-[8px] font-bold text-slate-400">BAN ${i + 1}</span>
+              <div class="w-full h-20 schale-card-inner border border-slate-200 rounded-xl flex items-center justify-center text-slate-400">
+                <span class="text-[9px] font-bold tracking-widest text-slate-400">BAN ${i + 1}</span>
               </div>
             `;
           }
