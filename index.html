@@ -203,7 +203,7 @@
   <!-- MAIN AREA -->
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- TURN STATUS BANNER WITH TIMER -->
+    <!-- TURN STATUS BANNER WITH TIMER & READY UP BUTTON -->
     <div id="turn-banner" class="schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden transition-all duration-300">
       <div class="text-left flex-1">
         <div class="text-[10px] uppercase tracking-widest font-black text-sky-600 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
@@ -211,9 +211,20 @@
         <div class="text-xs text-slate-500 mt-1 font-semibold" id="turn-subtitle">Host and Guest must ready up before Admin can start the draft.</div>
       </div>
 
-      <div id="timer-box" class="flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-300 min-w-[110px]">
-        <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">TIME LEFT</span>
-        <span id="timer-text" class="text-3xl font-black text-slate-400 tracking-wider">--:--</span>
+      <div class="flex items-center gap-3">
+        <!-- READY UP BUTTONS MOVED BESIDE TIMER -->
+        <button id="host-ready-btn" onclick="toggleReady('host')" class="hidden bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-cyan">
+          READY UP
+        </button>
+        <button id="guest-ready-btn" onclick="toggleReady('guest')" class="hidden bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-rose">
+          READY UP
+        </button>
+
+        <!-- TIMER BOX -->
+        <div id="timer-box" class="flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-300 min-w-[110px]">
+          <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">TIME LEFT</span>
+          <span id="timer-text" class="text-3xl font-black text-slate-400 tracking-wider">--:--</span>
+        </div>
       </div>
     </div>
 
@@ -223,9 +234,6 @@
       <div class="flex flex-col items-center md:items-start gap-1.5">
         <div class="flex items-center gap-2">
           <span class="text-xs font-black text-sky-600 uppercase tracking-widest" id="host-ban-header-title">Host Boss Bans</span>
-          <button id="host-ready-btn" onclick="toggleReady('host')" class="hidden bg-sky-500 hover:bg-sky-400 text-white text-[10px] font-black px-2.5 py-0.5 rounded transition shadow tracking-wider">
-            READY UP
-          </button>
         </div>
         <div id="host-boss-bans-container" class="flex gap-2"></div>
       </div>
@@ -244,9 +252,6 @@
       <!-- GUEST BOSS BANS -->
       <div class="flex flex-col items-center md:items-end gap-1.5">
         <div class="flex items-center gap-2">
-          <button id="guest-ready-btn" onclick="toggleReady('guest')" class="hidden bg-rose-500 hover:bg-rose-400 text-white text-[10px] font-black px-2.5 py-0.5 rounded transition shadow tracking-wider">
-            READY UP
-          </button>
           <span class="text-xs font-black text-rose-600 uppercase tracking-widest" id="guest-ban-header-title">Guest Boss Bans</span>
         </div>
         <div id="guest-boss-bans-container" class="flex gap-2"></div>
@@ -883,6 +888,7 @@
 
       const step = DRAFT_SEQUENCE[currentStepIndex];
 
+      // RESTRICTED ADMIN TIMEOUT LOGIC
       const isMyTurnToCommit = (step.team === 'blue' && currentRole === 'host') || 
                                (step.team === 'red' && currentRole === 'guest') || 
                                (currentRole === 'admin' && step.type === 'roll');
@@ -964,6 +970,29 @@
       } else {
         guestBadge.innerText = "NOT READY";
         guestBadge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
+      }
+
+      // UPDATE READY UP BUTTON STYLING IN BANNER
+      const hostReadyBtn = document.getElementById('host-ready-btn');
+      if (hostReadyBtn) {
+        if (hostReady) {
+          hostReadyBtn.innerText = "CANCEL READY";
+          hostReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider";
+        } else {
+          hostReadyBtn.innerText = "READY UP";
+          hostReadyBtn.className = "bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-cyan";
+        }
+      }
+
+      const guestReadyBtn = document.getElementById('guest-ready-btn');
+      if (guestReadyBtn) {
+        if (guestReady) {
+          guestReadyBtn.innerText = "CANCEL READY";
+          guestReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider";
+        } else {
+          guestReadyBtn.innerText = "READY UP";
+          guestReadyBtn.className = "bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-rose";
+        }
       }
 
       updateRoleControls();
@@ -1116,6 +1145,7 @@
         confirmBtn.classList.add('hidden');
       }
 
+      // RESTRICTED ADMIN CARD SELECTION (Admin can only act on Game 3 terrain roll)
       const isAllowedRole = (step.team === 'blue' && currentRole === 'host') || 
                             (step.team === 'red' && currentRole === 'guest') ||
                             (currentRole === 'admin' && step.type === 'roll');
@@ -1227,7 +1257,6 @@
           grid.appendChild(card);
         });
 
-        // RE-APPLY SEARCH FILTER SO GRID STAYS FILTERED ON CARD CLICK
         if (searchInput && searchInput.value) {
           filterStudents(searchInput.value);
         }
@@ -1474,15 +1503,12 @@
             let bannedByName = '';
     
             if (gameNum === 1) {
-              // Game 1 Student Bans belong to Guest (Red)
               bannedByRole = 'Guest';
               bannedByName = guestName || 'Guest';
             } else if (gameNum === 2) {
-              // Game 2 Student Bans belong to Host (Blue)
               bannedByRole = 'Host';
               bannedByName = hostName || 'Host';
             } else if (gameNum === 3) {
-              // Game 3 Student Bans: First 2 by Host, Last 2 by Guest
               if (banIdx < 2) {
                 bannedByRole = 'Host';
                 bannedByName = hostName || 'Host';
