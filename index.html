@@ -885,7 +885,7 @@
 
       const isMyTurnToCommit = (step.team === 'blue' && currentRole === 'host') || 
                                (step.team === 'red' && currentRole === 'guest') || 
-                               (currentRole === 'admin');
+                               (currentRole === 'admin' && step.type === 'roll');
 
       if (!isMyTurnToCommit) return;
 
@@ -1118,7 +1118,7 @@
 
       const isAllowedRole = (step.team === 'blue' && currentRole === 'host') || 
                             (step.team === 'red' && currentRole === 'guest') ||
-                            (currentRole === 'admin');
+                            (currentRole === 'admin' && step.type === 'roll');
 
       if (step.target === 'boss') {
         document.getElementById('grid-title').innerText = "SELECTABLE BOSS POOL";
