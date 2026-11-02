@@ -3,14 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Custom Favicon for Browser Tab -->
   <link rel="icon" type="image/png" href="sh_logo_norm_white.png">
-  <title>BO3 Draft Spectator Overlay - Senseihood</title>
+  <title>Senseihood BO3 Draft - Spectator Stream Broadcast</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&display=swap');
-    
     * { font-family: 'Noto Sans', sans-serif !important; }
     
     body { 
@@ -23,135 +26,182 @@
       color: #1e293b; 
     }
 
-    .schale-card {
-      background: #ffffff;
-      border: 1px solid #cce7ff;
-      box-shadow: 0 4px 16px rgba(18, 180, 255, 0.08);
+    .glow-halo-cyan { box-shadow: 0 4px 20px rgba(18, 180, 255, 0.35); border-color: #00a2ff !important; }
+    .glow-halo-rose { box-shadow: 0 4px 20px rgba(244, 63, 94, 0.35); border-color: #f43f5e !important; }
+    .glow-halo-gold { box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35); border-color: #f59e0b !important; }
+    .glow-halo-emerald { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35); border-color: #10b981 !important; }
+
+    .schale-card { background: #ffffff; border: 1px solid #cce7ff; box-shadow: 0 4px 16px rgba(18, 180, 255, 0.08); }
+    .schale-card-inner { background: #f0f7ff; border: 1px solid #d3e6f9; color: #334155; }
+
+    @keyframes pulse-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .animate-pulse-fast { animation: pulse-fast 0.6s infinite; }
+
+    @keyframes slot-pulse-cyan {
+      0%, 100% { box-shadow: 0 0 16px rgba(18, 180, 255, 0.8); border-color: #00a2ff !important; transform: scale(1.02); }
+      50% { box-shadow: 0 0 6px rgba(18, 180, 255, 0.3); border-color: #7dd3fc !important; transform: scale(1); }
+    }
+    @keyframes slot-pulse-rose {
+      0%, 100% { box-shadow: 0 0 16px rgba(244, 63, 94, 0.8); border-color: #f43f5e !important; transform: scale(1.02); }
+      50% { box-shadow: 0 0 6px rgba(244, 63, 94, 0.3); border-color: #fda4af !important; transform: scale(1); }
+    }
+    @keyframes slot-pulse-yellow {
+      0%, 100% { box-shadow: 0 0 16px rgba(245, 158, 11, 0.8); border-color: #f59e0b !important; transform: scale(1.02); }
+      50% { box-shadow: 0 0 6px rgba(245, 158, 11, 0.3); border-color: #fde68a !important; transform: scale(1); }
     }
 
-    .schale-card-inner {
-      background: #f0f7ff;
-      border: 1px solid #d3e6f9;
-      color: #334155;
-    }
+    .active-slot-blue { animation: slot-pulse-cyan 1.2s infinite ease-in-out; border-width: 2px !important; }
+    .active-slot-red { animation: slot-pulse-rose 1.2s infinite ease-in-out; border-width: 2px !important; }
+    .active-slot-yellow { animation: slot-pulse-yellow 1.2s infinite ease-in-out; border-width: 2px !important; }
   </style>
 </head>
-<body class="p-6 min-h-screen flex flex-col justify-between">
+<body class="min-h-screen flex flex-col justify-between">
 
-  <!-- SPECTATOR TOP HEADER BAR -->
-  <header class="bg-white/90 border border-sky-200 rounded-2xl p-4 mb-6 flex justify-between items-center shadow-sm backdrop-blur-md">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-sky-500 border border-sky-400 flex items-center justify-center shadow-md overflow-hidden p-1">
-        <img src="sh_logo_norm_white.png" alt="Senseihood Emblem" class="w-full h-full object-contain">
+  <!-- BROADCAST HEADER -->
+  <header class="bg-white/90 border-b border-sky-200 px-6 py-3 sticky top-0 z-50 backdrop-blur-md shadow-sm">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-sky-500 border border-sky-400 flex items-center justify-center shadow-md overflow-hidden p-1">
+          <img src="sh_logo_norm_white.png" alt="Senseihood Emblem" class="w-full h-full object-contain">
+        </div>
+        <div>
+          <h1 class="text-lg font-black text-slate-800 tracking-widest uppercase flex items-center gap-2">
+            SENSEIHOOD <span class="text-sky-500">SPECTATOR BROADCAST</span>
+          </h1>
+          <p class="text-[11px] text-sky-600 font-bold tracking-wider">LIVE BO3 DRAFT FEED</p>
+        </div>
       </div>
-      <div>
-        <h1 class="text-lg font-black text-slate-800 tracking-widest uppercase flex items-center gap-2">
-          SENSEIHOOD <span class="text-sky-500">BO3 SPECTATOR VIEW</span>
-        </h1>
-        <p class="text-[11px] text-sky-600 font-bold tracking-wider" id="match-pair-title">WAITING FOR ROOM SYNC...</p>
-      </div>
-    </div>
 
-    <!-- ROOM CODE INPUT -->
-    <div class="flex items-center bg-sky-50/80 px-2.5 py-1.5 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
-      <span class="text-sky-700 font-bold uppercase tracking-wider text-[10px]">ROOM:</span>
-      <input type="text" id="room-input" value="default-room" class="bg-white px-2 py-1 rounded text-sky-800 font-black border border-sky-300 w-28 text-center outline-none focus:border-sky-500 shadow-sm">
-      <button onclick="syncRoom()" class="bg-sky-500 hover:bg-sky-400 text-white font-black px-3 py-1 rounded transition tracking-wider shadow">SYNC</button>
+      <!-- ROOM SYNC CONTROLS -->
+      <div class="flex items-center bg-sky-50/80 px-3 py-1.5 rounded-xl border border-sky-200 text-xs gap-2 shadow-inner">
+        <span class="text-sky-700 font-bold uppercase tracking-wider text-[10px]">ROOM:</span>
+        <input type="text" id="room-code-input" value="default-room" class="bg-white px-2 py-1 rounded text-sky-800 font-black border border-sky-300 w-28 text-center outline-none focus:border-sky-500 shadow-sm">
+        <button onclick="connectToRoom()" class="bg-sky-500 hover:bg-sky-400 text-white font-black px-3 py-1 rounded transition tracking-wider shadow">
+          SYNC
+        </button>
+      </div>
     </div>
   </header>
 
-  <!-- TOP BANS SUMMARY -->
-  <div class="schale-card rounded-2xl p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-md">
-    <!-- HOST BANS -->
-    <div class="flex flex-col items-center md:items-start gap-1.5">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-black text-sky-600 uppercase tracking-widest" id="spec-host-header">Host Boss Bans</span>
-      </div>
-      <div id="spec-host-bans" class="flex gap-2"></div>
-    </div>
+  <!-- BROADCAST MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- CENTER LABEL -->
-    <div class="text-center px-4">
-      <div class="w-10 h-10 mx-auto mb-1 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center">
-        <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-        </svg>
-      </div>
-      <h2 class="text-xs font-black text-slate-800 tracking-widest uppercase">BOSS BAN POOL</h2>
-      <p class="text-[10px] text-sky-600 font-bold">4 HOST • 4 GUEST</p>
-    </div>
-
-    <!-- GUEST BANS -->
-    <div class="flex flex-col items-center md:items-end gap-1.5">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-black text-rose-600 uppercase tracking-widest" id="spec-guest-header">Guest Boss Bans</span>
-      </div>
-      <div id="spec-guest-bans" class="flex gap-2"></div>
-    </div>
-  </div>
-
-  <!-- 3 GAME CARDS DISPLAY -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
-    <!-- G1 -->
-    <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
-      <div>
-        <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-sky-100">
-          <span class="font-black text-xs text-sky-600 tracking-wider" id="spec-g1-title">GAME 1 (HOST PICK)</span>
-          <span class="text-[10px] bg-sky-50 border border-sky-200 px-2 py-0.5 rounded text-sky-700 font-bold">MATCH 1</span>
-        </div>
-
-        <div class="grid grid-cols-3 gap-2 mb-3">
-          <div id="spec-g1-boss" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center"></div>
-          <div id="spec-g1-terrain" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center"></div>
-        </div>
+    <!-- LIVE TURN BANNER & TIMER -->
+    <div id="turn-banner" class="schale-card rounded-2xl p-5 flex items-center justify-between shadow-md relative overflow-hidden transition-all duration-300">
+      <div class="text-left flex-1">
+        <div class="text-xs uppercase tracking-widest font-black text-sky-600 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
+        <div class="text-3xl font-black text-slate-800 tracking-wide" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
+        <div class="text-xs text-slate-500 mt-1 font-semibold" id="turn-subtitle">Live sync in progress...</div>
       </div>
 
-      <div>
-        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1.5" id="spec-g1-bans-label">Guest Student Bans (3):</div>
-        <div id="spec-g1-student-bans" class="grid grid-cols-3 gap-1.5 min-h-[64px]"></div>
+      <div id="timer-box" class="flex flex-col items-center justify-center schale-card-inner px-6 py-3 rounded-2xl border border-sky-300 min-w-[120px]">
+        <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">TIME REMAINING</span>
+        <span id="timer-text" class="text-4xl font-black text-slate-400 tracking-wider">--:--</span>
       </div>
     </div>
 
-    <!-- G2 -->
-    <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
-      <div>
-        <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-rose-100">
-          <span class="font-black text-xs text-rose-600 tracking-wider" id="spec-g2-title">GAME 2 (GUEST PICK)</span>
-          <span class="text-[10px] bg-rose-50 border border-rose-200 px-2 py-0.5 rounded text-rose-700 font-bold">MATCH 2</span>
-        </div>
+    <!-- TOP BOSS BANS BAR -->
+    <div class="schale-card rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-md">
+      <!-- HOST BOSS BANS -->
+      <div class="flex flex-col items-center md:items-start gap-2">
+        <span class="text-xs font-black text-sky-600 uppercase tracking-widest" id="host-ban-header-title">Host Boss Bans</span>
+        <div id="host-boss-bans-container" class="flex gap-2"></div>
+      </div>
 
-        <div class="grid grid-cols-3 gap-2 mb-3">
-          <div id="spec-g2-boss" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center"></div>
-          <div id="spec-g2-terrain" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center"></div>
+      <!-- CENTER LABEL -->
+      <div class="text-center px-4">
+        <div class="w-12 h-12 mx-auto mb-1 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center shadow-sm">
+          <svg class="w-6 h-6 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+          </svg>
+        </div>
+        <h2 class="text-xs font-black text-slate-800 tracking-widest uppercase">BOSS BAN POOL</h2>
+        <p class="text-[10px] text-sky-600 font-bold">4 HOST • 4 GUEST</p>
+      </div>
+
+      <!-- GUEST BOSS BANS -->
+      <div class="flex flex-col items-center md:items-end gap-2">
+        <span class="text-xs font-black text-rose-600 uppercase tracking-widest" id="guest-ban-header-title">Guest Boss Bans</span>
+        <div id="guest-boss-bans-container" class="flex gap-2"></div>
+      </div>
+    </div>
+
+    <!-- GAME CARDS CONTAINER -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <!-- GAME 1 -->
+      <div class="schale-card rounded-2xl p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-center mb-3 pb-2 border-b border-sky-100">
+            <span class="font-black text-sm text-sky-600 tracking-wider" id="g1-title">GAME 1 (HOST PICK)</span>
+            <span class="text-[10px] bg-sky-50 border border-sky-200 px-2.5 py-1 rounded text-sky-700 font-bold">MATCH 1</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <div id="g1-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[115px] flex flex-col items-center justify-center">
+              <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Boss</span>
+              <span class="text-xs font-bold text-slate-500">Pending</span>
+            </div>
+            <div id="g1-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[115px] flex flex-col items-center justify-center">
+              <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Terrain</span>
+              <span class="text-xs font-bold text-slate-500">Pending</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-2" id="g1-bans-label">Guest Student Bans (3):</div>
+          <div id="g1-bans-container" class="grid grid-cols-3 gap-2 min-h-[72px]"></div>
         </div>
       </div>
 
-      <div>
-        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1.5" id="spec-g2-bans-label">Host Student Bans (3):</div>
-        <div id="spec-g2-student-bans" class="grid grid-cols-3 gap-1.5 min-h-[64px]"></div>
+      <!-- GAME 2 -->
+      <div class="schale-card rounded-2xl p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-center mb-3 pb-2 border-b border-rose-100">
+            <span class="font-black text-sm text-rose-600 tracking-wider" id="g2-title">GAME 2 (GUEST PICK)</span>
+            <span class="text-[10px] bg-rose-50 border border-rose-200 px-2.5 py-1 rounded text-rose-700 font-bold">MATCH 2</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <div id="g2-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[115px] flex flex-col items-center justify-center">
+              <span class="text-[9px] text-rose-600 uppercase font-black tracking-widest">Boss</span>
+              <span class="text-xs font-bold text-slate-500">Pending</span>
+            </div>
+            <div id="g2-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[115px] flex flex-col items-center justify-center">
+              <span class="text-[9px] text-rose-600 uppercase font-black tracking-widest">Terrain</span>
+              <span class="text-xs font-bold text-slate-500">Pending</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-2" id="g2-bans-label">Host Student Bans (3):</div>
+          <div id="g2-bans-container" class="grid grid-cols-3 gap-2 min-h-[72px]"></div>
+        </div>
+      </div>
+
+      <!-- GAME 3 (DECIDER) -->
+      <div class="schale-card rounded-2xl p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-center mb-3 pb-2 border-b border-amber-100">
+            <span class="font-black text-sm text-amber-600 tracking-wider">GAME 3 (DECIDER)</span>
+            <span class="text-[10px] bg-amber-50 border border-amber-200 px-2.5 py-1 rounded text-amber-700 font-bold">MATCH 3</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <div id="g3-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[115px] flex flex-col items-center justify-center">
+              <span class="text-[9px] text-amber-600 uppercase font-black tracking-widest">Boss</span>
+              <span class="text-xs font-bold text-slate-500">Last Remaining</span>
+            </div>
+            <div id="g3-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[115px] flex flex-col items-center justify-center">
+              <span class="text-[9px] text-amber-600 uppercase font-black tracking-widest">Terrain</span>
+              <span class="text-xs font-bold text-amber-600">Admin Roll</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-2" id="g3-bans-label">Host (2) & Guest (2) Bans (4):</div>
+          <div id="g3-bans-container" class="grid grid-cols-4 gap-1.5 min-h-[72px]"></div>
+        </div>
       </div>
     </div>
 
-    <!-- G3 DECIDER -->
-    <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
-      <div>
-        <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-amber-100">
-          <span class="font-black text-xs text-amber-600 tracking-wider">GAME 3 (DECIDER)</span>
-          <span class="text-[10px] bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-amber-700 font-bold">MATCH 3</span>
-        </div>
-
-        <div class="grid grid-cols-3 gap-2 mb-3">
-          <div id="spec-g3-boss" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center"></div>
-          <div id="spec-g3-terrain" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center"></div>
-        </div>
-      </div>
-
-      <div>
-        <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1.5" id="spec-g3-bans-label">Host (2) & Guest (2) Bans (4):</div>
-        <div id="spec-g3-student-bans" class="grid grid-cols-4 gap-1 min-h-[64px]"></div>
-      </div>
-    </div>
-  </div>
+  </main>
 
   <script>
     const firebaseConfig = {
@@ -161,157 +211,362 @@
       projectId: "bluearchivedrafttourney",
       storageBucket: "bluearchivedrafttourney.firebasestorage.app",
       messagingSenderId: "615654907851",
-      appId: "1:1:615654907851:web:f2d3b7101e07149faae04e"
+      appId: "1:1:615654907851:web:f2d3b7101e07149faae04e",
+      measurementId: "G-X4XQ1W735V"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let currentRoomRef = null;
 
-    function syncRoom() {
-      const code = document.getElementById('room-input').value.trim() || 'default-room';
-      if (currentRoomRef) currentRoomRef.off();
+    const BOSS_ROSTER = [];
+    const TERRAIN_ROSTER = [
+      { id: 'street',  name: 'Urban (Street)',  image: 'https://schaledb.com/images/ui/Terrain_Street.png' },
+      { id: 'outdoor', name: 'Field (Outdoor)', image: 'https://schaledb.com/images/ui/Terrain_Outdoor.png' },
+      { id: 'indoor',  name: 'Indoor',          image: 'https://schaledb.com/images/ui/Terrain_Indoor.png' }
+    ];
 
-      currentRoomRef = db.ref('draft_rooms/' + code);
-      currentRoomRef.on('value', snapshot => {
+    let DRAFT_SEQUENCE = [];
+    const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbarka'];
+
+    let currentStepIndex = 0;
+    let draftStarted = false;
+    let stepDeadline = 0;
+    let hostName = '';
+    let guestName = '';
+
+    let bannedBosses = [];
+    let timerInterval = null;
+
+    function getEmptyGameData() {
+      return [
+        { boss: null, terrain: null, studentBans: [] },
+        { boss: null, terrain: null, studentBans: [] },
+        { boss: null, terrain: null, studentBans: [] }
+      ];
+    }
+    let gameData = getEmptyGameData();
+
+    function buildDraftSequence() {
+      const hName = hostName || 'Host';
+      const gName = guestName || 'Guest';
+
+      DRAFT_SEQUENCE = [
+        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 1` },
+        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 1` },
+        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 2` },
+        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 2` },
+        { team: 'blue', type: 'pick', target: 'boss',    game: 1, label: `Game 1 Boss (${hName} Pick)` },
+        { team: 'blue', type: 'pick', target: 'terrain', game: 1, label: `Game 1 Terrain (${hName} Pick)` },
+        { team: 'red',  type: 'pick', target: 'boss',    game: 2, label: `Game 2 Boss (${gName} Pick)` },
+        { team: 'red',  type: 'pick', target: 'terrain', game: 2, label: `Game 2 Terrain (${gName} Pick)` },
+        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 3` },
+        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 3` },
+        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 4` },
+        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 4` },
+        { team: 'neutral', type: 'decider', target: 'boss',    game: 3, label: 'Game 3 Boss (Decider Auto-Pick)' },
+        { team: 'admin',   type: 'roll',    target: 'terrain', game: 3, label: 'Game 3 Terrain (Admin Randomize)' },
+        { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 1 (${gName})` },
+        { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 2 (${gName})` },
+        { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 3 (${gName})` },
+        { team: 'blue', type: 'ban', target: 'student', game: 2, label: `Game 2 Student Ban 1 (${hName})` },
+        { team: 'blue', type: 'ban', target: 'student', game: 2, label: `Game 2 Student Ban 2 (${hName})` },
+        { team: 'blue', type: 'ban', target: 'student', game: 2, label: `Game 2 Student Ban 3 (${hName})` },
+        { team: 'blue', type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 1 (${hName})` },
+        { team: 'blue', type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 2 (${hName})` },
+        { team: 'red',  type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 1 (${gName})` },
+        { team: 'red',  type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 2 (${gName})` }
+      ];
+    }
+
+    window.onload = function() {
+      fetch("https://schaledb.com/data/en/raids.min.json")
+        .then(r => r.json())
+        .then(data => {
+          data.Raid.forEach(x => {
+            const bossId = x.PathName.toLowerCase();
+            const bossName = x.Name.toLowerCase();
+            if (PERMA_BANNED_BOSSES.some(b => bossId.includes(b) || bossName.includes(b))) return;
+
+            BOSS_ROSTER.push({
+              id: x.PathName,
+              name: x.Name,
+              terrains: x.Terrain.map(y => y.toLowerCase()),
+              image: 'https://schaledb.com/images/raid/Boss_Portrait_' + x.DevName + '_Lobby.png'
+            });
+          });
+          buildDraftSequence();
+          connectToRoom();
+        });
+    };
+
+    function connectToRoom() {
+      const roomCode = document.getElementById('room-code-input').value.trim() || 'default-room';
+      if (currentRoomRef) currentRoomRef.off();
+      currentRoomRef = db.ref('draft_rooms/' + roomCode);
+
+      currentRoomRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        if (data) renderSpectator(data);
+        if (data) {
+          currentStepIndex = data.currentStepIndex || 0;
+          draftStarted = !!data.draftStarted;
+          stepDeadline = data.stepDeadline || 0;
+          bannedBosses = data.bannedBosses || [];
+          hostName = data.hostName || '';
+          guestName = data.guestName || '';
+          
+          const rawGameData = data.gameData || [];
+          gameData = [0, 1, 2].map(idx => {
+            const raw = rawGameData[idx] || {};
+            return {
+              boss: raw.boss || null,
+              terrain: raw.terrain || null,
+              studentBans: raw.studentBans || []
+            };
+          });
+
+          buildDraftSequence();
+          updateSpectatorState();
+        }
       });
     }
 
-    function renderSpectator(data) {
-      const hostName = data.hostName || 'Host';
-      const guestName = data.guestName || 'Guest';
+    function syncServerTimer() {
+      stopTimer();
+      if (!draftStarted || stepDeadline <= 0) {
+        updateTimerDisplay(0);
+        return;
+      }
+      updateTimerDisplay(getRemainingSeconds());
+      timerInterval = setInterval(() => {
+        const remaining = getRemainingSeconds();
+        updateTimerDisplay(remaining);
+        if (remaining <= 0) stopTimer();
+      }, 500);
+    }
 
-      document.getElementById('match-pair-title').innerText = `${hostName.toUpperCase()} VS ${guestName.toUpperCase()}`;
-      document.getElementById('spec-host-header').innerText = `${hostName} Boss Bans`;
-      document.getElementById('spec-guest-header').innerText = `${guestName} Boss Bans`;
+    function getRemainingSeconds() {
+      if (!stepDeadline) return 0;
+      return Math.max(0, Math.ceil((stepDeadline - Date.now()) / 1000));
+    }
 
-      document.getElementById('spec-g1-title').innerText = `GAME 1 (${hostName.toUpperCase()} PICK)`;
-      document.getElementById('spec-g2-title').innerText = `GAME 2 (${guestName.toUpperCase()} PICK)`;
+    function stopTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+    }
+
+    function updateTimerDisplay(sec) {
+      const timerText = document.getElementById('timer-text');
+      const timerBox = document.getElementById('timer-box');
+
+      if (!draftStarted) {
+        timerText.innerText = "--:--";
+        timerText.className = "text-4xl font-black text-slate-400";
+        timerBox.className = "flex flex-col items-center justify-center schale-card-inner px-6 py-3 rounded-2xl border border-sky-300 min-w-[120px]";
+        return;
+      }
+
+      const mins = Math.floor(sec / 60);
+      const remainingSecs = sec % 60;
+      const formatted = `${String(mins).padStart(2, '0')}:${String(remainingSecs).padStart(2, '0')}`;
+      timerText.innerText = formatted;
+
+      if (sec <= 10) {
+        timerText.className = "text-4xl font-black text-rose-600 animate-pulse-fast";
+        timerBox.className = "flex flex-col items-center justify-center bg-rose-50 px-6 py-3 rounded-2xl border border-rose-300 min-w-[120px] glow-halo-rose";
+      } else {
+        timerText.className = "text-4xl font-black text-sky-600";
+        timerBox.className = "flex flex-col items-center justify-center schale-card-inner px-6 py-3 rounded-2xl border border-sky-300 min-w-[120px]";
+      }
+    }
+
+    function updateSpectatorState() {
+      document.getElementById('host-ban-header-title').innerText = hostName ? `${hostName} Boss Bans` : 'Host Boss Bans';
+      document.getElementById('guest-ban-header-title').innerText = guestName ? `${guestName} Boss Bans` : 'Guest Boss Bans';
+
+      document.getElementById('g1-title').innerText = hostName ? `GAME 1 (${hostName.toUpperCase()} PICK)` : 'GAME 1 (HOST PICK)';
+      document.getElementById('g2-title').innerText = guestName ? `GAME 2 (${guestName.toUpperCase()} PICK)` : 'GAME 2 (GUEST PICK)';
       
-      document.getElementById('spec-g1-bans-label').innerText = `${guestName} Student Bans (3):`;
-      document.getElementById('spec-g2-bans-label').innerText = `${hostName} Student Bans (3):`;
-      document.getElementById('spec-g3-bans-label').innerText = `${hostName} (2) & ${guestName} (2) Bans (4):`;
+      document.getElementById('g1-bans-label').innerText = guestName ? `${guestName} Student Bans (3):` : 'Guest Student Bans (3):';
+      document.getElementById('g2-bans-label').innerText = hostName ? `${hostName} Student Bans (3):` : 'Host Student Bans (3):';
+      document.getElementById('g3-bans-label').innerText = `${hostName || 'Host'} (2) & ${guestName || 'Guest'} (2) Bans (4):`;
 
-      // Render Top Boss Bans
-      const bannedBosses = data.bannedBosses || [];
+      if (!draftStarted) {
+        stopTimer();
+        const banner = document.getElementById('turn-banner');
+        banner.className = "schale-card rounded-2xl p-5 flex items-center justify-between shadow-md relative overflow-hidden";
+        document.getElementById('phase-title').innerText = "PRE-DRAFT LOBBY";
+        document.getElementById('turn-label').className = "text-3xl font-black text-slate-800 tracking-wide";
+        document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
+        document.getElementById('turn-subtitle').innerText = "Host and Guest are preparing in lobby...";
+
+        updateGameCardsUI();
+        updateTopBossBansUI();
+        return;
+      }
+
+      if (currentStepIndex >= DRAFT_SEQUENCE.length) {
+        stopTimer();
+        updateGameCardsUI();
+        updateTopBossBansUI();
+        const banner = document.getElementById('turn-banner');
+        banner.className = "schale-card rounded-2xl p-5 flex items-center justify-between shadow-md glow-halo-emerald relative overflow-hidden";
+        document.getElementById('phase-title').innerText = "STATUS: COMPLETED";
+        document.getElementById('turn-label').className = "text-3xl font-black text-emerald-600 tracking-wide";
+        document.getElementById('turn-label').innerText = "BO3 DRAFT COMPLETE!";
+        document.getElementById('turn-subtitle').innerText = "All maps and student bans are locked in.";
+        document.getElementById('timer-text').innerText = "00:00";
+        document.getElementById('timer-text').className = "text-4xl font-black text-emerald-600";
+        return;
+      }
+
+      const step = DRAFT_SEQUENCE[currentStepIndex];
+      const banner = document.getElementById('turn-banner');
+      document.getElementById('phase-title').innerText = `STEP ${currentStepIndex + 1} OF ${DRAFT_SEQUENCE.length}`;
+      document.getElementById('turn-label').innerText = step.label.toUpperCase();
+      document.getElementById('turn-subtitle').innerText = `Current turn in progress...`;
+
+      if (step.team === 'blue') {
+        banner.className = "schale-card rounded-2xl p-5 flex items-center justify-between shadow-md glow-halo-cyan relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-3xl font-black text-sky-600 tracking-wide";
+      } else if (step.team === 'red') {
+        banner.className = "schale-card rounded-2xl p-5 flex items-center justify-between shadow-md glow-halo-rose relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-3xl font-black text-rose-600 tracking-wide";
+      } else {
+        banner.className = "schale-card rounded-2xl p-5 flex items-center justify-between shadow-md glow-halo-gold relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-3xl font-black text-amber-600 tracking-wide";
+      }
+
+      updateGameCardsUI();
+      updateTopBossBansUI();
+      syncServerTimer();
+    }
+
+    function updateTopBossBansUI() {
+      const step = draftStarted ? DRAFT_SEQUENCE[currentStepIndex] : null;
       const hostBans = bannedBosses.filter(b => b.team === 'blue');
       const guestBans = bannedBosses.filter(b => b.team === 'red');
 
       let hostHTML = '';
       for (let i = 0; i < 4; i++) {
         const banned = hostBans[i];
+        const isActiveSlot = (step?.target === 'boss' && step?.type === 'ban' && step?.team === 'blue' && hostBans.length === i);
+        const activeClass = isActiveSlot ? 'active-slot-blue' : '';
+
         if (banned) {
+          const bossObj = BOSS_ROSTER.find(x => x.id === banned.id);
           hostHTML += `
             <div class="relative w-20 h-20 schale-card-inner border border-sky-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
-              <img src="${banned.image || ''}" class="w-full h-full object-cover grayscale opacity-75">
+              <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-75">
               <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
-                <span class="text-[9.5px] font-black text-sky-200 truncate block tracking-wide">${banned.name || ''}</span>
+                <span class="text-[9.5px] font-black text-sky-200 truncate block tracking-wide">${bossObj ? bossObj.name : ''}</span>
               </div>
             </div>
           `;
         } else {
-          hostHTML += `
-            <div class="w-20 h-20 schale-card-inner border border-sky-200 rounded-xl flex items-center justify-center text-sky-600 font-black text-sm">
-              ${i + 1}
-            </div>
-          `;
+          hostHTML += `<div class="w-20 h-20 schale-card-inner border border-sky-200 rounded-xl flex items-center justify-center text-sky-600 font-black text-sm ${activeClass}">${i + 1}</div>`;
         }
       }
-      document.getElementById('spec-host-bans').innerHTML = hostHTML;
+      document.getElementById('host-boss-bans-container').innerHTML = hostHTML;
 
       let guestHTML = '';
       const guestLabels = [4, 3, 2, 1];
       for (let i = 0; i < 4; i++) {
         const banned = guestBans[i];
+        const isActiveSlot = (step?.target === 'boss' && step?.type === 'ban' && step?.team === 'red' && guestBans.length === i);
+        const activeClass = isActiveSlot ? 'active-slot-red' : '';
+
         if (banned) {
+          const bossObj = BOSS_ROSTER.find(x => x.id === banned.id);
           guestHTML += `
             <div class="relative w-20 h-20 schale-card-inner border border-rose-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
-              <img src="${banned.image || ''}" class="w-full h-full object-cover grayscale opacity-75">
+              <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-75">
               <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
-                <span class="text-[9.5px] font-black text-rose-200 truncate block tracking-wide">${banned.name || ''}</span>
+                <span class="text-[9.5px] font-black text-rose-200 truncate block tracking-wide">${bossObj ? bossObj.name : ''}</span>
               </div>
             </div>
           `;
         } else {
-          guestHTML += `
-            <div class="w-20 h-20 schale-card-inner border border-rose-200 rounded-xl flex items-center justify-center text-rose-600 font-black text-sm">
-              ${guestLabels[i]}
-            </div>
-          `;
+          guestHTML += `<div class="w-20 h-20 schale-card-inner border border-rose-200 rounded-xl flex items-center justify-center text-rose-600 font-black text-sm ${activeClass}">${guestLabels[i]}</div>`;
         }
       }
-      document.getElementById('spec-guest-bans').innerHTML = guestHTML;
+      document.getElementById('guest-boss-bans-container').innerHTML = guestHTML;
+    }
 
-      // Render 3 Games
-      const games = data.gameData || [];
+    function updateGameCardsUI() {
+      const step = draftStarted ? DRAFT_SEQUENCE[currentStepIndex] : null;
+
       for (let g = 1; g <= 3; g++) {
-        const game = games[g - 1] || {};
-        
-        // Boss Slot
-        const bossContainer = document.getElementById(`spec-g${g}-boss`);
-        if (game.boss) {
-          bossContainer.innerHTML = `
+        const data = gameData[g - 1] || { boss: null, terrain: null, studentBans: [] };
+        const bossSlot = document.getElementById(`g${g}-boss-slot`);
+        const isBossActive = (step?.game === g && step?.target === 'boss' && step?.type === 'pick');
+        const bossPulseClass = isBossActive ? (step.team === 'blue' ? 'active-slot-blue' : 'active-slot-red') : '';
+
+        if (data.boss) {
+          bossSlot.className = "col-span-2 schale-card-inner border border-sky-300 rounded-xl p-2 text-center min-h-[115px] flex flex-col items-center justify-center relative";
+          bossSlot.innerHTML = `
             <div class="w-full h-full flex flex-col items-center justify-center">
-              <img src="${game.boss.image}" class="w-full h-16 object-cover rounded-lg mb-1">
-              <span class="text-xs font-bold text-sky-700 truncate w-full text-center">${game.boss.name}</span>
+              <img src="${data.boss.image}" class="w-full h-16 object-cover rounded-lg mb-1">
+              <span class="text-xs font-bold text-sky-700 truncate w-full text-center">${data.boss.name}</span>
             </div>
           `;
         } else {
-          bossContainer.innerHTML = `
+          bossSlot.className = `col-span-2 schale-card-inner border border-sky-200 rounded-xl p-2 text-center min-h-[115px] flex flex-col items-center justify-center relative ${bossPulseClass}`;
+          bossSlot.innerHTML = `
             <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Boss</span>
             <span class="text-xs font-bold text-slate-500">${g === 3 ? 'Last Remaining' : 'Pending'}</span>
           `;
         }
 
-        // Terrain Slot
-        const terrainContainer = document.getElementById(`spec-g${g}-terrain`);
-        if (game.terrain) {
-          terrainContainer.className = "col-span-1 border border-amber-400 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative bg-slate-900";
-          terrainContainer.innerHTML = `
+        const terrainSlot = document.getElementById(`g${g}-terrain-slot`);
+        const isTerrainActive = (step?.game === g && step?.target === 'terrain');
+        let terrainPulseClass = isTerrainActive ? (step.team === 'blue' ? 'active-slot-blue' : (step.team === 'red' ? 'active-slot-red' : 'active-slot-yellow')) : '';
+
+        if (data.terrain) {
+          terrainSlot.className = "col-span-1 border border-amber-400 rounded-xl p-2 text-center min-h-[115px] flex flex-col items-center justify-center relative bg-slate-900";
+          terrainSlot.innerHTML = `
             <div class="w-full h-full flex flex-col items-center justify-center">
-              <img src="${game.terrain.image}" class="w-8 h-8 object-contain rounded mb-1 filter brightness-0 invert">
-              <span class="text-[10px] font-black text-amber-300 truncate w-full text-center tracking-wide">${game.terrain.name}</span>
+              <img src="${data.terrain.image}" class="w-8 h-8 object-contain rounded mb-1 filter brightness-0 invert">
+              <span class="text-[10px] font-black text-amber-300 truncate w-full text-center tracking-wide">${data.terrain.name}</span>
             </div>
           `;
         } else {
-          terrainContainer.className = "col-span-1 schale-card-inner border border-sky-200 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative";
-          terrainContainer.innerHTML = `
+          terrainSlot.className = `col-span-1 schale-card-inner border border-sky-200 rounded-xl p-2 text-center min-h-[115px] flex flex-col items-center justify-center relative ${terrainPulseClass}`;
+          terrainSlot.innerHTML = `
             <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Terrain</span>
             <span class="text-xs font-bold ${g === 3 ? 'text-amber-600' : 'text-slate-500'}">${g === 3 ? 'Admin Roll' : 'Pending'}</span>
           `;
         }
 
-        // Student Bans
-        const studentContainer = document.getElementById(`spec-g${g}-student-bans`);
         const totalSlots = g === 3 ? 4 : 3;
-        let studentHTML = '';
-        const bans = game.studentBans || [];
-        for (let i = 0; i < totalSlots; i++) {
-          const sb = bans[i];
-          if (sb) {
-            studentHTML += `
-              <div class="relative w-full h-20 schale-card-inner border border-rose-300 rounded-xl overflow-hidden shadow-md">
-                <img src="${sb.image}" class="w-full h-full object-cover grayscale opacity-75">
+        const bansContainer = document.getElementById(`g${g}-bans-container`);
+        let slotsHTML = '';
+        const currentBans = data.studentBans || [];
+
+        for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
+          const bannedStudent = currentBans[slotIndex];
+          const isStudentSlotActive = (step?.game === g && step?.target === 'student' && currentBans.length === slotIndex);
+          const studentPulseClass = isStudentSlotActive ? (step.team === 'blue' ? 'active-slot-blue' : 'active-slot-red') : '';
+
+          if (bannedStudent) {
+            slotsHTML += `
+              <div class="relative w-full h-24 schale-card-inner border border-rose-300 rounded-xl overflow-hidden shadow-md">
+                <img src="${bannedStudent.image}" class="w-full h-full object-cover grayscale opacity-75">
                 <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
-                  <span class="text-[10px] font-black text-rose-200 truncate block tracking-wide">${sb.name}</span>
+                  <span class="text-[10px] font-black text-rose-200 truncate block tracking-wide">${bannedStudent.name}</span>
                 </div>
               </div>
             `;
           } else {
-            studentHTML += `
-              <div class="w-full h-20 schale-card-inner border border-slate-200 rounded-xl flex items-center justify-center text-slate-400">
-                <span class="text-[9px] font-bold tracking-widest text-slate-400">BAN ${i + 1}</span>
+            slotsHTML += `
+              <div class="w-full h-24 schale-card-inner border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 ${studentPulseClass}">
+                <span class="text-[9px] font-bold tracking-widest text-slate-400">BAN ${slotIndex + 1}</span>
               </div>
             `;
           }
         }
-        studentContainer.innerHTML = studentHTML;
+        bansContainer.innerHTML = slotsHTML;
       }
     }
-
-    window.onload = syncRoom;
   </script>
 </body>
 </html>
