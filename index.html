@@ -1442,27 +1442,73 @@
       `;
     }
 
-    /* MANUAL SUBMIT FUNCTION FOR ADMIN */
+    /* MANUAL SUBMIT FUNCTION FOR ADMIN WITH STUDENT ATTRIBUTION */
     function submitResultsToSheet() {
       if (currentRole !== 'admin') return;
-
+    
       const submitBtn = document.getElementById('submit-sheet-btn');
       const statusMsg = document.getElementById('submit-status-msg');
-
+    
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
         submitBtn.innerHTML = `SUBMITTING...`;
       }
-
+    
       const hostBannedBosses = bannedBosses
         .filter(b => b.team === 'blue')
         .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
-
+    
       const guestBannedBosses = bannedBosses
         .filter(b => b.team === 'red')
         .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
-
+    
+      // Map each game's student bans with exact player and role attribution
+      const formattedGames = gameData.map((g, idx) => {
+        const gameNum = idx + 1;
+        let studentBans = [];
+    
+        if (g.studentBans && Array.isArray(g.studentBans)) {
+          studentBans = g.studentBans.map((s, banIdx) => {
+            let bannedByRole = '';
+            let bannedByName = '';
+    
+            if (gameNum === 1) {
+              // Game 1 Student Bans belong to Guest (Red)
+              bannedByRole = 'Guest';
+              bannedByName = guestName || 'Guest';
+            } else if (gameNum === 2) {
+              // Game 2 Student Bans belong to Host (Blue)
+              bannedByRole = 'Host';
+              bannedByName = hostName || 'Host';
+            } else if (gameNum === 3) {
+              // Game 3 Student Bans: First 2 by Host, Last 2 by Guest
+              if (banIdx < 2) {
+                bannedByRole = 'Host';
+                bannedByName = hostName || 'Host';
+              } else {
+                bannedByRole = 'Guest';
+                bannedByName = guestName || 'Guest';
+              }
+            }
+    
+            return {
+              name: s.name,
+              bannedByRole: bannedByRole,
+              bannedByName: bannedByName
+            };
+          });
+        }
+    
+        return {
+          gameNumber: gameNum,
+          boss: g.boss,
+          terrain: g.terrain,
+          studentBans: studentBans
+        };
+      });
+    
+      // Send formatted JSON payload to Google Apps Script
       fetch(WEB_APP_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -1473,7 +1519,7 @@
           guestName: guestName,
           hostBossBans: hostBannedBosses,
           guestBossBans: guestBannedBosses,
-          games: gameData.map((g, idx) => ({ gameNumber: idx + 1, ...g }))
+          games: formattedGames
         })
       })
       .then(() => {
