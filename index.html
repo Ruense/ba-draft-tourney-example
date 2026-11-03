@@ -3,20 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- Custom Favicon for Browser Tab -->
   <link rel="icon" type="image/png" href="sh_logo_norm_white.png">
-
-  <title>Blue Archive BO3 Draft - Senseihood Tournament</title>
+  <title>Senseihood BO3 Draft - Player & Admin Control</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&display=swap');
-    
     * { font-family: 'Noto Sans', sans-serif !important; }
     
     body { 
@@ -34,17 +28,8 @@
     .glow-halo-gold { box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35); border-color: #f59e0b !important; }
     .glow-halo-emerald { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35); border-color: #10b981 !important; }
 
-    .schale-card {
-      background: #ffffff;
-      border: 1px solid #cce7ff;
-      box-shadow: 0 4px 16px rgba(18, 180, 255, 0.08);
-    }
-
-    .schale-card-inner {
-      background: #f0f7ff;
-      border: 1px solid #d3e6f9;
-      color: #334155;
-    }
+    .schale-card { background: #ffffff; border: 1px solid #cce7ff; box-shadow: 0 4px 16px rgba(18, 180, 255, 0.08); }
+    .schale-card-inner { background: #f0f7ff; border: 1px solid #d3e6f9; color: #334155; }
 
     .slot-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     .slot-card:hover:not(.disabled) { 
@@ -52,10 +37,7 @@
       box-shadow: 0 6px 18px rgba(18, 180, 255, 0.25);
     }
 
-    @keyframes pulse-fast {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
+    @keyframes pulse-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .animate-pulse-fast { animation: pulse-fast 0.6s infinite; }
 
     @keyframes slot-pulse-cyan {
@@ -78,27 +60,26 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between">
 
-  <!-- ROLE SELECTION POPUP MODAL -->
+  <!-- ROLE POPUP MODAL -->
   <div id="role-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
     <div class="schale-card rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-sky-300 relative">
       <div class="text-center mb-6">
         <div class="w-12 h-12 rounded-2xl bg-sky-500 border border-sky-400 flex items-center justify-center mx-auto mb-2 shadow-md p-1">
           <img src="sh_logo_norm_white.png" alt="Logo" class="w-full h-full object-contain">
         </div>
-        <h2 class="text-xl font-black text-slate-800 tracking-wider">SELECT YOUR ROLE</h2>
-        <p class="text-xs text-sky-600 font-bold tracking-wide mt-0.5">SENSEIHOOD TOURNAMENT DRAFT</p>
+        <h2 class="text-xl font-black text-slate-800 tracking-wider">BO3 DRAFT LOBBY</h2>
+        <p class="text-xs text-sky-600 font-bold tracking-wide mt-0.5">SELECT YOUR ROLE</p>
       </div>
 
-      <!-- ROLE GRID BUTTONS -->
       <div class="grid grid-cols-3 gap-3 mb-5">
         <button onclick="selectModalRole('host')" id="role-btn-host" class="modal-role-btn border-2 border-sky-200 bg-sky-50/50 hover:bg-sky-100 p-3 rounded-xl flex flex-col items-center justify-center transition">
           <span class="font-black text-sm text-sky-600">HOST</span>
-          <span class="text-[10px] text-sky-500 font-bold">Team Blue</span>
+          <span class="text-[10px] text-sky-500 font-bold">Room Owner</span>
         </button>
 
         <button onclick="selectModalRole('guest')" id="role-btn-guest" class="modal-role-btn border-2 border-rose-200 bg-rose-50/50 hover:bg-rose-100 p-3 rounded-xl flex flex-col items-center justify-center transition">
           <span class="font-black text-sm text-rose-600">GUEST</span>
-          <span class="text-[10px] text-rose-500 font-bold">Team Red</span>
+          <span class="text-[10px] text-rose-500 font-bold">Opponent</span>
         </button>
 
         <button onclick="selectModalRole('admin')" id="role-btn-admin" class="modal-role-btn border-2 border-amber-200 bg-amber-50/50 hover:bg-amber-100 p-3 rounded-xl flex flex-col items-center justify-center transition">
@@ -107,7 +88,6 @@
         </button>
       </div>
 
-      <!-- CONDITIONAL INPUT BOXES -->
       <div id="modal-input-section" class="mb-5 hidden">
         <label id="modal-input-label" class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 text-center">
           ENTER YOUR NAME
@@ -115,133 +95,112 @@
         <input type="text" id="modal-role-input" placeholder="Enter here..." class="w-full bg-slate-50 border border-sky-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 text-center outline-none focus:border-sky-500 shadow-inner">
       </div>
 
-      <!-- SUBMIT BUTTON -->
       <button onclick="confirmModalRole()" id="modal-submit-btn" class="w-full bg-sky-500 hover:bg-sky-400 text-white font-black text-xs py-3 rounded-xl shadow-md transition tracking-widest uppercase">
-        ENTER DRAFT
+        ENTER DRAFT ROOM
       </button>
     </div>
   </div>
 
-  <!-- HEADER -->
-  <header class="bg-white/90 border-b border-sky-200 px-6 py-3 sticky top-0 z-50 backdrop-blur-md shadow-sm">
-    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+  <!-- STICKY HEADER WITH CENTERED TIMER -->
+  <header class="bg-white/90 border-b border-sky-200 px-6 py-2.5 sticky top-0 z-50 backdrop-blur-md shadow-sm">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- LEFT BRANDING -->
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-sky-500 border border-sky-400 flex items-center justify-center shadow-md overflow-hidden p-1">
+        <div class="w-9 h-9 rounded-xl bg-sky-500 border border-sky-400 flex items-center justify-center shadow-md overflow-hidden p-1">
           <img src="sh_logo_norm_white.png" alt="Senseihood Emblem" class="w-full h-full object-contain">
         </div>
         <div>
-          <h1 class="text-lg font-black text-slate-800 tracking-widest uppercase flex items-center gap-2">
-            SENSEIHOOD <span class="text-sky-500">TOURNAMENT DRAFT</span>
+          <h1 class="text-base font-black text-slate-800 tracking-widest uppercase flex items-center gap-2">
+            SENSEIHOOD <span class="text-sky-500">BO3 DRAFT</span>
           </h1>
-          <p class="text-[11px] text-sky-600 font-bold tracking-wider">PLAYER & ADMIN CONTROL ROOM</p>
+          <p class="text-[10px] text-sky-600 font-bold tracking-wider">STANDARD BO3 MATCH DRAFT</p>
         </div>
       </div>
 
-      <!-- ROOM & ROLE DISPLAY CONTROLS -->
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="flex items-center bg-sky-50/80 px-2.5 py-1.5 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
-          <span class="text-sky-700 font-bold uppercase tracking-wider text-[10px]">ROOM:</span>
-          <input type="text" id="room-code-input" value="default-room" class="bg-white px-2 py-1 rounded text-sky-800 font-black border border-sky-300 w-28 text-center outline-none focus:border-sky-500 shadow-sm">
-          <button onclick="connectToRoom()" class="bg-sky-500 hover:bg-sky-400 text-white font-black px-3 py-1 rounded transition tracking-wider shadow">
-            SYNC
-          </button>
+      <!-- CENTER STICKY TOP TIMER -->
+      <div id="timer-box" class="flex flex-col items-center justify-center bg-white px-5 py-1 rounded-xl border border-sky-300 min-w-[130px] shadow-sm">
+        <span class="text-[8px] font-black text-sky-600 uppercase tracking-widest">TIME REMAINING</span>
+        <span id="timer-text" class="text-2xl font-black text-slate-400 tracking-wider">--:--</span>
+      </div>
+
+      <!-- RIGHT CONTROLS -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center bg-sky-50/80 px-2 py-1 rounded-lg border border-sky-200 text-xs gap-1 shadow-inner">
+          <span class="text-sky-700 font-bold uppercase tracking-wider text-[9px]">ROOM:</span>
+          <input type="text" id="room-code-input" value="default-room" class="bg-white px-2 py-0.5 rounded text-sky-800 font-black border border-sky-300 w-24 text-center outline-none focus:border-sky-500 text-xs">
+          <button onclick="connectToRoom()" class="bg-sky-500 hover:bg-sky-400 text-white font-black px-2.5 py-0.5 rounded transition text-xs shadow">SYNC</button>
         </div>
 
-        <div class="flex items-center bg-sky-50/80 px-2.5 py-1.5 rounded-lg border border-sky-200 text-xs gap-2 shadow-inner">
-          <span class="text-sky-700 font-bold uppercase tracking-wider text-[10px]">ROLE:</span>
+        <div class="flex items-center bg-sky-50/80 px-2 py-1 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
+          <span class="text-sky-700 font-bold uppercase tracking-wider text-[9px]">ROLE:</span>
           <span id="current-role-display" class="font-black text-sky-800 uppercase text-xs">UNASSIGNED</span>
-          <button id="change-role-btn" onclick="openRoleModal()" class="hidden bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold text-[10px] px-2 py-0.5 rounded border border-sky-300 transition">
-            CHANGE
-          </button>
+          <button id="change-role-btn" onclick="openRoleModal()" class="hidden bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold text-[9px] px-1.5 py-0.5 rounded border border-sky-300 transition">CHANGE</button>
         </div>
 
-        <a id="header-spectator-btn" href="spectator.html" target="_blank" class="hidden bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-bold px-3 py-2 rounded-lg border border-sky-200 transition flex items-center gap-1.5 shadow-sm">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-          </svg>
-          SPECTATOR VIEW
+        <a id="header-spectator-btn" href="spectator.html" target="_blank" class="hidden bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1.5 rounded-lg border border-amber-300 transition flex items-center gap-1 shadow-sm">
+          SPECTATOR
         </a>
 
-        <button id="header-reset-btn" onclick="resetDraft()" class="hidden bg-white hover:bg-rose-50 text-rose-600 text-xs font-bold px-3 py-2 rounded-lg border border-rose-200 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1.5 shadow-sm">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-          </svg>
+        <button id="header-reset-btn" onclick="resetDraft()" class="hidden bg-white hover:bg-rose-50 text-rose-600 text-xs font-bold px-2.5 py-1.5 rounded-lg border border-rose-200 transition shadow-sm">
           RESET
         </button>
       </div>
+
     </div>
   </header>
 
-  <!-- LOBBY STATUS BAR -->
-  <div id="lobby-bar" class="bg-white/80 border-b border-sky-200/60 px-6 py-2.5">
+  <!-- LOBBY BAR -->
+  <div id="lobby-bar" class="bg-white/80 border-b border-sky-200/60 px-6 py-2">
     <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
       <div class="flex items-center gap-6">
         <div class="flex items-center gap-2">
-          <span class="text-xs font-bold text-sky-600 uppercase tracking-wide" id="bar-host-label">Host (Blue):</span>
+          <span class="text-xs font-bold text-sky-600 uppercase tracking-wide" id="bar-host-label">Host:</span>
           <span id="host-ready-badge" class="bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">NOT READY</span>
         </div>
-
         <div class="flex items-center gap-2">
-          <span class="text-xs font-bold text-rose-600 uppercase tracking-wide" id="bar-guest-label">Guest (Red):</span>
+          <span class="text-xs font-bold text-rose-600 uppercase tracking-wide" id="bar-guest-label">Guest:</span>
           <span id="guest-ready-badge" class="bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">NOT READY</span>
         </div>
       </div>
 
-      <!-- Admin Start Draft Button -->
-      <div>
-        <button id="admin-start-btn" onclick="startDraftByAdmin()" disabled class="bg-emerald-50 text-slate-400 cursor-not-allowed text-xs font-black px-4 py-1.5 rounded-lg border border-emerald-200 transition tracking-wider flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z"/>
-          </svg>
-          START DRAFT (WAITING FOR READINESS)
-        </button>
-      </div>
+      <button id="admin-start-btn" onclick="startDraftByAdmin()" disabled class="bg-emerald-50 text-slate-400 cursor-not-allowed text-xs font-black px-4 py-1.5 rounded-lg border border-emerald-200 transition tracking-wider flex items-center gap-1.5">
+        START BO3 DRAFT
+      </button>
     </div>
   </div>
 
   <!-- MAIN AREA -->
-  <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
+  <main class="max-w-7xl mx-auto w-full px-4 py-4 flex-1 flex flex-col gap-4">
 
-    <!-- TURN STATUS BANNER WITH TIMER & READY UP BUTTON -->
+    <!-- TURN STATUS BANNER WITH READY BUTTON -->
     <div id="turn-banner" class="schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden transition-all duration-300">
       <div class="text-left flex-1">
-        <div class="text-[10px] uppercase tracking-widest font-black text-sky-600 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
+        <div class="text-[10px] uppercase tracking-widest font-black text-sky-600 mb-0.5" id="phase-title">PRE-DRAFT LOBBY</div>
         <div class="text-2xl font-black text-slate-800 tracking-wide" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
-        <div class="text-xs text-slate-500 mt-1 font-semibold" id="turn-subtitle">Host and Guest must ready up before Admin can start the draft.</div>
+        <div class="text-xs text-slate-500 font-semibold" id="turn-subtitle">Host and Guest must ready up before Admin starts.</div>
       </div>
 
       <div class="flex items-center gap-3">
-        <!-- READY UP BUTTONS MOVED BESIDE TIMER -->
-        <button id="host-ready-btn" onclick="toggleReady('host')" class="hidden bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-cyan">
+        <button id="host-ready-btn" onclick="toggleReady('host')" class="hidden bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-cyan">
           READY UP
         </button>
-        <button id="guest-ready-btn" onclick="toggleReady('guest')" class="hidden bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-rose">
+        <button id="guest-ready-btn" onclick="toggleReady('guest')" class="hidden bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-rose">
           READY UP
         </button>
-
-        <!-- TIMER BOX -->
-        <div id="timer-box" class="flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-300 min-w-[110px]">
-          <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">TIME LEFT</span>
-          <span id="timer-text" class="text-3xl font-black text-slate-400 tracking-wider">--:--</span>
-        </div>
       </div>
     </div>
 
     <!-- TOP BOSS BANS BAR -->
     <div class="schale-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-md">
-      <!-- HOST BOSS BANS -->
-      <div class="flex flex-col items-center md:items-start gap-1.5">
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-black text-sky-600 uppercase tracking-widest" id="host-ban-header-title">Host Boss Bans</span>
-        </div>
+      <div class="flex flex-col items-center md:items-start gap-1">
+        <span class="text-xs font-black text-sky-600 uppercase tracking-widest" id="host-ban-header-title">Host Boss Bans</span>
         <div id="host-boss-bans-container" class="flex gap-2"></div>
       </div>
 
-      <!-- CENTER LABEL -->
       <div class="text-center px-4">
-        <div class="w-10 h-10 mx-auto mb-1 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center">
-          <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-8 h-8 mx-auto mb-1 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center shadow-sm">
+          <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
           </svg>
         </div>
@@ -249,104 +208,75 @@
         <p class="text-[10px] text-sky-600 font-bold">4 HOST • 4 GUEST</p>
       </div>
 
-      <!-- GUEST BOSS BANS -->
-      <div class="flex flex-col items-center md:items-end gap-1.5">
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-black text-rose-600 uppercase tracking-widest" id="guest-ban-header-title">Guest Boss Bans</span>
-        </div>
+      <div class="flex flex-col items-center md:items-end gap-1">
+        <span class="text-xs font-black text-rose-600 uppercase tracking-widest" id="guest-ban-header-title">Guest Boss Bans</span>
         <div id="guest-boss-bans-container" class="flex gap-2"></div>
       </div>
     </div>
 
-    <!-- GAME CARDS CONTAINER -->
+    <!-- 3 GAME CARDS DISPLAY -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      
       <!-- GAME 1 -->
       <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
         <div>
-          <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-sky-100">
+          <div class="flex justify-between items-center mb-2 pb-1.5 border-b border-sky-100">
             <span class="font-black text-xs text-sky-600 tracking-wider" id="g1-title">GAME 1 (HOST PICK)</span>
-            <span class="text-[10px] bg-sky-50 border border-sky-200 px-2 py-0.5 rounded text-sky-700 font-bold">MATCH 1</span>
+            <span class="text-[9px] bg-sky-50 border border-sky-200 px-2 py-0.5 rounded text-sky-700 font-bold">MATCH 1</span>
           </div>
-
           <div class="grid grid-cols-3 gap-2 mb-3">
-            <div id="g1-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center">
-              <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Boss</span>
-              <span class="text-xs font-bold text-slate-500">Pending</span>
-            </div>
-            <div id="g1-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center">
-              <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Terrain</span>
-              <span class="text-xs font-bold text-slate-500">Pending</span>
-            </div>
+            <div id="g1-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-2 text-center h-[90px] flex flex-col items-center justify-center"></div>
+            <div id="g1-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-2 text-center h-[90px] flex flex-col items-center justify-center"></div>
           </div>
         </div>
-
         <div>
-          <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1.5" id="g1-bans-label">Guest Student Bans (3):</div>
-          <div id="g1-bans-container" class="grid grid-cols-3 gap-1.5 min-h-[64px]"></div>
+          <div class="text-[9px] uppercase font-bold text-slate-500 tracking-wider mb-1" id="g1-bans-label">Guest Student Bans (3):</div>
+          <div id="g1-bans-container" class="grid grid-cols-3 gap-1.5 h-[64px]"></div>
         </div>
       </div>
 
       <!-- GAME 2 -->
       <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
         <div>
-          <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-rose-100">
+          <div class="flex justify-between items-center mb-2 pb-1.5 border-b border-rose-100">
             <span class="font-black text-xs text-rose-600 tracking-wider" id="g2-title">GAME 2 (GUEST PICK)</span>
-            <span class="text-[10px] bg-rose-50 border border-rose-200 px-2 py-0.5 rounded text-rose-700 font-bold">MATCH 2</span>
+            <span class="text-[9px] bg-rose-50 border border-rose-200 px-2 py-0.5 rounded text-rose-700 font-bold">MATCH 2</span>
           </div>
-
           <div class="grid grid-cols-3 gap-2 mb-3">
-            <div id="g2-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center">
-              <span class="text-[9px] text-rose-600 uppercase font-black tracking-widest">Boss</span>
-              <span class="text-xs font-bold text-slate-500">Pending</span>
-            </div>
-            <div id="g2-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center">
-              <span class="text-[9px] text-rose-600 uppercase font-black tracking-widest">Terrain</span>
-              <span class="text-xs font-bold text-slate-500">Pending</span>
-            </div>
+            <div id="g2-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-2 text-center h-[90px] flex flex-col items-center justify-center"></div>
+            <div id="g2-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-2 text-center h-[90px] flex flex-col items-center justify-center"></div>
           </div>
         </div>
-
         <div>
-          <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1.5" id="g2-bans-label">Host Student Bans (3):</div>
-          <div id="g2-bans-container" class="grid grid-cols-3 gap-1.5 min-h-[64px]"></div>
+          <div class="text-[9px] uppercase font-bold text-slate-500 tracking-wider mb-1" id="g2-bans-label">Host Student Bans (3):</div>
+          <div id="g2-bans-container" class="grid grid-cols-3 gap-1.5 h-[64px]"></div>
         </div>
       </div>
 
-      <!-- GAME 3 (DECIDER) -->
+      <!-- GAME 3 DECIDER -->
       <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
         <div>
-          <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-amber-100">
+          <div class="flex justify-between items-center mb-2 pb-1.5 border-b border-amber-100">
             <span class="font-black text-xs text-amber-600 tracking-wider">GAME 3 (DECIDER)</span>
-            <span class="text-[10px] bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-amber-700 font-bold">MATCH 3</span>
+            <span class="text-[9px] bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-amber-700 font-bold">MATCH 3</span>
           </div>
-
           <div class="grid grid-cols-3 gap-2 mb-3">
-            <div id="g3-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center">
-              <span class="text-[9px] text-amber-600 uppercase font-black tracking-widest">Boss</span>
-              <span class="text-xs font-bold text-slate-500">Last Remaining</span>
-            </div>
-            <div id="g3-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center">
-              <span class="text-[9px] text-amber-600 uppercase font-black tracking-widest">Terrain</span>
-              <span class="text-xs font-bold text-amber-600">Admin Roll</span>
-            </div>
+            <div id="g3-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-2 text-center h-[90px] flex flex-col items-center justify-center"></div>
+            <div id="g3-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-2 text-center h-[90px] flex flex-col items-center justify-center"></div>
           </div>
         </div>
-
         <div>
-          <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1.5" id="g3-bans-label">Host (2) & Guest (2) Bans (4):</div>
-          <div id="g3-bans-container" class="grid grid-cols-4 gap-1 min-h-[64px]"></div>
+          <div class="text-[9px] uppercase font-bold text-slate-500 tracking-wider mb-1" id="g3-bans-label">Host (2) & Guest (2) Bans (4):</div>
+          <div id="g3-bans-container" class="grid grid-cols-4 gap-1.5 h-[64px]"></div>
         </div>
       </div>
-
     </div>
 
     <!-- SELECTION GRID AREA -->
-    <div class="schale-card rounded-2xl p-5 flex-1 flex flex-col min-h-[400px] shadow-lg">
-      <div class="flex justify-between items-center mb-4 pb-2.5 border-b border-sky-100 gap-3">
-        <div class="flex items-center gap-2.5">
+    <div class="schale-card rounded-2xl p-5 flex-1 flex flex-col min-h-[380px] shadow-lg">
+      <div class="flex justify-between items-center mb-3 pb-2 border-b border-sky-100 gap-3">
+        <div class="flex items-center gap-2">
           <h2 class="text-xs font-black text-slate-800 uppercase tracking-widest" id="grid-title">SELECTABLE BOSS POOL</h2>
-          <span class="text-[10px] bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-full text-sky-700 font-bold" id="grid-count">11 Available</span>
+          <span class="text-[10px] bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-full text-sky-700 font-bold" id="grid-count">Available</span>
         </div>
 
         <div id="student-search-box" class="hidden flex-1 max-w-xs">
@@ -355,30 +285,20 @@
 
         <div class="flex items-center gap-2">
           <button id="confirm-selection-btn" onclick="confirmCurrentSelection()" class="hidden bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs px-5 py-2 rounded-lg shadow-md transition duration-200 tracking-wider glow-halo-emerald flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-            </svg>
             CONFIRM SELECTION
           </button>
-
-          <button id="admin-roll-btn" onclick="executeAdminRoll()" class="hidden bg-amber-500 hover:bg-amber-400 text-white font-black text-xs px-4 py-2 rounded-lg shadow-md transition tracking-wider glow-halo-gold flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-            </svg>
+          <button id="admin-roll-btn" onclick="executeAdminRoll()" class="hidden bg-amber-500 hover:bg-amber-400 text-white font-black text-xs px-4 py-2 rounded-lg shadow-md transition tracking-wider glow-halo-gold">
             RANDOMIZE DECIDER TERRAIN
           </button>
         </div>
       </div>
 
-      <div id="selection-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 overflow-y-auto max-h-[480px] p-1">
-        <!-- CARDS RENDERED BY JS -->
-      </div>
+      <div id="selection-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 overflow-y-auto max-h-[440px] p-1"></div>
     </div>
 
   </main>
 
   <script>
-    /* FIREBASE CONFIGURATION */
     const firebaseConfig = {
       apiKey: "AIzaSyCCThwp_3-lx7C6MyCWiUiZich_guk4oLk",
       authDomain: "bluearchivedrafttourney.firebaseapp.com",
@@ -386,8 +306,7 @@
       projectId: "bluearchivedrafttourney",
       storageBucket: "bluearchivedrafttourney.firebasestorage.app",
       messagingSenderId: "615654907851",
-      appId: "1:1:615654907851:web:f2d3b7101e07149faae04e",
-      measurementId: "G-X4XQ1W735V"
+      appId: "1:1:615654907851:web:f2d3b7101e07149faae04e"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -400,18 +319,12 @@
       localStorage.setItem('sh_draft_session_id', clientSessionId);
     }
 
-    // RESTORE SAVED ROLE ON PAGE LOAD
     let currentRole = 'host';
     let modalSelectedRole = 'host';
     const savedRole = localStorage.getItem('sh_draft_current_role');
-    if (savedRole) {
-      currentRole = savedRole;
-      modalSelectedRole = savedRole;
-    }
+    if (savedRole) { currentRole = savedRole; modalSelectedRole = savedRole; }
 
     const ADMIN_PASSWORD = "Senseihood1234";
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwexc3_lsvhadskAmSTKe65PWZnxU65h-xGO_6JlxcKrxse6bB65Bd6zXIDTrc1bqIJqw/exec";
-
     const BOSS_ROSTER = [];
     const TERRAIN_ROSTER = [
       { id: 'street',  name: 'Urban (Street)',  image: 'https://schaledb.com/images/ui/Terrain_Street.png' },
@@ -419,50 +332,10 @@
       { id: 'indoor',  name: 'Indoor',          image: 'https://schaledb.com/images/ui/Terrain_Indoor.png' }
     ];
     let STUDENT_ROSTER = [];
-
     let DRAFT_SEQUENCE = [];
 
-    function buildDraftSequence() {
-      const hName = hostName || 'Host';
-      const gName = guestName || 'Guest';
-
-      DRAFT_SEQUENCE = [
-        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 1` },
-        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 1` },
-        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 2` },
-        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 2` },
-
-        { team: 'blue', type: 'pick', target: 'boss',    game: 1, label: `Game 1 Boss (${hName} Pick)` },
-        { team: 'blue', type: 'pick', target: 'terrain', game: 1, label: `Game 1 Terrain (${hName} Pick)` },
-
-        { team: 'red',  type: 'pick', target: 'boss',    game: 2, label: `Game 2 Boss (${gName} Pick)` },
-        { team: 'red',  type: 'pick', target: 'terrain', game: 2, label: `Game 2 Terrain (${gName} Pick)` },
-
-        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 3` },
-        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 3` },
-        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 4` },
-        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 4` },
-
-        { team: 'neutral', type: 'decider', target: 'boss',    game: 3, label: 'Game 3 Boss (Decider Auto-Pick)' },
-        { team: 'admin',   type: 'roll',    target: 'terrain', game: 3, label: 'Game 3 Terrain (Admin Randomize)' },
-
-        { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 1 (${gName})` },
-        { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 2 (${gName})` },
-        { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 3 (${gName})` },
-
-        { team: 'blue', type: 'ban', target: 'student', game: 2, label: `Game 2 Student Ban 1 (${hName})` },
-        { team: 'blue', type: 'ban', target: 'student', game: 2, label: `Game 2 Student Ban 2 (${hName})` },
-        { team: 'blue', type: 'ban', target: 'student', game: 2, label: `Game 2 Student Ban 3 (${hName})` },
-
-        { team: 'blue', type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 1 (${hName})` },
-        { team: 'blue', type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 2 (${hName})` },
-        { team: 'red',  type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 1 (${gName})` },
-        { team: 'red',  type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 2 (${gName})` }
-      ];
-    }
-
     const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbarka'];
-    const PERMA_BANNED_STUDENTS = ['10099', '10144']; // Perma-banned 2-in-1 students
+    const PERMA_BANNED_STUDENTS = ['10099', '10144'];
 
     let currentStepIndex = 0;
     let roleConfirmed = false;
@@ -470,13 +343,9 @@
     let hostReady = false;
     let guestReady = false;
     let stepDeadline = 0;
-    let lastNotifiedStep = -1;
 
-    let hostSessionId = null;
-    let guestSessionId = null;
     let hostName = '';
     let guestName = '';
-
     let bannedBosses = [];
     let pendingSelection = null;
     let timerInterval = null;
@@ -488,8 +357,39 @@
         { boss: null, terrain: null, studentBans: [] }
       ];
     }
-
     let gameData = getEmptyGameData();
+
+    function buildDraftSequence() {
+      const hName = hostName || 'Host';
+      const gName = guestName || 'Guest';
+
+      DRAFT_SEQUENCE = [
+        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 1` },
+        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 1` },
+        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 2` },
+        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 2` },
+        { team: 'blue', type: 'pick', target: 'boss',    game: 1, label: `Game 1 Boss (${hName} Pick)` },
+        { team: 'blue', type: 'pick', target: 'terrain', game: 1, label: `Game 1 Terrain (${hName} Pick)` },
+        { team: 'red',  type: 'pick', target: 'boss',    game: 2, label: `Game 2 Boss (${gName} Pick)` },
+        { team: 'red',  type: 'pick', target: 'terrain', game: 2, label: `Game 2 Terrain (${gName} Pick)` },
+        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 3` },
+        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 3` },
+        { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 4` },
+        { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 4` },
+        { team: 'neutral', type: 'decider', target: 'boss', game: 3, label: 'Game 3 Boss (Decider Auto-Pick)' },
+        { team: 'admin',   type: 'roll',    target: 'terrain', game: 3, label: 'Game 3 Terrain (Admin Randomize)' },
+        { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 1 (${gName})` },
+        { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 2 (${gName})` },
+        { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 3 (${gName})` },
+        { team: 'blue', type: 'ban', target: 'student', game: 2, label: `Game 2 Student Ban 1 (${hName})` },
+        { team: 'blue', type: 'ban', target: 'student', game: 2, label: `Game 2 Student Ban 2 (${hName})` },
+        { team: 'blue', type: 'ban', target: 'student', game: 2, label: `Game 2 Student Ban 3 (${hName})` },
+        { team: 'blue', type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 1 (${hName})` },
+        { team: 'blue', type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 2 (${hName})` },
+        { team: 'red',  type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 1 (${gName})` },
+        { team: 'red',  type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 2 (${gName})` }
+      ];
+    }
 
     window.onload = function() {
       const raid_boss_promise = fetch("https://schaledb.com/data/en/raids.min.json")
@@ -513,16 +413,13 @@
         .then(r => r.json())
         .then(data => {
           Object.keys(data).forEach(x => {
-            // SKIP PERMA-BANNED STUDENT IDs
             if (PERMA_BANNED_STUDENTS.includes(x)) return;
-      
             STUDENT_ROSTER.push({
               id: x,
               name: data[x].Name,
               image: 'https://schaledb.com/images/student/collection/' + x + '.webp'
             });
           });
-      
           STUDENT_ROSTER.sort((a, b) => a.name.localeCompare(b.name));
         });
 
@@ -533,55 +430,16 @@
       });
     };
 
-    /* WEB AUDIO SYNTHESIZER FOR TURN ALERTS */
-    function playTurnChime() {
-      try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
-        const ctx = new AudioContext();
-        const now = ctx.currentTime;
-        
-        const osc1 = ctx.createOscillator();
-        const gain1 = ctx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(880, now);
-        gain1.gain.setValueAtTime(0.15, now);
-        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-        osc1.connect(gain1);
-        gain1.connect(ctx.destination);
-        osc1.start(now);
-        osc1.stop(now + 0.6);
-
-        const osc2 = ctx.createOscillator();
-        const gain2 = ctx.createGain();
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(1318.51, now + 0.08);
-        gain2.gain.setValueAtTime(0.2, now + 0.08);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-        osc2.connect(gain2);
-        gain2.connect(ctx.destination);
-        osc2.start(now + 0.08);
-        osc2.stop(now + 0.8);
-      } catch (e) {
-        console.log("Audio playback error:", e);
-      }
-    }
-
-    /* MODAL POPUP ROLE LOGIC */
     function openRoleModal() {
-      if (roleConfirmed && currentRole !== 'admin') {
-        alert("Roles and player names are locked. Only the Admin can reset the session!");
-        return;
-      }
+      if (roleConfirmed && currentRole !== 'admin') return;
       document.getElementById('role-modal').classList.remove('hidden');
       selectModalRole(currentRole);
     }
 
     function selectModalRole(role) {
       modalSelectedRole = role;
-      
       document.querySelectorAll('.modal-role-btn').forEach(btn => {
-        btn.classList.remove('ring-4', 'ring-sky-400', 'ring-rose-400', 'ring-amber-400', 'border-transparent');
+        btn.classList.remove('ring-4', 'ring-sky-400', 'ring-rose-400', 'ring-amber-400');
       });
 
       const selectedBtn = document.getElementById(`role-btn-${role}`);
@@ -599,80 +457,38 @@
         inputSec.classList.remove('hidden');
         label.innerText = "ENTER HOST NAME";
         input.type = "text";
-        input.placeholder = "Player 1 Name...";
         input.value = hostName || '';
       } else if (role === 'guest') {
         inputSec.classList.remove('hidden');
         label.innerText = "ENTER GUEST NAME";
         input.type = "text";
-        input.placeholder = "Player 2 Name...";
         input.value = guestName || '';
       } else if (role === 'admin') {
         inputSec.classList.remove('hidden');
         label.innerText = "ENTER ADMIN PASSWORD";
         input.type = "password";
-        input.placeholder = "••••••••";
         input.value = '';
       }
     }
 
     function confirmModalRole() {
       const inputVal = document.getElementById('modal-role-input').value.trim();
-
-      if (modalSelectedRole === 'admin') {
-        if (inputVal !== ADMIN_PASSWORD) {
-          alert("Incorrect Admin Password!");
-          return;
-        }
-      }
-
-      if (modalSelectedRole === 'host') {
-        if (!inputVal) {
-          alert("Please enter a name for Host!");
-          return;
-        }
-        if (hostName && hostName.toLowerCase() !== inputVal.toLowerCase()) {
-          alert(`Host role is already claimed by "${hostName}". You cannot join with a different name!`);
-          return;
-        }
-        hostSessionId = clientSessionId;
-        hostName = inputVal;
-      }
-
-      if (modalSelectedRole === 'guest') {
-        if (!inputVal) {
-          alert("Please enter a name for Guest!");
-          return;
-        }
-        if (guestName && guestName.toLowerCase() !== inputVal.toLowerCase()) {
-          alert(`Guest role is already claimed by "${guestName}". You cannot join with a different name!`);
-          return;
-        }
-        guestSessionId = clientSessionId;
-        guestName = inputVal;
-      }
+      if (modalSelectedRole === 'admin' && inputVal !== ADMIN_PASSWORD) { alert("Incorrect Admin Password!"); return; }
+      if (modalSelectedRole === 'host') { if (!inputVal) return; hostName = inputVal; }
+      if (modalSelectedRole === 'guest') { if (!inputVal) return; guestName = inputVal; }
 
       currentRole = modalSelectedRole;
       roleConfirmed = true;
-      pendingSelection = null;
-
-      // SAVE ROLE TO LOCALSTORAGE
       localStorage.setItem('sh_draft_current_role', currentRole);
-
       document.getElementById('role-modal').classList.add('hidden');
       
       updateRoleControls();
       pushStateToFirebase();
     }
 
-    /* FIREBASE ROOM SYNC LOGIC */
     function connectToRoom() {
       const roomCode = document.getElementById('room-code-input').value.trim() || 'default-room';
-      
-      if (currentRoomRef) {
-        currentRoomRef.off();
-      }
-
+      if (currentRoomRef) currentRoomRef.off();
       currentRoomRef = db.ref('draft_rooms/' + roomCode);
 
       currentRoomRef.on('value', (snapshot) => {
@@ -684,9 +500,6 @@
           guestReady = !!data.guestReady;
           stepDeadline = data.stepDeadline || 0;
           bannedBosses = data.bannedBosses || [];
-          
-          hostSessionId = data.hostSessionId || null;
-          guestSessionId = data.guestSessionId || null;
           hostName = data.hostName || '';
           guestName = data.guestName || '';
           
@@ -699,19 +512,6 @@
               studentBans: raw.studentBans || []
             };
           });
-
-          if (!hostSessionId && !guestSessionId && !draftStarted && currentRole !== 'admin') {
-            roleConfirmed = false;
-          }
-
-          if (currentRole === 'host' && hostSessionId && hostSessionId !== clientSessionId && hostName.toLowerCase() !== (hostName || '').toLowerCase()) {
-            alert('Host role has been claimed by another user.');
-            roleConfirmed = false;
-          }
-          if (currentRole === 'guest' && guestSessionId && guestSessionId !== clientSessionId && guestName.toLowerCase() !== (guestName || '').toLowerCase()) {
-            alert('Guest role has been claimed by another user.');
-            roleConfirmed = false;
-          }
 
           buildDraftSequence();
           updateDraftState();
@@ -731,33 +531,24 @@
         stepDeadline: newDeadline !== null ? newDeadline : stepDeadline,
         bannedBosses: bannedBosses,
         gameData: gameData,
-        hostSessionId: hostSessionId,
-        guestSessionId: guestSessionId,
         hostName: hostName,
         guestName: guestName
       });
     }
 
     function toggleReady(role) {
-      if (role === 'host' && currentRole === 'host') {
-        hostReady = !hostReady;
-        pushStateToFirebase();
-      } else if (role === 'guest' && currentRole === 'guest') {
-        guestReady = !guestReady;
-        pushStateToFirebase();
-      }
+      if (role === 'host' && currentRole === 'host') { hostReady = !hostReady; pushStateToFirebase(); }
+      else if (role === 'guest' && currentRole === 'guest') { guestReady = !guestReady; pushStateToFirebase(); }
     }
 
     function startDraftByAdmin() {
-      if (currentRole !== 'admin') return;
-      if (!hostReady || !guestReady) return;
+      if (currentRole !== 'admin' || !hostReady || !guestReady) return;
       draftStarted = true;
       pushStateToFirebase(Date.now() + 30000);
     }
 
     function resetDraft() {
       if (currentRole !== 'admin') return;
-      stopTimer();
       currentStepIndex = 0;
       draftStarted = false;
       hostReady = false;
@@ -765,8 +556,6 @@
       stepDeadline = 0;
       bannedBosses = [];
       pendingSelection = null;
-      hostSessionId = null;
-      guestSessionId = null;
       hostName = '';
       guestName = '';
       gameData = getEmptyGameData();
@@ -777,25 +566,14 @@
 
     function updateRoleControls() {
       document.getElementById('current-role-display').innerText = currentRole.toUpperCase();
-
       const changeBtn = document.getElementById('change-role-btn');
       const resetBtn = document.getElementById('header-reset-btn');
       const spectatorBtn = document.getElementById('header-spectator-btn');
 
       if (currentRole === 'admin') {
-        if (changeBtn) {
-          changeBtn.classList.remove('hidden');
-          changeBtn.disabled = false;
-          changeBtn.classList.remove('opacity-40', 'cursor-not-allowed');
-        }
-        if (resetBtn) {
-          resetBtn.classList.remove('hidden');
-          resetBtn.disabled = false;
-          resetBtn.classList.remove('opacity-40', 'cursor-not-allowed');
-        }
-        if (spectatorBtn) {
-          spectatorBtn.classList.remove('hidden');
-        }
+        if (changeBtn) changeBtn.classList.remove('hidden');
+        if (resetBtn) resetBtn.classList.remove('hidden');
+        if (spectatorBtn) spectatorBtn.classList.remove('hidden');
       } else {
         if (changeBtn) changeBtn.classList.add('hidden');
         if (resetBtn) resetBtn.classList.add('hidden');
@@ -816,12 +594,10 @@
         adminStartBtn.classList.remove('hidden');
         if (hostReady && guestReady) {
           adminStartBtn.disabled = false;
-          adminStartBtn.className = "bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-black px-4 py-1.5 rounded-lg border border-emerald-400 transition cursor-pointer shadow-md tracking-wider glow-halo-emerald flex items-center gap-1.5";
-          adminStartBtn.innerHTML = `<svg class="w-3.5 h-3.5 fill-current text-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> START DRAFT NOW`;
+          adminStartBtn.className = "bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-black px-4 py-1.5 rounded-lg transition cursor-pointer shadow-md tracking-wider glow-halo-emerald";
         } else {
           adminStartBtn.disabled = true;
-          adminStartBtn.className = "bg-emerald-50 text-slate-400 text-xs font-black px-4 py-1.5 rounded-lg border border-emerald-200 cursor-not-allowed transition tracking-wider flex items-center gap-1.5";
-          adminStartBtn.innerHTML = `<svg class="w-3.5 h-3.5 fill-current text-slate-400" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> START DRAFT (WAITING FOR READINESS)`;
+          adminStartBtn.className = "bg-emerald-50 text-slate-400 text-xs font-black px-4 py-1.5 rounded-lg border border-emerald-200 cursor-not-allowed transition tracking-wider";
         }
       } else {
         adminStartBtn.classList.add('hidden');
@@ -830,21 +606,12 @@
 
     function syncServerTimer() {
       stopTimer();
-      if (!draftStarted || stepDeadline <= 0) {
-        updateTimerDisplay(0);
-        return;
-      }
-
+      if (!draftStarted || stepDeadline <= 0) { updateTimerDisplay(0); return; }
       updateTimerDisplay(getRemainingSeconds());
-
       timerInterval = setInterval(() => {
         const remaining = getRemainingSeconds();
         updateTimerDisplay(remaining);
-
-        if (remaining <= 0) {
-          stopTimer();
-          autoHandleTimeout();
-        }
+        if (remaining <= 0) stopTimer();
       }, 500);
     }
 
@@ -853,9 +620,7 @@
       return Math.max(0, Math.ceil((stepDeadline - Date.now()) / 1000));
     }
 
-    function stopTimer() {
-      if (timerInterval) clearInterval(timerInterval);
-    }
+    function stopTimer() { if (timerInterval) clearInterval(timerInterval); }
 
     function updateTimerDisplay(sec) {
       const timerText = document.getElementById('timer-text');
@@ -863,95 +628,33 @@
 
       if (!draftStarted) {
         timerText.innerText = "--:--";
-        timerText.className = "text-3xl font-black text-slate-400";
-        timerBox.className = "flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-300 min-w-[110px]";
+        timerText.className = "text-2xl font-black text-slate-400";
+        timerBox.className = "flex flex-col items-center justify-center bg-white px-5 py-1 rounded-xl border border-sky-300 min-w-[130px] shadow-sm";
         return;
       }
 
       const mins = Math.floor(sec / 60);
       const remainingSecs = sec % 60;
-      const formatted = `${String(mins).padStart(2, '0')}:${String(remainingSecs).padStart(2, '0')}`;
-      
-      timerText.innerText = formatted;
+      timerText.innerText = `${String(mins).padStart(2, '0')}:${String(remainingSecs).padStart(2, '0')}`;
 
       if (sec <= 10) {
-        timerText.className = "text-3xl font-black text-rose-600 animate-pulse-fast";
-        timerBox.className = "flex flex-col items-center justify-center bg-rose-50 px-5 py-2 rounded-xl border border-rose-300 min-w-[110px] glow-halo-rose";
+        timerText.className = "text-2xl font-black text-rose-600 animate-pulse-fast";
+        timerBox.className = "flex flex-col items-center justify-center bg-rose-50 px-5 py-1 rounded-xl border border-rose-400 min-w-[130px] glow-halo-rose shadow-md";
       } else {
-        timerText.className = "text-3xl font-black text-sky-600";
-        timerBox.className = "flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-300 min-w-[110px]";
+        timerText.className = "text-2xl font-black text-sky-600";
+        timerBox.className = "flex flex-col items-center justify-center bg-sky-50 px-5 py-1 rounded-xl border border-sky-400 min-w-[130px] shadow-sm";
       }
-    }
-
-    function autoHandleTimeout() {
-      if (!draftStarted || currentStepIndex >= DRAFT_SEQUENCE.length) return;
-
-      const step = DRAFT_SEQUENCE[currentStepIndex];
-
-      // RESTRICTED ADMIN TIMEOUT LOGIC
-      const isMyTurnToCommit = (step.team === 'blue' && currentRole === 'host') || 
-                               (step.team === 'red' && currentRole === 'guest') || 
-                               (currentRole === 'admin' && step.type === 'roll');
-
-      if (!isMyTurnToCommit) return;
-
-      if (pendingSelection) {
-        confirmCurrentSelection();
-        return;
-      }
-
-      if (step.target === 'boss') {
-        const usedIds = [...bannedBosses.map(b => b.id), gameData[0].boss?.id, gameData[1].boss?.id].filter(Boolean);
-        const availableBosses = BOSS_ROSTER.filter(b => !usedIds.includes(b.id));
-        if (availableBosses.length > 0) {
-          pendingSelection = availableBosses[Math.floor(Math.random() * availableBosses.length)];
-          confirmCurrentSelection();
-        }
-      } else if (step.target === 'terrain') {
-        const activeBoss = gameData[step.game - 1].boss;
-        const allowedTerrains = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
-        const availableTerrains = TERRAIN_ROSTER.filter(t => allowedTerrains.includes(t.id));
-        if (availableTerrains.length > 0) {
-          pendingSelection = availableTerrains[Math.floor(Math.random() * availableTerrains.length)];
-          confirmCurrentSelection();
-        }
-      } else if (step.target === 'student') {
-        const activeGameBans = gameData[step.game - 1].studentBans || [];
-        const availableStudents = STUDENT_ROSTER.filter(s => !activeGameBans.some(b => b.id === s.id));
-        if (availableStudents.length > 0) {
-          pendingSelection = availableStudents[Math.floor(Math.random() * availableStudents.length)];
-          confirmCurrentSelection();
-        }
-      }
-    }
-
-    function getStepSubtitle(step) {
-      if (step.target === 'boss') {
-        return step.type === 'ban' ? 'Select 1 boss from the pool to ban' : 'Select 1 boss from the pool to pick';
-      } else if (step.target === 'terrain') {
-        return step.type === 'roll' ? 'Randomizing decider terrain...' : `Select terrain for Game ${step.game}`;
-      } else if (step.target === 'student') {
-        return `Select 1 student to ban for Game ${step.game}`;
-      }
-      return '';
     }
 
     function updateDraftState() {
-      const hostDisplay = hostName ? `${hostName} (Blue)` : 'Host (Blue)';
-      const guestDisplay = guestName ? `${guestName} (Red)` : 'Guest (Red)';
-
-      document.getElementById('bar-host-label').innerText = hostDisplay + ':';
-      document.getElementById('bar-guest-label').innerText = guestDisplay + ':';
+      document.getElementById('bar-host-label').innerText = (hostName || 'Host') + ':';
+      document.getElementById('bar-guest-label').innerText = (guestName || 'Guest') + ':';
 
       document.getElementById('host-ban-header-title').innerText = hostName ? `${hostName} Boss Bans` : 'Host Boss Bans';
       document.getElementById('guest-ban-header-title').innerText = guestName ? `${guestName} Boss Bans` : 'Guest Boss Bans';
 
       document.getElementById('g1-title').innerText = hostName ? `GAME 1 (${hostName.toUpperCase()} PICK)` : 'GAME 1 (HOST PICK)';
       document.getElementById('g2-title').innerText = guestName ? `GAME 2 (${guestName.toUpperCase()} PICK)` : 'GAME 2 (GUEST PICK)';
-      
-      document.getElementById('g1-bans-label').innerText = guestName ? `${guestName} Student Bans (3):` : 'Guest Student Bans (3):';
-      document.getElementById('g2-bans-label').innerText = hostName ? `${hostName} Student Bans (3):` : 'Host Student Bans (3):';
-      document.getElementById('g3-bans-label').innerText = `${hostName || 'Host'} (2) & ${guestName || 'Guest'} (2) Bans (4):`;
 
       const hostBadge = document.getElementById('host-ready-badge');
       const guestBadge = document.getElementById('guest-ready-badge');
@@ -972,40 +675,16 @@
         guestBadge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
       }
 
-      // UPDATE READY UP BUTTON STYLING IN BANNER
-      const hostReadyBtn = document.getElementById('host-ready-btn');
-      if (hostReadyBtn) {
-        if (hostReady) {
-          hostReadyBtn.innerText = "CANCEL READY";
-          hostReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider";
-        } else {
-          hostReadyBtn.innerText = "READY UP";
-          hostReadyBtn.className = "bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-cyan";
-        }
-      }
-
-      const guestReadyBtn = document.getElementById('guest-ready-btn');
-      if (guestReadyBtn) {
-        if (guestReady) {
-          guestReadyBtn.innerText = "CANCEL READY";
-          guestReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider";
-        } else {
-          guestReadyBtn.innerText = "READY UP";
-          guestReadyBtn.className = "bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-rose";
-        }
-      }
-
       updateRoleControls();
 
       if (!draftStarted) {
         stopTimer();
-        lastNotifiedStep = -1;
         const banner = document.getElementById('turn-banner');
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden";
         document.getElementById('phase-title').innerText = "PRE-DRAFT LOBBY";
         document.getElementById('turn-label').className = "text-2xl font-black text-slate-800 tracking-wide";
         document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
-        document.getElementById('turn-subtitle').innerText = "Host and Guest must ready up before Admin can start the draft.";
+        document.getElementById('turn-subtitle').innerText = "Host and Guest must ready up before Admin starts.";
 
         updateGameCardsUI();
         updateTopBossBansUI();
@@ -1021,28 +700,20 @@
 
       const step = DRAFT_SEQUENCE[currentStepIndex];
 
+      // Decider boss auto-assign
       if (step.type === 'decider' && step.target === 'boss') {
         const usedIds = [...bannedBosses.map(b => b.id), gameData[0].boss?.id, gameData[1].boss?.id].filter(Boolean);
-        const rem = BOSS_ROSTER.find(b => !usedIds.includes(b.id));
-        if (rem) gameData[2].boss = rem;
+        const lastBoss = BOSS_ROSTER.find(b => !usedIds.includes(b.id));
+        if (lastBoss) { gameData[2].boss = lastBoss; }
         currentStepIndex++;
         pushStateToFirebase(Date.now() + 30000);
         return;
       }
 
-      // SOUND NOTIFICATION FOR ACTIVE TURN
-      const isMyTurn = (step.team === 'blue' && currentRole === 'host') || 
-                       (step.team === 'red' && currentRole === 'guest');
-
-      if (isMyTurn && lastNotifiedStep !== currentStepIndex) {
-        playTurnChime();
-        lastNotifiedStep = currentStepIndex;
-      }
-
       const banner = document.getElementById('turn-banner');
       document.getElementById('phase-title').innerText = `STEP ${currentStepIndex + 1} OF ${DRAFT_SEQUENCE.length}`;
       document.getElementById('turn-label').innerText = step.label.toUpperCase();
-      document.getElementById('turn-subtitle').innerText = getStepSubtitle(step);
+      document.getElementById('turn-subtitle').innerText = `BO3 Draft Turn`;
 
       if (step.team === 'blue') {
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-cyan relative overflow-hidden";
@@ -1063,41 +734,42 @@
 
     function renderLobbyGrid() {
       const grid = document.getElementById('selection-grid');
-      document.getElementById('grid-title').innerText = "PRE-DRAFT PREVIEW";
+      document.getElementById('grid-title').innerText = "BO3 PRE-DRAFT LOBBY";
       document.getElementById('grid-count').innerText = "Waiting";
       document.getElementById('confirm-selection-btn').classList.add('hidden');
       document.getElementById('admin-roll-btn').classList.add('hidden');
 
       grid.innerHTML = `
         <div class="col-span-full schale-card-inner p-8 rounded-xl border border-sky-200 text-center flex flex-col items-center justify-center my-6">
-          <svg class="w-10 h-10 text-sky-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-          </svg>
-          <h3 class="font-bold text-lg text-slate-800 mb-1 tracking-wide">Lobby In Progress</h3>
-          <p class="text-xs text-slate-500 max-w-md">Host and Guest must click <b>READY UP</b> in their respective roles. The Admin can then initiate Step 1 of the BO3 Draft.</p>
+          <h3 class="font-bold text-lg text-slate-800 mb-1">BO3 Draft Lobby</h3>
+          <p class="text-xs text-slate-500 max-w-md">Both Host and Guest must click <b>READY UP</b> to begin.</p>
         </div>
       `;
     }
 
     function handleCardClick(item) {
       if (!draftStarted) return;
+      const searchInput = document.getElementById('student-search-input');
+      const currentQuery = searchInput ? searchInput.value : '';
+
       if (pendingSelection && pendingSelection.id === item.id) {
         pendingSelection = null;
       } else {
         pendingSelection = item;
       }
+      
       const step = DRAFT_SEQUENCE[currentStepIndex];
       renderGridForStep(step);
+
+      if (step.target === 'student' && searchInput) {
+        searchInput.value = currentQuery;
+        filterStudents(currentQuery);
+        searchInput.focus();
+      }
     }
 
     function confirmCurrentSelection() {
       if (!pendingSelection || !draftStarted) return;
-
-      const searchInput = document.getElementById('student-search-input');
-      if (searchInput) {
-        searchInput.value = '';
-        filterStudents('');
-      }
 
       const step = DRAFT_SEQUENCE[currentStepIndex];
       if (step.type === 'ban' && step.target === 'boss') {
@@ -1111,21 +783,11 @@
         gameData[step.game - 1].studentBans.push(pendingSelection);
       }
 
+      const searchInput = document.getElementById('student-search-input');
+      if (searchInput) { searchInput.value = ''; filterStudents(''); }
+
       pendingSelection = null;
       currentStepIndex++;
-
-      const nextStep = DRAFT_SEQUENCE[currentStepIndex];
-      
-      if (nextStep) {
-        if (nextStep.target === 'boss' && nextStep.type === 'pick') {
-          pushStateToFirebase(Date.now() + 60000);
-          return;
-        } else if (nextStep.target === 'terrain' && nextStep.type === 'pick') {
-          pushStateToFirebase(stepDeadline);
-          return;
-        }
-      }
-
       pushStateToFirebase(Date.now() + 30000);
     }
 
@@ -1139,13 +801,9 @@
       searchBox.classList.add('hidden');
       rollBtn.classList.add('hidden');
 
-      if (pendingSelection) {
-        confirmBtn.classList.remove('hidden');
-      } else {
-        confirmBtn.classList.add('hidden');
-      }
+      if (pendingSelection) confirmBtn.classList.remove('hidden');
+      else confirmBtn.classList.add('hidden');
 
-      // RESTRICTED ADMIN CARD SELECTION (Admin can only act on Game 3 terrain roll)
       const isAllowedRole = (step.team === 'blue' && currentRole === 'host') || 
                             (step.team === 'red' && currentRole === 'guest') ||
                             (currentRole === 'admin' && step.type === 'roll');
@@ -1156,19 +814,12 @@
         BOSS_ROSTER.forEach(boss => {
           const banRecord = bannedBosses.find(b => b.id === boss.id);
           const isBanned = !!banRecord;
-          const isPicked = gameData[0].boss?.id === boss.id || gameData[1].boss?.id === boss.id;
+          const isPicked = gameData.some(g => g.boss?.id === boss.id);
           const isAvailable = !isBanned && !isPicked;
           const isPending = pendingSelection?.id === boss.id;
 
           const card = document.createElement('div');
           let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (isAvailable ? 'border-sky-200 hover:border-sky-500' : 'border-slate-200 opacity-40 cursor-not-allowed');
-
-          let banBadge = '';
-          if (isBanned) {
-            const label = banRecord.team === 'blue' ? (hostName ? hostName.toUpperCase() : 'HOST') : (guestName ? guestName.toUpperCase() : 'GUEST');
-            const bgClass = banRecord.team === 'blue' ? 'bg-sky-600' : 'bg-rose-600';
-            banBadge = `<span class="absolute top-1 right-1 ${bgClass} text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow">${label} BAN</span>`;
-          }
 
           card.className = `slot-card schale-card-inner border rounded-xl p-2 text-center relative flex flex-col justify-between items-center ${borderStyle}`;
           card.innerHTML = `
@@ -1176,15 +827,9 @@
               <img src="${boss.image}" class="w-full h-full object-cover">
             </div>
             <span class="font-bold text-xs text-slate-800">${boss.name}</span>
-            <span class="text-[10px] text-sky-600 font-semibold">${boss.terrains.length} Terrains</span>
-            ${banBadge}
-            ${isPicked ? '<span class="absolute top-1 right-1 bg-emerald-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow">PICKED</span>' : ''}
-            ${isPending ? '<span class="absolute top-1 left-1 bg-amber-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow">SELECTED</span>' : ''}
           `;
 
-          if (isAvailable && isAllowedRole) {
-            card.onclick = () => handleCardClick(boss);
-          }
+          if (isAvailable && isAllowedRole) card.onclick = () => handleCardClick(boss);
           grid.appendChild(card);
         });
 
@@ -1193,22 +838,12 @@
         const activeBoss = gameData[step.game - 1].boss;
         const allowed = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
 
-        if (allowed.length === 1 && step.type !== 'roll') {
-          gameData[step.game - 1].terrain = TERRAIN_ROSTER.find(t => t.id === allowed[0]);
-          currentStepIndex++;
-          pushStateToFirebase(stepDeadline);
-          return;
-        }
-
-        if (step.type === 'roll' && currentRole === 'admin') {
-          rollBtn.classList.remove('hidden');
-        }
+        if (step.type === 'roll' && currentRole === 'admin') rollBtn.classList.remove('hidden');
 
         TERRAIN_ROSTER.forEach(terrain => {
           const isAllowed = allowed.includes(terrain.id);
           const isPending = pendingSelection?.id === terrain.id;
           const card = document.createElement('div');
-
           let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (isAllowed ? 'border-sky-200 hover:border-amber-500' : 'border-slate-200 opacity-20 cursor-not-allowed');
 
           card.className = `slot-card schale-card-inner border rounded-xl p-2 text-center relative ${borderStyle}`;
@@ -1217,12 +852,9 @@
               <img src="${terrain.image}" class="w-full h-full object-contain filter brightness-0 invert">
             </div>
             <span class="font-bold text-xs text-slate-800">${terrain.name}</span>
-            ${isPending ? '<span class="absolute top-1 left-1 bg-amber-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow">SELECTED</span>' : ''}
           `;
 
-          if (isAllowed && step.type !== 'roll' && isAllowedRole) {
-            card.onclick = () => handleCardClick(terrain);
-          }
+          if (isAllowed && step.type !== 'roll' && isAllowedRole) card.onclick = () => handleCardClick(terrain);
           grid.appendChild(card);
         });
 
@@ -1231,35 +863,30 @@
         searchBox.classList.remove('hidden');
 
         const searchInput = document.getElementById('student-search-input');
+        const activeQuery = searchInput ? searchInput.value.trim() : '';
         const activeGameBans = gameData[step.game - 1].studentBans || [];
 
         STUDENT_ROSTER.forEach(student => {
           const isBanned = activeGameBans.some(s => s.id === student.id);
           const isPending = pendingSelection?.id === student.id;
           const card = document.createElement('div');
-
           let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (!isBanned ? 'border-sky-200 hover:border-rose-500' : 'border-slate-200 opacity-40 cursor-not-allowed');
 
-          card.className = `student-card slot-card schale-card-inner border rounded-xl p-2 text-center relative ${borderStyle}`;
+          const matchesQuery = student.name.toLowerCase().includes(activeQuery.toLowerCase());
+          const visibilityClass = (activeQuery && !matchesQuery) ? 'hidden' : '';
+
+          card.className = `student-card slot-card schale-card-inner border rounded-xl p-2 text-center relative ${borderStyle} ${visibilityClass}`;
           card.setAttribute('data-name', student.name.toLowerCase());
           card.innerHTML = `
             <div class="w-12 h-12 bg-slate-200/80 rounded-full mx-auto mb-1 overflow-hidden border border-sky-200">
               <img src="${student.image}" class="w-full h-full object-cover">
             </div>
             <span class="font-bold text-[10px] text-slate-800 block truncate">${student.name}</span>
-            ${isBanned ? '<span class="absolute top-1 right-1 bg-rose-600 text-white text-[8px] font-black px-1 rounded">BANNED</span>' : ''}
-            ${isPending ? '<span class="absolute top-1 left-1 bg-amber-500 text-white text-[8px] font-black px-1 rounded">SELECTED</span>' : ''}
           `;
 
-          if (!isBanned && isAllowedRole) {
-            card.onclick = () => handleCardClick(student);
-          }
+          if (!isBanned && isAllowedRole) card.onclick = () => handleCardClick(student);
           grid.appendChild(card);
         });
-
-        if (searchInput && searchInput.value) {
-          filterStudents(searchInput.value);
-        }
       }
     }
 
@@ -1275,13 +902,9 @@
     }
 
     function filterStudents(q) {
-      const cards = document.querySelectorAll('.student-card');
-      cards.forEach(card => {
-        if (card.getAttribute('data-name').includes(q.toLowerCase().trim())) {
-          card.classList.remove('hidden');
-        } else {
-          card.classList.add('hidden');
-        }
+      document.querySelectorAll('.student-card').forEach(card => {
+        if (card.getAttribute('data-name').includes(q.toLowerCase().trim())) card.classList.remove('hidden');
+        else card.classList.add('hidden');
       });
     }
 
@@ -1299,19 +922,15 @@
         if (banned) {
           const bossObj = BOSS_ROSTER.find(x => x.id === banned.id);
           hostHTML += `
-            <div class="relative w-20 h-20 schale-card-inner border border-sky-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
+            <div class="relative w-16 h-16 schale-card-inner border border-sky-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
               <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-75">
-              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
-                <span class="text-[9.5px] font-black text-sky-200 truncate block tracking-wide">${bossObj ? bossObj.name : ''}</span>
+              <div class="absolute inset-x-0 bottom-0 bg-slate-900/80 p-0.5 text-center">
+                <span class="text-[8px] font-black text-sky-200 truncate block">${bossObj ? bossObj.name : ''}</span>
               </div>
             </div>
           `;
         } else {
-          hostHTML += `
-            <div class="w-20 h-20 schale-card-inner border border-sky-200 rounded-xl flex items-center justify-center text-sky-600 font-black text-sm ${activeClass}">
-              ${i + 1}
-            </div>
-          `;
+          hostHTML += `<div class="w-16 h-16 schale-card-inner border border-sky-200 rounded-xl flex items-center justify-center text-sky-600 font-black text-xs ${activeClass}">${i + 1}</div>`;
         }
       }
       document.getElementById('host-boss-bans-container').innerHTML = hostHTML;
@@ -1326,19 +945,15 @@
         if (banned) {
           const bossObj = BOSS_ROSTER.find(x => x.id === banned.id);
           guestHTML += `
-            <div class="relative w-20 h-20 schale-card-inner border border-rose-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
+            <div class="relative w-16 h-16 schale-card-inner border border-rose-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
               <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-75">
-              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
-                <span class="text-[9.5px] font-black text-rose-200 truncate block tracking-wide">${bossObj ? bossObj.name : ''}</span>
+              <div class="absolute inset-x-0 bottom-0 bg-slate-900/80 p-0.5 text-center">
+                <span class="text-[8px] font-black text-rose-200 truncate block">${bossObj ? bossObj.name : ''}</span>
               </div>
             </div>
           `;
         } else {
-          guestHTML += `
-            <div class="w-20 h-20 schale-card-inner border border-rose-200 rounded-xl flex items-center justify-center text-rose-600 font-black text-sm ${activeClass}">
-              ${guestLabels[i]}
-            </div>
-          `;
+          guestHTML += `<div class="w-16 h-16 schale-card-inner border border-rose-200 rounded-xl flex items-center justify-center text-rose-600 font-black text-xs ${activeClass}">${guestLabels[i]}</div>`;
         }
       }
       document.getElementById('guest-boss-bans-container').innerHTML = guestHTML;
@@ -1349,25 +964,16 @@
 
       for (let g = 1; g <= 3; g++) {
         const data = gameData[g - 1] || { boss: null, terrain: null, studentBans: [] };
-
         const bossSlot = document.getElementById(`g${g}-boss-slot`);
         const isBossActive = (step?.game === g && step?.target === 'boss' && step?.type === 'pick');
         const bossPulseClass = isBossActive ? (step.team === 'blue' ? 'active-slot-blue' : 'active-slot-red') : '';
 
         if (data.boss) {
-          bossSlot.className = "col-span-2 schale-card-inner border border-sky-300 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative";
-          bossSlot.innerHTML = `
-            <div class="w-full h-full flex flex-col items-center justify-center">
-              <img src="${data.boss.image}" class="w-full h-16 object-cover rounded-lg mb-1">
-              <span class="text-xs font-bold text-sky-700 truncate w-full text-center">${data.boss.name}</span>
-            </div>
-          `;
+          bossSlot.className = "col-span-2 schale-card-inner border border-sky-300 rounded-xl p-2 text-center h-[90px] flex flex-col items-center justify-center relative";
+          bossSlot.innerHTML = `<img src="${data.boss.image}" class="w-full h-12 object-cover rounded mb-1"><span class="text-xs font-bold text-sky-700 truncate w-full">${data.boss.name}</span>`;
         } else {
-          bossSlot.className = `col-span-2 schale-card-inner border border-sky-200 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative ${bossPulseClass}`;
-          bossSlot.innerHTML = `
-            <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Boss</span>
-            <span class="text-xs font-bold text-slate-500">${g === 3 ? 'Last Remaining' : 'Pending'}</span>
-          `;
+          bossSlot.className = `col-span-2 schale-card-inner border border-sky-200 rounded-xl p-2 text-center h-[90px] flex flex-col items-center justify-center relative ${bossPulseClass}`;
+          bossSlot.innerHTML = `<span class="text-[9px] text-sky-600 uppercase font-black">Boss</span><span class="text-xs font-bold text-slate-500">${g === 3 ? 'Last Remaining' : 'Pending'}</span>`;
         }
 
         const terrainSlot = document.getElementById(`g${g}-terrain-slot`);
@@ -1375,19 +981,11 @@
         let terrainPulseClass = isTerrainActive ? (step.team === 'blue' ? 'active-slot-blue' : (step.team === 'red' ? 'active-slot-red' : 'active-slot-yellow')) : '';
 
         if (data.terrain) {
-          terrainSlot.className = "col-span-1 border border-amber-400 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative bg-slate-900";
-          terrainSlot.innerHTML = `
-            <div class="w-full h-full flex flex-col items-center justify-center">
-              <img src="${data.terrain.image}" class="w-8 h-8 object-contain rounded mb-1 filter brightness-0 invert">
-              <span class="text-[10px] font-black text-amber-300 truncate w-full text-center tracking-wide">${data.terrain.name}</span>
-            </div>
-          `;
+          terrainSlot.className = "col-span-1 border border-amber-400 rounded-xl p-2 text-center h-[90px] flex flex-col items-center justify-center relative bg-slate-900";
+          terrainSlot.innerHTML = `<img src="${data.terrain.image}" class="w-6 h-6 object-contain rounded mb-1 filter brightness-0 invert"><span class="text-[10px] font-black text-amber-300 truncate w-full">${data.terrain.name}</span>`;
         } else {
-          terrainSlot.className = `col-span-1 schale-card-inner border border-sky-200 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative ${terrainPulseClass}`;
-          terrainSlot.innerHTML = `
-            <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Terrain</span>
-            <span class="text-xs font-bold ${g === 3 ? 'text-amber-600' : 'text-slate-500'}">${g === 3 ? 'Admin Roll' : 'Pending'}</span>
-          `;
+          terrainSlot.className = `col-span-1 schale-card-inner border border-sky-200 rounded-xl p-2 text-center h-[90px] flex flex-col items-center justify-center relative ${terrainPulseClass}`;
+          terrainSlot.innerHTML = `<span class="text-[9px] text-sky-600 uppercase font-black">Terrain</span><span class="text-xs font-bold ${g === 3 ? 'text-amber-600' : 'text-slate-500'}">${g === 3 ? 'Admin Roll' : 'Pending'}</span>`;
         }
 
         const totalSlots = g === 3 ? 4 : 3;
@@ -1402,22 +1000,17 @@
 
           if (bannedStudent) {
             slotsHTML += `
-              <div class="relative w-full h-20 schale-card-inner border border-rose-300 rounded-xl overflow-hidden shadow-md">
+              <div class="relative w-full h-16 schale-card-inner border border-rose-300 rounded-xl overflow-hidden shadow-sm">
                 <img src="${bannedStudent.image}" class="w-full h-full object-cover grayscale opacity-75">
-                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
-                  <span class="text-[10px] font-black text-rose-200 truncate block tracking-wide">${bannedStudent.name}</span>
+                <div class="absolute inset-x-0 bottom-0 bg-slate-900/80 p-0.5 text-center">
+                  <span class="text-[9px] font-black text-rose-200 truncate block">${bannedStudent.name}</span>
                 </div>
               </div>
             `;
           } else {
-            slotsHTML += `
-              <div class="w-full h-20 schale-card-inner border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 ${studentPulseClass}">
-                <span class="text-[9px] font-bold tracking-widest text-slate-400">BAN ${slotIndex + 1}</span>
-              </div>
-            `;
+            slotsHTML += `<div class="w-full h-16 schale-card-inner border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 ${studentPulseClass}"><span class="text-[9px] font-bold">BAN ${slotIndex + 1}</span></div>`;
           }
         }
-
         bansContainer.innerHTML = slotsHTML;
       }
     }
@@ -1431,146 +1024,15 @@
       banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-emerald relative overflow-hidden";
       document.getElementById('phase-title').innerText = "STATUS: COMPLETED";
       document.getElementById('turn-label').className = "text-2xl font-black text-emerald-600 tracking-wide";
-      document.getElementById('turn-label').innerText = "BO3 MAP & BAN DRAFT LOCKED IN!";
-      document.getElementById('turn-subtitle').innerText = "All bosses, terrains, and student bans have been finalized";
-
-      document.getElementById('timer-text').innerText = "00:00";
-      document.getElementById('timer-text').className = "text-3xl font-black text-emerald-600";
+      document.getElementById('turn-label').innerText = "BO3 DRAFT COMPLETE!";
+      document.getElementById('turn-subtitle').innerText = "All maps and student bans are locked in.";
 
       const grid = document.getElementById('selection-grid');
-      document.getElementById('grid-title').innerText = "DRAFT SUMMARY";
-      document.getElementById('grid-count').innerText = "Finished";
-      document.getElementById('confirm-selection-btn').classList.add('hidden');
-
       grid.innerHTML = `
         <div class="col-span-full schale-card-inner p-6 rounded-xl border border-emerald-300 text-center">
-          <svg class="w-10 h-10 text-emerald-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <h3 class="font-bold text-lg text-slate-800 mb-2">Match Ready to Begin</h3>
-
-          ${currentRole === 'admin' ? `
-            <div class="flex flex-wrap items-center justify-center gap-3 mt-4">
-              <button id="submit-sheet-btn" onclick="submitResultsToSheet()" class="bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs px-5 py-2.5 rounded-lg transition tracking-wider flex items-center justify-center gap-1.5 shadow-md glow-halo-emerald">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                </svg>
-                SUBMIT RESULTS TO SHEET
-              </button>
-
-              <button onclick="resetDraft()" class="bg-sky-500 hover:bg-sky-400 text-white font-black text-xs px-5 py-2.5 rounded-lg transition tracking-wider flex items-center justify-center gap-1.5 shadow-md">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                START NEW DRAFT
-              </button>
-            </div>
-            <div id="submit-status-msg" class="text-xs font-bold text-emerald-600 mt-2 hidden"></div>
-          ` : ''}
+          <h3 class="font-bold text-lg text-slate-800 mb-2">Match Draft Finalized</h3>
         </div>
       `;
-    }
-
-    /* MANUAL SUBMIT FUNCTION FOR ADMIN WITH STUDENT ATTRIBUTION */
-    function submitResultsToSheet() {
-      if (currentRole !== 'admin') return;
-    
-      const submitBtn = document.getElementById('submit-sheet-btn');
-      const statusMsg = document.getElementById('submit-status-msg');
-    
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        submitBtn.innerHTML = `SUBMITTING...`;
-      }
-    
-      const hostBannedBosses = bannedBosses
-        .filter(b => b.team === 'blue')
-        .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
-    
-      const guestBannedBosses = bannedBosses
-        .filter(b => b.team === 'red')
-        .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
-    
-      // Map each game's student bans with exact player and role attribution
-      const formattedGames = gameData.map((g, idx) => {
-        const gameNum = idx + 1;
-        let studentBans = [];
-    
-        if (g.studentBans && Array.isArray(g.studentBans)) {
-          studentBans = g.studentBans.map((s, banIdx) => {
-            let bannedByRole = '';
-            let bannedByName = '';
-    
-            if (gameNum === 1) {
-              bannedByRole = 'Guest';
-              bannedByName = guestName || 'Guest';
-            } else if (gameNum === 2) {
-              bannedByRole = 'Host';
-              bannedByName = hostName || 'Host';
-            } else if (gameNum === 3) {
-              if (banIdx < 2) {
-                bannedByRole = 'Host';
-                bannedByName = hostName || 'Host';
-              } else {
-                bannedByRole = 'Guest';
-                bannedByName = guestName || 'Guest';
-              }
-            }
-    
-            return {
-              name: s.name,
-              bannedByRole: bannedByRole,
-              bannedByName: bannedByName
-            };
-          });
-        }
-    
-        return {
-          gameNumber: gameNum,
-          boss: g.boss,
-          terrain: g.terrain,
-          studentBans: studentBans
-        };
-      });
-    
-      // Send formatted JSON payload to Google Apps Script
-      fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          roomCode: document.getElementById('room-code-input').value,
-          hostName: hostName,
-          guestName: guestName,
-          hostBossBans: hostBannedBosses,
-          guestBossBans: guestBannedBosses,
-          games: formattedGames
-        })
-      })
-      .then(() => {
-        if (submitBtn) {
-          submitBtn.innerHTML = `SUBMITTED TO SHEET!`;
-          submitBtn.className = "bg-emerald-600 text-white font-black text-xs px-5 py-2.5 rounded-lg tracking-wider flex items-center justify-center gap-1.5 shadow-md";
-        }
-        if (statusMsg) {
-          statusMsg.innerText = "Draft results successfully logged into Google Sheet!";
-          statusMsg.classList.remove('hidden');
-        }
-      })
-      .catch(err => {
-        console.error('Error logging draft to Google Sheet:', err);
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          submitBtn.innerText = "RETRY SUBMIT";
-        }
-        if (statusMsg) {
-          statusMsg.innerText = "Failed to submit. Please try again.";
-          statusMsg.className = "text-xs font-bold text-rose-600 mt-2";
-          statusMsg.classList.remove('hidden');
-        }
-      });
     }
   </script>
 </body>
