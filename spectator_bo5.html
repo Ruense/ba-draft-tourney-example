@@ -112,11 +112,11 @@
   <!-- BROADCAST MAIN CONTAINER -->
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- LIVE TURN BANNER -->
-    <div id="turn-banner" class="schale-card rounded-2xl p-5 flex items-center justify-between shadow-md relative overflow-hidden transition-all duration-300">
-      <div class="text-left flex-1">
+    <!-- CENTERED LIVE TURN BANNER -->
+    <div id="turn-banner" class="schale-card rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden transition-all duration-300">
+      <div class="text-center w-full">
         <div class="text-xs uppercase tracking-widest font-black text-amber-600 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
-        <div class="text-3xl font-black text-slate-800 tracking-wide" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
+        <div class="text-3xl font-black text-slate-800 tracking-wide uppercase" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
         <div class="text-xs text-slate-500 mt-1 font-semibold" id="turn-subtitle">Live sync in progress...</div>
       </div>
     </div>
@@ -486,13 +486,12 @@
       if (!draftStarted) {
         stopTimer();
         const banner = document.getElementById('turn-banner');
-        banner.className = "schale-card rounded-2xl p-5 flex items-center justify-between shadow-md relative overflow-hidden";
+        banner.className = "schale-card rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden";
         document.getElementById('phase-title').innerText = "PRE-DRAFT LOBBY";
-        document.getElementById('turn-label').className = "text-3xl font-black text-slate-800 tracking-wide";
+        document.getElementById('turn-label').className = "text-3xl font-black text-slate-800 tracking-wide uppercase";
         document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
         document.getElementById('turn-subtitle').innerText = "Host and Guest are preparing in lobby...";
 
-        // UPDATE TOP-CENTER TURN LABEL FOR PRE-DRAFT
         document.getElementById('header-turn-label').innerText = "LOBBY WAITING";
 
         updateGameCardsUI();
@@ -505,9 +504,9 @@
         updateGameCardsUI();
         updateTopBossBansUI();
         const banner = document.getElementById('turn-banner');
-        banner.className = "schale-card rounded-2xl p-5 flex items-center justify-between shadow-md glow-halo-emerald relative overflow-hidden";
+        banner.className = "schale-card rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-md glow-halo-emerald relative overflow-hidden";
         document.getElementById('phase-title').innerText = "STATUS: COMPLETED";
-        document.getElementById('turn-label').className = "text-3xl font-black text-emerald-600 tracking-wide";
+        document.getElementById('turn-label').className = "text-3xl font-black text-emerald-600 tracking-wide uppercase";
         document.getElementById('turn-label').innerText = "BO5 GRAND FINAL COMPLETE!";
         document.getElementById('turn-subtitle').innerText = "All 5 games are locked in.";
         
@@ -523,18 +522,17 @@
       document.getElementById('turn-label').innerText = step.label.toUpperCase();
       document.getElementById('turn-subtitle').innerText = `Current turn in progress...`;
 
-      // UPDATE TOP-CENTER TURN LABEL FOR ACTIVE DRAFT STEP
       document.getElementById('header-turn-label').innerText = step.label.toUpperCase();
 
       if (step.team === 'blue') {
-        banner.className = "schale-card rounded-2xl p-5 flex items-center justify-between shadow-md glow-halo-cyan relative overflow-hidden";
-        document.getElementById('turn-label').className = "text-3xl font-black text-sky-600 tracking-wide";
+        banner.className = "schale-card rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-md glow-halo-cyan relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-3xl font-black text-sky-600 tracking-wide uppercase";
       } else if (step.team === 'red') {
-        banner.className = "schale-card rounded-2xl p-5 flex items-center justify-between shadow-md glow-halo-rose relative overflow-hidden";
-        document.getElementById('turn-label').className = "text-3xl font-black text-rose-600 tracking-wide";
+        banner.className = "schale-card rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-md glow-halo-rose relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-3xl font-black text-rose-600 tracking-wide uppercase";
       } else {
-        banner.className = "schale-card rounded-2xl p-5 flex items-center justify-between shadow-md glow-halo-gold relative overflow-hidden";
-        document.getElementById('turn-label').className = "text-3xl font-black text-amber-600 tracking-wide";
+        banner.className = "schale-card rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-md glow-halo-gold relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-3xl font-black text-amber-600 tracking-wide uppercase";
       }
 
       updateGameCardsUI();
