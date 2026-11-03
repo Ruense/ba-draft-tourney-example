@@ -363,10 +363,14 @@
     function updateTimerDisplay(sec) {
       const timerText = document.getElementById('timer-text');
       const timerContainer = document.getElementById('header-timer-container');
+      const timerHeaderLabel = timerContainer ? timerContainer.querySelector('span:first-child') : null;
+      const turnLabel = document.getElementById('header-turn-label');
 
       if (!draftStarted) {
         timerText.innerText = "--:--";
         timerText.className = "text-2xl font-black text-slate-400 leading-tight";
+        if (timerHeaderLabel) timerHeaderLabel.className = "text-[9px] font-black text-sky-600 uppercase tracking-widest leading-none";
+        if (turnLabel) turnLabel.className = "text-[10px] font-black text-slate-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]";
         timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center schale-card-inner px-5 py-1 rounded-xl border border-sky-300 min-w-[220px] text-center shadow-inner";
         return;
       }
@@ -376,12 +380,38 @@
       const formatted = `${String(mins).padStart(2, '0')}:${String(remainingSecs).padStart(2, '0')}`;
       timerText.innerText = formatted;
 
+      // GET CURRENT STEP TEAM DIRECTION
+      const step = DRAFT_SEQUENCE[currentStepIndex];
+      const team = step ? step.team : 'neutral';
+
+      // LOW TIME WARNING (< 10 SECONDS)
       if (sec <= 10) {
         timerText.className = "text-2xl font-black text-rose-600 leading-tight animate-pulse-fast";
-        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-rose-50 px-5 py-1 rounded-xl border border-rose-300 min-w-[220px] text-center shadow-inner glow-halo-rose";
-      } else {
+        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-rose-50 px-5 py-1 rounded-xl border border-rose-400 min-w-[220px] text-center shadow-inner glow-halo-rose";
+        if (timerHeaderLabel) timerHeaderLabel.className = "text-[9px] font-black text-rose-600 uppercase tracking-widest leading-none";
+        if (turnLabel) turnLabel.className = "text-[10px] font-black text-rose-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]";
+        return;
+      }
+
+      // DYNAMIC COLOR STYLING BY TURN TEAM
+      if (team === 'blue') {
+        // HOST TURN (BLUE)
         timerText.className = "text-2xl font-black text-sky-600 leading-tight";
-        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center schale-card-inner px-5 py-1 rounded-xl border border-sky-300 min-w-[220px] text-center shadow-inner";
+        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-sky-50/90 px-5 py-1 rounded-xl border-2 border-sky-400 min-w-[220px] text-center shadow-inner glow-halo-cyan";
+        if (timerHeaderLabel) timerHeaderLabel.className = "text-[9px] font-black text-sky-600 uppercase tracking-widest leading-none";
+        if (turnLabel) turnLabel.className = "text-[10px] font-black text-sky-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]";
+      } else if (team === 'red') {
+        // GUEST TURN (RED)
+        timerText.className = "text-2xl font-black text-rose-600 leading-tight";
+        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-rose-50/90 px-5 py-1 rounded-xl border-2 border-rose-400 min-w-[220px] text-center shadow-inner glow-halo-rose";
+        if (timerHeaderLabel) timerHeaderLabel.className = "text-[9px] font-black text-rose-600 uppercase tracking-widest leading-none";
+        if (turnLabel) turnLabel.className = "text-[10px] font-black text-rose-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]";
+      } else {
+        // ADMIN / NEUTRAL TURN (GOLD)
+        timerText.className = "text-2xl font-black text-amber-600 leading-tight";
+        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-amber-50/90 px-5 py-1 rounded-xl border-2 border-amber-400 min-w-[220px] text-center shadow-inner glow-halo-gold";
+        if (timerHeaderLabel) timerHeaderLabel.className = "text-[9px] font-black text-amber-600 uppercase tracking-widest leading-none";
+        if (turnLabel) turnLabel.className = "text-[10px] font-black text-amber-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]";
       }
     }
 
