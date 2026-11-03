@@ -219,44 +219,47 @@
   <!-- MAIN AREA -->
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- REVERTED CENTERED STEP BANNER -->
-    <div id="turn-banner" class="schale-card rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden transition-all duration-300">
-      <div class="text-center w-full">
-        <div class="text-[11px] uppercase tracking-widest font-black text-amber-500 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
-        <div class="text-3xl md:text-4xl font-black text-slate-800 tracking-wide uppercase" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
+    <!-- TURN STATUS BANNER WITH READY UP BUTTON -->
+    <div id="turn-banner" class="schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden transition-all duration-300">
+      <div class="text-left flex-1">
+        <div class="text-[10px] uppercase tracking-widest font-black text-amber-600 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
+        <div class="text-2xl font-black text-slate-800 tracking-wide" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
         <div class="text-xs text-slate-500 mt-1 font-semibold" id="turn-subtitle">Host and Guest must ready up before Admin starts the Grand Final.</div>
       </div>
 
-      <div id="ready-btns-container" class="flex items-center justify-center gap-3 mt-4 hidden">
-        <button id="host-ready-btn" onclick="toggleReady('host')" class="hidden bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-5 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-cyan">
+      <div class="flex items-center gap-3">
+        <button id="host-ready-btn" onclick="toggleReady('host')" class="hidden bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-cyan">
           READY UP
         </button>
-        <button id="guest-ready-btn" onclick="toggleReady('guest')" class="hidden bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-5 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-rose">
+        <button id="guest-ready-btn" onclick="toggleReady('guest')" class="hidden bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-rose">
           READY UP
         </button>
       </div>
     </div>
 
-    <!-- PERFECTLY CENTERED TOP BOSS BANS BAR -->
-    <div class="schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative min-h-[105px]">
-      <div class="flex flex-col items-start gap-1.5 z-10">
-        <span class="text-xs font-black text-sky-600 uppercase tracking-widest" id="host-ban-header-title">Host Boss Bans (4)</span>
+    <!-- TOP BOSS BANS BAR -->
+    <div class="schale-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-md">
+      <div class="flex flex-col items-center md:items-start gap-1.5">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-black text-sky-600 uppercase tracking-widest" id="host-ban-header-title">Host Boss Bans (4)</span>
+        </div>
         <div id="host-boss-bans-container" class="flex gap-2"></div>
       </div>
 
-      <!-- CENTERED EMBLEM & TITLE -->
-      <div class="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none z-10">
-        <div class="w-9 h-9 mx-auto mb-1 rounded-full bg-amber-50 border border-amber-300 flex items-center justify-center shadow-sm">
-          <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="text-center px-4">
+        <div class="w-10 h-10 mx-auto mb-1 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center">
+          <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
           </svg>
         </div>
         <h2 class="text-xs font-black text-slate-800 tracking-widest uppercase">BO5 GRAND FINAL</h2>
-        <p class="text-[10px] text-amber-600 font-bold whitespace-nowrap">4 HOST VETOES • 2 GUEST VETOES</p>
+        <p class="text-[10px] text-amber-600 font-bold">4 HOST VETOES • 2 GUEST VETOES</p>
       </div>
 
-      <div class="flex flex-col items-end gap-1.5 z-10">
-        <span class="text-xs font-black text-rose-600 uppercase tracking-widest" id="guest-ban-header-title">Guest Boss Bans (2)</span>
+      <div class="flex flex-col items-center md:items-end gap-1.5">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-black text-rose-600 uppercase tracking-widest" id="guest-ban-header-title">Guest Boss Bans (2)</span>
+        </div>
         <div id="guest-boss-bans-container" class="flex gap-2"></div>
       </div>
     </div>
@@ -800,6 +803,7 @@
       if (currentRole === 'admin') {
         if (changeBtn) { changeBtn.classList.remove('hidden'); changeBtn.disabled = false; }
         if (resetBtn) { resetBtn.classList.remove('hidden'); resetBtn.disabled = false; }
+        // HIDE SPECTATOR VIEW BUTTON FOR ADMIN
         if (spectatorBtn) spectatorBtn.classList.add('hidden');
       } else {
         if (changeBtn) changeBtn.classList.add('hidden');
@@ -807,30 +811,14 @@
         if (spectatorBtn) spectatorBtn.classList.add('hidden');
       }
 
-      const readyContainer = document.getElementById('ready-btns-container');
       const hostReadyBtn = document.getElementById('host-ready-btn');
       const guestReadyBtn = document.getElementById('guest-ready-btn');
 
-      let hasVisibleReadyBtn = false;
+      if (!draftStarted && currentRole === 'host') hostReadyBtn.classList.remove('hidden');
+      else hostReadyBtn.classList.add('hidden');
 
-      if (!draftStarted && currentRole === 'host') {
-        hostReadyBtn.classList.remove('hidden');
-        hasVisibleReadyBtn = true;
-      } else {
-        hostReadyBtn.classList.add('hidden');
-      }
-
-      if (!draftStarted && currentRole === 'guest') {
-        guestReadyBtn.classList.remove('hidden');
-        hasVisibleReadyBtn = true;
-      } else {
-        guestReadyBtn.classList.add('hidden');
-      }
-
-      if (readyContainer) {
-        if (hasVisibleReadyBtn) readyContainer.classList.remove('hidden');
-        else readyContainer.classList.add('hidden');
-      }
+      if (!draftStarted && currentRole === 'guest') guestReadyBtn.classList.remove('hidden');
+      else guestReadyBtn.classList.add('hidden');
 
       const adminStartBtn = document.getElementById('admin-start-btn');
       if (currentRole === 'admin' && !draftStarted) {
@@ -991,10 +979,10 @@
       if (hostReadyBtn) {
         if (hostReady) {
           hostReadyBtn.innerText = "CANCEL READY";
-          hostReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-5 py-2.5 rounded-xl transition shadow tracking-wider";
+          hostReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider";
         } else {
           hostReadyBtn.innerText = "READY UP";
-          hostReadyBtn.className = "bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-5 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-cyan";
+          hostReadyBtn.className = "bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-cyan";
         }
       }
 
@@ -1002,10 +990,10 @@
       if (guestReadyBtn) {
         if (guestReady) {
           guestReadyBtn.innerText = "CANCEL READY";
-          guestReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-5 py-2.5 rounded-xl transition shadow tracking-wider";
+          guestReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider";
         } else {
           guestReadyBtn.innerText = "READY UP";
-          guestReadyBtn.className = "bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-5 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-rose";
+          guestReadyBtn.className = "bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-rose";
         }
       }
 
@@ -1015,12 +1003,13 @@
         stopTimer();
         lastNotifiedStep = -1;
         const banner = document.getElementById('turn-banner');
-        banner.className = "schale-card rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden";
+        banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden";
         document.getElementById('phase-title').innerText = "PRE-DRAFT LOBBY";
-        document.getElementById('turn-label').className = "text-3xl md:text-4xl font-black text-slate-800 tracking-wide uppercase";
+        document.getElementById('turn-label').className = "text-2xl font-black text-slate-800 tracking-wide";
         document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
         document.getElementById('turn-subtitle').innerText = "Host and Guest must ready up before Admin starts the Grand Final.";
 
+        // UPDATE TOP-CENTER TURN LABEL FOR PRE-DRAFT
         document.getElementById('header-turn-label').innerText = "LOBBY WAITING";
 
         updateGameCardsUI();
@@ -1068,17 +1057,18 @@
       document.getElementById('turn-label').innerText = step.label.toUpperCase();
       document.getElementById('turn-subtitle').innerText = `BO5 Grand Final Step`;
 
+      // UPDATE TOP-CENTER TURN LABEL FOR ACTIVE DRAFT STEP
       document.getElementById('header-turn-label').innerText = step.label.toUpperCase();
 
       if (step.team === 'blue') {
-        banner.className = "schale-card rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md glow-halo-cyan relative overflow-hidden";
-        document.getElementById('turn-label').className = "text-3xl md:text-4xl font-black text-sky-600 tracking-wide uppercase";
+        banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-cyan relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-2xl font-black text-sky-600 tracking-wide";
       } else if (step.team === 'red') {
-        banner.className = "schale-card rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md glow-halo-rose relative overflow-hidden";
-        document.getElementById('turn-label').className = "text-3xl md:text-4xl font-black text-rose-600 tracking-wide uppercase";
+        banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-rose relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-2xl font-black text-rose-600 tracking-wide";
       } else {
-        banner.className = "schale-card rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md glow-halo-gold relative overflow-hidden";
-        document.getElementById('turn-label').className = "text-3xl md:text-4xl font-black text-amber-600 tracking-wide uppercase";
+        banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-gold relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-2xl font-black text-amber-600 tracking-wide";
       }
 
       updateGameCardsUI();
@@ -1128,8 +1118,6 @@
       if (!pendingSelection || !draftStarted) return;
     
       const step = DRAFT_SEQUENCE[currentStepIndex];
-      const remainingMs = Math.max(0, stepDeadline - Date.now());
-
       if (step.type === 'ban' && step.target === 'boss') {
         bannedBosses.push({ id: pendingSelection.id, team: step.team });
       } else if (step.type === 'pick' && step.target === 'boss') {
@@ -1149,19 +1137,7 @@
   
       pendingSelection = null;
       currentStepIndex++;
-
-      const nextStep = DRAFT_SEQUENCE[currentStepIndex];
-      let nextDuration = 30000;
-
-      if (nextStep) {
-        if (nextStep.type === 'pick' && nextStep.target === 'boss') {
-          nextDuration = 60000;
-        } else if (nextStep.type === 'pick' && nextStep.target === 'terrain') {
-          nextDuration = remainingMs; 
-        }
-      }
-
-      pushStateToFirebase(Date.now() + nextDuration);
+      pushStateToFirebase(Date.now() + 30000);
     }
 
     function renderGridForStep(step) {
@@ -1406,9 +1382,9 @@
       updateTopBossBansUI();
 
       const banner = document.getElementById('turn-banner');
-      banner.className = "schale-card rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md glow-halo-emerald relative overflow-hidden";
+      banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-emerald relative overflow-hidden";
       document.getElementById('phase-title').innerText = "STATUS: COMPLETED";
-      document.getElementById('turn-label').className = "text-3xl md:text-4xl font-black text-emerald-600 tracking-wide uppercase";
+      document.getElementById('turn-label').className = "text-2xl font-black text-emerald-600 tracking-wide";
       document.getElementById('turn-label').innerText = "BO5 GRAND FINAL DRAFT LOCKED IN!";
       document.getElementById('turn-subtitle').innerText = "All 5 games have been finalized.";
 
