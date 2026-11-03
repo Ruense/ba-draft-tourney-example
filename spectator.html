@@ -95,6 +95,29 @@
     </div>
   </header>
 
+  <!-- LOBBY STATUS BAR (FIXED WRAPPER TO PREVENT LAYOUT SHIFTS) -->
+  <div id="lobby-bar" class="bg-white/80 border-b border-sky-200/60 px-6 py-2">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- LEFT PLAYER STATUSES -->
+      <div class="flex items-center gap-6 flex-1">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-sky-600 uppercase tracking-wide" id="bar-host-label">Host (Blue):</span>
+          <span id="host-ready-badge" class="bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">NOT READY</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-rose-600 uppercase tracking-wide" id="bar-guest-label">Guest (Red):</span>
+          <span id="guest-ready-badge" class="bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">NOT READY</span>
+        </div>
+      </div>
+
+      <!-- RIGHT RESERVED AREA (PREVENTS SHIFTING) -->
+      <div class="min-w-[280px] flex justify-end"></div>
+
+    </div>
+  </div>
+
   <!-- BROADCAST MAIN CONTAINER -->
   <main class="max-w-7xl mx-auto w-full px-4 py-4 flex-1 flex flex-col gap-4">
 
@@ -244,6 +267,8 @@
 
     let currentStepIndex = 0;
     let draftStarted = false;
+    let hostReady = false;
+    let guestReady = false;
     let stepDeadline = 0;
     let hostName = '';
     let guestName = '';
@@ -323,6 +348,8 @@
         if (data) {
           currentStepIndex = data.currentStepIndex || 0;
           draftStarted = !!data.draftStarted;
+          hostReady = !!data.hostReady;
+          guestReady = !!data.guestReady;
           stepDeadline = data.stepDeadline || 0;
           bannedBosses = data.bannedBosses || [];
           hostName = data.hostName || '';
@@ -409,6 +436,12 @@
     }
 
     function updateSpectatorState() {
+      const hostDisplay = hostName ? `${hostName} (Blue)` : 'Host (Blue)';
+      const guestDisplay = guestName ? `${guestName} (Red)` : 'Guest (Red)';
+
+      document.getElementById('bar-host-label').innerText = hostDisplay + ':';
+      document.getElementById('bar-guest-label').innerText = guestDisplay + ':';
+
       document.getElementById('host-ban-header-title').innerText = hostName ? `${hostName} Boss Bans` : 'Host Boss Bans';
       document.getElementById('guest-ban-header-title').innerText = guestName ? `${guestName} Boss Bans` : 'Guest Boss Bans';
 
@@ -418,6 +451,25 @@
       document.getElementById('g1-bans-label').innerText = guestName ? `${guestName} Student Bans (3):` : 'Guest Student Bans (3):';
       document.getElementById('g2-bans-label').innerText = hostName ? `${hostName} Student Bans (3):` : 'Host Student Bans (3):';
       document.getElementById('g3-bans-label').innerText = `${hostName || 'Host'} (2) & ${guestName || 'Guest'} (2) Bans (4):`;
+
+      const hostBadge = document.getElementById('host-ready-badge');
+      const guestBadge = document.getElementById('guest-ready-badge');
+
+      if (hostReady) {
+        hostBadge.innerText = "READY";
+        hostBadge.className = "bg-sky-100 text-sky-700 border border-sky-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-cyan";
+      } else {
+        hostBadge.innerText = "NOT READY";
+        hostBadge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
+      }
+
+      if (guestReady) {
+        guestBadge.innerText = "READY";
+        guestBadge.className = "bg-rose-100 text-rose-700 border border-rose-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-rose";
+      } else {
+        guestBadge.innerText = "NOT READY";
+        guestBadge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
+      }
 
       if (!draftStarted) {
         stopTimer();
