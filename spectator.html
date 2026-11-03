@@ -75,10 +75,10 @@
       </div>
 
       <!-- CENTERED TIMER & TURN TEXT -->
-      <div id="header-timer-container" class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center schale-card-inner px-5 py-1 rounded-xl border border-sky-300 min-w-[200px] text-center shadow-inner">
+      <div id="header-timer-container" class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center schale-card-inner px-5 py-1 rounded-xl border border-sky-300 min-w-[220px] text-center shadow-inner">
         <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest leading-none">TIME REMAINING</span>
         <span id="timer-text" class="text-2xl font-black text-slate-400 tracking-wider leading-tight">--:--</span>
-        <span id="header-turn-label" class="text-[10px] font-black text-slate-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[180px]">
+        <span id="header-turn-label" class="text-[10px] font-black text-slate-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]">
           LOBBY WAITING
         </span>
       </div>
@@ -97,17 +97,12 @@
   <!-- BROADCAST MAIN CONTAINER -->
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- LIVE TURN BANNER & TIMER -->
+    <!-- LIVE TURN BANNER -->
     <div id="turn-banner" class="schale-card rounded-2xl p-5 flex items-center justify-between shadow-md relative overflow-hidden transition-all duration-300">
       <div class="text-left flex-1">
         <div class="text-xs uppercase tracking-widest font-black text-sky-600 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
         <div class="text-3xl font-black text-slate-800 tracking-wide" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
         <div class="text-xs text-slate-500 mt-1 font-semibold" id="turn-subtitle">Live sync in progress...</div>
-      </div>
-
-      <div id="timer-box" class="flex flex-col items-center justify-center schale-card-inner px-6 py-3 rounded-2xl border border-sky-300 min-w-[120px]">
-        <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">TIME REMAINING</span>
-        <span id="timer-text" class="text-4xl font-black text-slate-400 tracking-wider">--:--</span>
       </div>
     </div>
 
@@ -367,12 +362,12 @@
 
     function updateTimerDisplay(sec) {
       const timerText = document.getElementById('timer-text');
-      const timerBox = document.getElementById('timer-box');
+      const timerContainer = document.getElementById('header-timer-container');
 
       if (!draftStarted) {
         timerText.innerText = "--:--";
-        timerText.className = "text-4xl font-black text-slate-400";
-        timerBox.className = "flex flex-col items-center justify-center schale-card-inner px-6 py-3 rounded-2xl border border-sky-300 min-w-[120px]";
+        timerText.className = "text-2xl font-black text-slate-400 leading-tight";
+        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center schale-card-inner px-5 py-1 rounded-xl border border-sky-300 min-w-[220px] text-center shadow-inner";
         return;
       }
 
@@ -382,11 +377,11 @@
       timerText.innerText = formatted;
 
       if (sec <= 10) {
-        timerText.className = "text-4xl font-black text-rose-600 animate-pulse-fast";
-        timerBox.className = "flex flex-col items-center justify-center bg-rose-50 px-6 py-3 rounded-2xl border border-rose-300 min-w-[120px] glow-halo-rose";
+        timerText.className = "text-2xl font-black text-rose-600 leading-tight animate-pulse-fast";
+        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-rose-50 px-5 py-1 rounded-xl border border-rose-300 min-w-[220px] text-center shadow-inner glow-halo-rose";
       } else {
-        timerText.className = "text-4xl font-black text-sky-600";
-        timerBox.className = "flex flex-col items-center justify-center schale-card-inner px-6 py-3 rounded-2xl border border-sky-300 min-w-[120px]";
+        timerText.className = "text-2xl font-black text-sky-600 leading-tight";
+        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center schale-card-inner px-5 py-1 rounded-xl border border-sky-300 min-w-[220px] text-center shadow-inner";
       }
     }
 
@@ -410,6 +405,9 @@
         document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
         document.getElementById('turn-subtitle').innerText = "Host and Guest are preparing in lobby...";
 
+        // UPDATE TOP-CENTER TURN LABEL FOR PRE-DRAFT
+        document.getElementById('header-turn-label').innerText = "LOBBY WAITING";
+
         updateGameCardsUI();
         updateTopBossBansUI();
         return;
@@ -425,8 +423,10 @@
         document.getElementById('turn-label').className = "text-3xl font-black text-emerald-600 tracking-wide";
         document.getElementById('turn-label').innerText = "BO3 DRAFT COMPLETE!";
         document.getElementById('turn-subtitle').innerText = "All maps and student bans are locked in.";
+        
+        document.getElementById('header-turn-label').innerText = "DRAFT COMPLETED";
         document.getElementById('timer-text').innerText = "00:00";
-        document.getElementById('timer-text').className = "text-4xl font-black text-emerald-600";
+        document.getElementById('timer-text').className = "text-2xl font-black text-emerald-600 leading-tight";
         return;
       }
 
@@ -435,6 +435,8 @@
       document.getElementById('phase-title').innerText = `STEP ${currentStepIndex + 1} OF ${DRAFT_SEQUENCE.length}`;
       document.getElementById('turn-label').innerText = step.label.toUpperCase();
       document.getElementById('turn-subtitle').innerText = `Current turn in progress...`;
+
+      // UPDATE TOP-CENTER TURN LABEL FOR ACTIVE DRAFT STEP
       document.getElementById('header-turn-label').innerText = step.label.toUpperCase();
 
       if (step.team === 'blue') {
