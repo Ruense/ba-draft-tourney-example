@@ -140,10 +140,10 @@
       </div>
 
       <!-- CENTERED TIMER & TURN TEXT -->
-      <div id="header-timer-container" class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center schale-card-inner px-5 py-1 rounded-xl border border-sky-300 min-w-[200px] text-center shadow-inner">
+      <div id="header-timer-container" class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center schale-card-inner px-5 py-1 rounded-xl border border-sky-300 min-w-[220px] text-center shadow-inner">
         <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest leading-none">TIME LEFT</span>
         <span id="timer-text" class="text-2xl font-black text-slate-400 tracking-wider leading-tight">--:--</span>
-        <span id="header-turn-label" class="text-[10px] font-black text-slate-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[180px]">
+        <span id="header-turn-label" class="text-[10px] font-black text-slate-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]">
           LOBBY WAITING
         </span>
       </div>
@@ -183,6 +183,7 @@
       </div>
     </div>
   </header>
+
   <!-- LOBBY STATUS BAR -->
   <div id="lobby-bar" class="bg-white/80 border-b border-sky-200/60 px-6 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
@@ -213,7 +214,7 @@
   <!-- MAIN AREA -->
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- TURN STATUS BANNER WITH TIMER & READY UP BUTTON -->
+    <!-- TURN STATUS BANNER WITH READY UP BUTTON -->
     <div id="turn-banner" class="schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden transition-all duration-300">
       <div class="text-left flex-1">
         <div class="text-[10px] uppercase tracking-widest font-black text-sky-600 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
@@ -222,19 +223,13 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <!-- READY UP BUTTONS MOVED BESIDE TIMER -->
+        <!-- READY UP BUTTONS -->
         <button id="host-ready-btn" onclick="toggleReady('host')" class="hidden bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-cyan">
           READY UP
         </button>
         <button id="guest-ready-btn" onclick="toggleReady('guest')" class="hidden bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-rose">
           READY UP
         </button>
-
-        <!-- TIMER BOX -->
-        <div id="timer-box" class="flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-300 min-w-[110px]">
-          <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest">TIME LEFT</span>
-          <span id="timer-text" class="text-3xl font-black text-slate-400 tracking-wider">--:--</span>
-        </div>
       </div>
     </div>
 
@@ -472,7 +467,7 @@
     }
 
     const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbarka'];
-    const PERMA_BANNED_STUDENTS = ['10099', '10144']; // Perma-banned 2-in-1 students
+    const PERMA_BANNED_STUDENTS = ['10099', '10144'];
 
     let currentStepIndex = 0;
     let roleConfirmed = false;
@@ -523,7 +518,6 @@
         .then(r => r.json())
         .then(data => {
           Object.keys(data).forEach(x => {
-            // SKIP PERMA-BANNED STUDENT IDs
             if (PERMA_BANNED_STUDENTS.includes(x)) return;
       
             STUDENT_ROSTER.push({
@@ -666,7 +660,6 @@
       roleConfirmed = true;
       pendingSelection = null;
 
-      // SAVE ROLE TO LOCALSTORAGE
       localStorage.setItem('sh_draft_current_role', currentRole);
 
       document.getElementById('role-modal').classList.add('hidden');
@@ -803,8 +796,9 @@
           resetBtn.disabled = false;
           resetBtn.classList.remove('opacity-40', 'cursor-not-allowed');
         }
+        // HIDE SPECTATOR VIEW BUTTON FOR ADMIN
         if (spectatorBtn) {
-          spectatorBtn.classList.remove('hidden');
+          spectatorBtn.classList.add('hidden');
         }
       } else {
         if (changeBtn) changeBtn.classList.add('hidden');
@@ -869,12 +863,12 @@
 
     function updateTimerDisplay(sec) {
       const timerText = document.getElementById('timer-text');
-      const timerBox = document.getElementById('timer-box');
+      const timerContainer = document.getElementById('header-timer-container');
 
       if (!draftStarted) {
         timerText.innerText = "--:--";
-        timerText.className = "text-3xl font-black text-slate-400";
-        timerBox.className = "flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-300 min-w-[110px]";
+        timerText.className = "text-2xl font-black text-slate-400 leading-tight";
+        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center schale-card-inner px-5 py-1 rounded-xl border border-sky-300 min-w-[220px] text-center shadow-inner";
         return;
       }
 
@@ -885,11 +879,11 @@
       timerText.innerText = formatted;
 
       if (sec <= 10) {
-        timerText.className = "text-3xl font-black text-rose-600 animate-pulse-fast";
-        timerBox.className = "flex flex-col items-center justify-center bg-rose-50 px-5 py-2 rounded-xl border border-rose-300 min-w-[110px] glow-halo-rose";
+        timerText.className = "text-2xl font-black text-rose-600 leading-tight animate-pulse-fast";
+        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-rose-50 px-5 py-1 rounded-xl border border-rose-300 min-w-[220px] text-center shadow-inner glow-halo-rose";
       } else {
-        timerText.className = "text-3xl font-black text-sky-600";
-        timerBox.className = "flex flex-col items-center justify-center schale-card-inner px-5 py-2 rounded-xl border border-sky-300 min-w-[110px]";
+        timerText.className = "text-2xl font-black text-sky-600 leading-tight";
+        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center schale-card-inner px-5 py-1 rounded-xl border border-sky-300 min-w-[220px] text-center shadow-inner";
       }
     }
 
@@ -898,7 +892,6 @@
 
       const step = DRAFT_SEQUENCE[currentStepIndex];
 
-      // RESTRICTED ADMIN TIMEOUT LOGIC
       const isMyTurnToCommit = (step.team === 'blue' && currentRole === 'host') || 
                                (step.team === 'red' && currentRole === 'guest') || 
                                (currentRole === 'admin' && step.type === 'roll');
@@ -982,7 +975,6 @@
         guestBadge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
       }
 
-      // UPDATE READY UP BUTTON STYLING IN BANNER
       const hostReadyBtn = document.getElementById('host-ready-btn');
       if (hostReadyBtn) {
         if (hostReady) {
@@ -1016,7 +1008,9 @@
         document.getElementById('turn-label').className = "text-2xl font-black text-slate-800 tracking-wide";
         document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
         document.getElementById('turn-subtitle').innerText = "Host and Guest must ready up before Admin can start the draft.";
-        document.getElementById('header-turn-label').innerText = step.label.toUpperCase();
+
+        // UPDATE TOP-CENTER TURN LABEL FOR PRE-DRAFT
+        document.getElementById('header-turn-label').innerText = "LOBBY WAITING";
 
         updateGameCardsUI();
         updateTopBossBansUI();
@@ -1041,7 +1035,6 @@
         return;
       }
 
-      // SOUND NOTIFICATION FOR ACTIVE TURN
       const isMyTurn = (step.team === 'blue' && currentRole === 'host') || 
                        (step.team === 'red' && currentRole === 'guest');
 
@@ -1054,6 +1047,9 @@
       document.getElementById('phase-title').innerText = `STEP ${currentStepIndex + 1} OF ${DRAFT_SEQUENCE.length}`;
       document.getElementById('turn-label').innerText = step.label.toUpperCase();
       document.getElementById('turn-subtitle').innerText = getStepSubtitle(step);
+
+      // UPDATE TOP-CENTER TURN LABEL FOR ACTIVE DRAFT STEP
+      document.getElementById('header-turn-label').innerText = step.label.toUpperCase();
 
       if (step.team === 'blue') {
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-cyan relative overflow-hidden";
@@ -1156,7 +1152,6 @@
         confirmBtn.classList.add('hidden');
       }
 
-      // RESTRICTED ADMIN CARD SELECTION (Admin can only act on Game 3 terrain roll)
       const isAllowedRole = (step.team === 'blue' && currentRole === 'host') || 
                             (step.team === 'red' && currentRole === 'guest') ||
                             (currentRole === 'admin' && step.type === 'roll');
@@ -1445,8 +1440,9 @@
       document.getElementById('turn-label').innerText = "BO3 MAP & BAN DRAFT LOCKED IN!";
       document.getElementById('turn-subtitle').innerText = "All bosses, terrains, and student bans have been finalized";
 
+      document.getElementById('header-turn-label').innerText = "DRAFT COMPLETED";
       document.getElementById('timer-text').innerText = "00:00";
-      document.getElementById('timer-text').className = "text-3xl font-black text-emerald-600";
+      document.getElementById('timer-text').className = "text-2xl font-black text-emerald-600 leading-tight";
 
       const grid = document.getElementById('selection-grid');
       document.getElementById('grid-title').innerText = "DRAFT SUMMARY";
@@ -1503,7 +1499,6 @@
         .filter(b => b.team === 'red')
         .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
     
-      // Map each game's student bans with exact player and role attribution
       const formattedGames = gameData.map((g, idx) => {
         const gameNum = idx + 1;
         let studentBans = [];
@@ -1545,7 +1540,6 @@
         };
       });
     
-      // Send formatted JSON payload to Google Apps Script
       fetch(WEB_APP_URL, {
         method: 'POST',
         mode: 'no-cors',
