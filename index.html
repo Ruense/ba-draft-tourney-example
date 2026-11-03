@@ -4,19 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- Custom Favicon for Browser Tab -->
   <link rel="icon" type="image/png" href="sh_logo_norm_white.png">
-
-  <title>Blue Archive BO3 Draft - Senseihood Tournament</title>
+  <title>Senseihood BO3 Draft - Match Control</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&display=swap');
-    
     * { font-family: 'Noto Sans', sans-serif !important; }
     
     body { 
@@ -34,28 +30,10 @@
     .glow-halo-gold { box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35); border-color: #f59e0b !important; }
     .glow-halo-emerald { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35); border-color: #10b981 !important; }
 
-    .schale-card {
-      background: #ffffff;
-      border: 1px solid #cce7ff;
-      box-shadow: 0 4px 16px rgba(18, 180, 255, 0.08);
-    }
+    .schale-card { background: #ffffff; border: 1px solid #cce7ff; box-shadow: 0 4px 16px rgba(18, 180, 255, 0.08); }
+    .schale-card-inner { background: #f0f7ff; border: 1px solid #d3e6f9; color: #334155; }
 
-    .schale-card-inner {
-      background: #f0f7ff;
-      border: 1px solid #d3e6f9;
-      color: #334155;
-    }
-
-    .slot-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-    .slot-card:hover:not(.disabled) { 
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(18, 180, 255, 0.25);
-    }
-
-    @keyframes pulse-fast {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
+    @keyframes pulse-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .animate-pulse-fast { animation: pulse-fast 0.6s infinite; }
 
     @keyframes slot-pulse-cyan {
@@ -71,56 +49,12 @@
       50% { box-shadow: 0 0 6px rgba(245, 158, 11, 0.3); border-color: #fde68a !important; transform: scale(1); }
     }
 
-    .active-slot-blue { animation: slot-pulse-cyan 1.2s infinite ease-in-out; border-width: 2px !important; z-index: 20; }
-    .active-slot-red { animation: slot-pulse-rose 1.2s infinite ease-in-out; border-width: 2px !important; z-index: 20; }
-    .active-slot-yellow { animation: slot-pulse-yellow 1.2s infinite ease-in-out; border-width: 2px !important; z-index: 20; }
+    .active-slot-blue { animation: slot-pulse-cyan 1.2s infinite ease-in-out; border-width: 2px !important; }
+    .active-slot-red { animation: slot-pulse-rose 1.2s infinite ease-in-out; border-width: 2px !important; }
+    .active-slot-yellow { animation: slot-pulse-yellow 1.2s infinite ease-in-out; border-width: 2px !important; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
-
-  <!-- ROLE SELECTION POPUP MODAL -->
-  <div id="role-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-    <div class="schale-card rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-sky-300 relative">
-      <div class="text-center mb-6">
-        <div class="w-12 h-12 rounded-2xl bg-sky-500 border border-sky-400 flex items-center justify-center mx-auto mb-2 shadow-md p-1">
-          <img src="sh_logo_norm_white.png" alt="Logo" class="w-full h-full object-contain">
-        </div>
-        <h2 class="text-xl font-black text-slate-800 tracking-wider">SELECT YOUR ROLE</h2>
-        <p class="text-xs text-sky-600 font-bold tracking-wide mt-0.5">SENSEIHOOD TOURNAMENT DRAFT</p>
-      </div>
-
-      <!-- ROLE GRID BUTTONS -->
-      <div class="grid grid-cols-3 gap-3 mb-5">
-        <button onclick="selectModalRole('host')" id="role-btn-host" class="modal-role-btn border-2 border-sky-200 bg-sky-50/50 hover:bg-sky-100 p-3 rounded-xl flex flex-col items-center justify-center transition">
-          <span class="font-black text-sm text-sky-600">HOST</span>
-          <span class="text-[10px] text-sky-500 font-bold">Team Blue</span>
-        </button>
-
-        <button onclick="selectModalRole('guest')" id="role-btn-guest" class="modal-role-btn border-2 border-rose-200 bg-rose-50/50 hover:bg-rose-100 p-3 rounded-xl flex flex-col items-center justify-center transition">
-          <span class="font-black text-sm text-rose-600">GUEST</span>
-          <span class="text-[10px] text-rose-500 font-bold">Team Red</span>
-        </button>
-
-        <button onclick="selectModalRole('admin')" id="role-btn-admin" class="modal-role-btn border-2 border-amber-200 bg-amber-50/50 hover:bg-amber-100 p-3 rounded-xl flex flex-col items-center justify-center transition">
-          <span class="font-black text-sm text-amber-600">ADMIN</span>
-          <span class="text-[10px] text-amber-500 font-bold">Controls</span>
-        </button>
-      </div>
-
-      <!-- CONDITIONAL INPUT BOXES -->
-      <div id="modal-input-section" class="mb-5 hidden">
-        <label id="modal-input-label" class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5 text-center">
-          ENTER YOUR NAME
-        </label>
-        <input type="text" id="modal-role-input" placeholder="Enter here..." class="w-full bg-slate-50 border border-sky-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 text-center outline-none focus:border-sky-500 shadow-inner">
-      </div>
-
-      <!-- SUBMIT BUTTON -->
-      <button onclick="confirmModalRole()" id="modal-submit-btn" class="w-full bg-sky-500 hover:bg-sky-400 text-white font-black text-xs py-3 rounded-xl shadow-md transition tracking-widest uppercase">
-        ENTER DRAFT
-      </button>
-    </div>
-  </div>
 
   <!-- STICKY HEADER WITH ABSOLUTE CENTERED TOP TIMER -->
   <header class="bg-white/95 border-b border-sky-200 px-6 py-2 sticky top-0 z-50 backdrop-blur-md shadow-sm">
@@ -150,15 +84,15 @@
 
       <!-- RIGHT ROOM & ROLE CONTROLS -->
       <div class="flex flex-wrap items-center gap-2">
-        <div class="flex items-center bg-sky-50/80 px-2 py-1 rounded-lg border border-sky-200 text-xs gap-1 shadow-inner">
+        <div class="flex items-center bg-sky-50/80 px-2.5 py-1 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
           <span class="text-sky-700 font-bold uppercase tracking-wider text-[9px]">ROOM:</span>
-          <input type="text" id="room-code-input" value="default-room" class="bg-white px-2 py-0.5 rounded text-sky-800 font-black border border-sky-300 w-24 text-center outline-none focus:border-sky-500 text-xs">
+          <input type="text" id="room-code-input" value="default-room" class="bg-white px-2 py-0.5 rounded text-sky-800 font-black border border-sky-300 w-24 text-center outline-none focus:border-sky-500 text-xs shadow-sm">
           <button onclick="connectToRoom()" class="bg-sky-500 hover:bg-sky-400 text-white font-black px-2.5 py-0.5 rounded transition text-xs shadow">
             SYNC
           </button>
         </div>
 
-        <div class="flex items-center bg-sky-50/80 px-2 py-1 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
+        <div class="flex items-center bg-sky-50/80 px-2.5 py-1 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
           <span class="text-sky-700 font-bold uppercase tracking-wider text-[9px]">ROLE:</span>
           <span id="current-role-display" class="font-black text-sky-800 uppercase text-xs">UNASSIGNED</span>
           <button id="change-role-btn" onclick="openRoleModal()" class="hidden bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold text-[9px] px-1.5 py-0.5 rounded border border-sky-300 transition">
@@ -174,7 +108,7 @@
     </div>
   </header>
 
-  <!-- LOBBY STATUS BAR (FIXED LAYOUT WRAPPER) -->
+  <!-- LOBBY STATUS BAR (FIXED WRAPPER TO PREVENT SHIFTS) -->
   <div id="lobby-bar" class="bg-white/80 border-b border-sky-200/60 px-6 py-2">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
       
@@ -183,15 +117,21 @@
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold text-sky-600 uppercase tracking-wide" id="bar-host-label">Host (Blue):</span>
           <span id="host-ready-badge" class="bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">NOT READY</span>
+          <button id="host-ready-btn" onclick="toggleReadiness('blue')" class="hidden bg-sky-500 hover:bg-sky-400 text-white font-black px-2.5 py-0.5 rounded text-xs shadow transition">
+            TOGGLE READY
+          </button>
         </div>
 
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold text-rose-600 uppercase tracking-wide" id="bar-guest-label">Guest (Red):</span>
           <span id="guest-ready-badge" class="bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">NOT READY</span>
+          <button id="guest-ready-btn" onclick="toggleReadiness('red')" class="hidden bg-rose-500 hover:bg-rose-400 text-white font-black px-2.5 py-0.5 rounded text-xs shadow transition">
+            TOGGLE READY
+          </button>
         </div>
       </div>
 
-      <!-- RIGHT ADMIN START BUTTON RESERVED AREA (PREVENTS LAYOUT SHIFT) -->
+      <!-- RIGHT ADMIN START BUTTON RESERVED AREA (PREVENTS SHIFTING) -->
       <div class="min-w-[280px] flex justify-end">
         <button id="admin-start-btn" onclick="startDraftByAdmin()" disabled class="bg-emerald-50 text-slate-400 cursor-not-allowed text-xs font-black px-4 py-1.5 rounded-lg border border-emerald-200 transition tracking-wider flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
@@ -204,24 +144,15 @@
     </div>
   </div>
 
-  <!-- MAIN AREA -->
+  <!-- MAIN CONTAINER -->
   <main class="max-w-7xl mx-auto w-full px-4 py-4 flex-1 flex flex-col gap-4">
 
-    <!-- TURN STATUS BANNER -->
+    <!-- LIVE TURN BANNER -->
     <div id="turn-banner" class="schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden transition-all duration-300">
       <div class="text-left flex-1">
         <div class="text-[10px] uppercase tracking-widest font-black text-sky-600 mb-0.5" id="phase-title">PRE-DRAFT LOBBY</div>
         <div class="text-2xl font-black text-slate-800 tracking-wide" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
         <div class="text-xs text-slate-500 font-semibold" id="turn-subtitle">Host and Guest must ready up before Admin can start the draft.</div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <button id="host-ready-btn" onclick="toggleReady('host')" class="hidden bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-cyan">
-          READY UP
-        </button>
-        <button id="guest-ready-btn" onclick="toggleReady('guest')" class="hidden bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-rose">
-          READY UP
-        </button>
       </div>
     </div>
 
@@ -253,7 +184,6 @@
 
     <!-- GAME CARDS CONTAINER -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      
       <!-- GAME 1 -->
       <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
         <div>
@@ -331,44 +261,42 @@
           <div id="g3-bans-container" class="grid grid-cols-4 gap-1.5 h-[64px]"></div>
         </div>
       </div>
-
     </div>
 
-    <!-- SELECTION GRID AREA -->
-    <div class="schale-card rounded-2xl p-5 flex-1 flex flex-col min-h-[380px] shadow-lg">
-      <div class="flex justify-between items-center mb-3 pb-2 border-b border-sky-100 gap-3">
-        <div class="flex items-center gap-2">
-          <h2 class="text-xs font-black text-slate-800 uppercase tracking-widest" id="grid-title">SELECTABLE BOSS POOL</h2>
-          <span class="text-[10px] bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-full text-sky-700 font-bold" id="grid-count">Available</span>
-        </div>
-
-        <div id="student-search-box" class="hidden flex-1 max-w-xs">
-          <input type="text" id="student-search-input" oninput="filterStudents(this.value)" placeholder="Search student name..." class="w-full bg-white border border-sky-300 text-slate-800 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-sky-500 shadow-inner">
-        </div>
-
-        <div class="flex items-center gap-2">
-          <button id="confirm-selection-btn" onclick="confirmCurrentSelection()" class="hidden bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs px-5 py-2 rounded-lg shadow-md transition duration-200 tracking-wider glow-halo-emerald flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-            </svg>
-            CONFIRM SELECTION
-          </button>
-
-          <button id="admin-roll-btn" onclick="executeAdminRoll()" class="hidden bg-amber-500 hover:bg-amber-400 text-white font-black text-xs px-4 py-2 rounded-lg shadow-md transition tracking-wider glow-halo-gold flex items-center gap-1.5">
-            RANDOMIZE DECIDER TERRAIN
-          </button>
-        </div>
-      </div>
-
-      <div id="selection-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 overflow-y-auto max-h-[440px] p-1">
-        <!-- CARDS RENDERED BY JS -->
-      </div>
+    <!-- SELECTION GRID CONTAINER -->
+    <div id="selection-grid-section" class="schale-card rounded-2xl p-4 shadow-md hidden">
+      <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2" id="grid-title">
+        <span>AVAILABLE SELECTIONS</span>
+      </h3>
+      <div id="selection-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2"></div>
     </div>
 
   </main>
 
+  <!-- ROLE MODAL -->
+  <div id="role-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl border border-sky-100 text-center">
+      <h3 class="text-base font-black text-slate-800 uppercase tracking-wider mb-1">SELECT YOUR DRAFT ROLE</h3>
+      <p class="text-xs text-slate-500 mb-5 font-semibold">Choose how you want to participate in this match.</p>
+      
+      <div class="flex flex-col gap-2.5">
+        <button onclick="selectRole('blue')" class="bg-sky-500 hover:bg-sky-400 text-white font-black py-2.5 rounded-xl transition text-xs tracking-wider shadow">
+          JOIN AS HOST (BLUE TEAM)
+        </button>
+        <button onclick="selectRole('red')" class="bg-rose-500 hover:bg-rose-400 text-white font-black py-2.5 rounded-xl transition text-xs tracking-wider shadow">
+          JOIN AS GUEST (RED TEAM)
+        </button>
+        <button onclick="selectRole('admin')" class="bg-amber-500 hover:bg-amber-400 text-white font-black py-2.5 rounded-xl transition text-xs tracking-wider shadow">
+          JOIN AS MATCH ADMIN
+        </button>
+        <button onclick="selectRole('spectator')" class="bg-slate-700 hover:bg-slate-600 text-white font-black py-2.5 rounded-xl transition text-xs tracking-wider shadow">
+          SPECTATOR ONLY
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    /* FIREBASE CONFIGURATION */
     const firebaseConfig = {
       apiKey: "AIzaSyCCThwp_3-lx7C6MyCWiUiZich_guk4oLk",
       authDomain: "bluearchivedrafttourney.firebaseapp.com",
@@ -384,70 +312,15 @@
     const db = firebase.database();
     let currentRoomRef = null;
 
-    /* WEB AUDIO ALERT SYNTHESIZER */
-    let audioCtx = null;
-    let lastNotifiedStep = -1;
+    let role = null;
+    let currentStepIndex = 0;
+    let draftStarted = false;
+    let hostReady = false;
+    let guestReady = false;
+    let stepDeadline = 0;
 
-    function getAudioContext() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      return audioCtx;
-    }
-
-    document.addEventListener('click', () => { getAudioContext(); }, { once: true });
-
-    function playTurnChime() {
-      try {
-        const ctx = getAudioContext();
-        if (!ctx) return;
-        const now = ctx.currentTime;
-        
-        const osc1 = ctx.createOscillator();
-        const gain1 = ctx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(880, now);
-        gain1.gain.setValueAtTime(0.15, now);
-        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-        osc1.connect(gain1);
-        gain1.connect(ctx.destination);
-        osc1.start(now);
-        osc1.stop(now + 0.6);
-
-        const osc2 = ctx.createOscillator();
-        const gain2 = ctx.createGain();
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(1318.51, now + 0.08);
-        gain2.gain.setValueAtTime(0.2, now + 0.08);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-        osc2.connect(gain2);
-        gain2.connect(ctx.destination);
-        osc2.start(now + 0.08);
-        osc2.stop(now + 0.8);
-      } catch (e) {
-        console.log("Audio alert playback suppressed:", e);
-      }
-    }
-
-    let clientSessionId = localStorage.getItem('sh_draft_session_id');
-    if (!clientSessionId) {
-      clientSessionId = 'sess_' + Math.random().toString(36).substring(2, 9);
-      localStorage.setItem('sh_draft_session_id', clientSessionId);
-    }
-
-    let currentRole = 'host';
-    let modalSelectedRole = 'host';
-    const savedRole = localStorage.getItem('sh_draft_current_role');
-    if (savedRole) {
-      currentRole = savedRole;
-      modalSelectedRole = savedRole;
-    }
-
-    const ADMIN_PASSWORD = "Senseihood1234";
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwexc3_lsvhadskAmSTKe65PWZnxU65h-xGO_6JlxcKrxse6bB65Bd6zXIDTrc1bqIJqw/exec";
+    let hostName = '';
+    let guestName = '';
 
     const BOSS_ROSTER = [];
     const TERRAIN_ROSTER = [
@@ -458,6 +331,19 @@
     let STUDENT_ROSTER = [];
 
     let DRAFT_SEQUENCE = [];
+    const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbarka'];
+
+    let bannedBosses = [];
+    let gameData = [
+      { boss: null, terrain: null, studentBans: [] },
+      { boss: null, terrain: null, studentBans: [] },
+      { boss: null, terrain: null, studentBans: [] }
+    ];
+
+    let timerInterval = null;
+    let preservedDeadline = 0; // Tracks remaining time for Boss Pick -> Terrain Pick carry over
+
+    function isAdmin() { return role === 'admin'; }
 
     function buildDraftSequence() {
       const hName = hostName || 'Host';
@@ -468,29 +354,22 @@
         { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 1` },
         { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 2` },
         { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 2` },
-
         { team: 'blue', type: 'pick', target: 'boss',    game: 1, label: `Game 1 Boss (${hName} Pick)` },
         { team: 'blue', type: 'pick', target: 'terrain', game: 1, label: `Game 1 Terrain (${hName} Pick)` },
-
         { team: 'red',  type: 'pick', target: 'boss',    game: 2, label: `Game 2 Boss (${gName} Pick)` },
         { team: 'red',  type: 'pick', target: 'terrain', game: 2, label: `Game 2 Terrain (${gName} Pick)` },
-
         { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 3` },
         { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 3` },
         { team: 'blue', type: 'ban', target: 'boss', label: `${hName} Boss Ban 4` },
         { team: 'red',  type: 'ban', target: 'boss', label: `${gName} Boss Ban 4` },
-
         { team: 'neutral', type: 'decider', target: 'boss',    game: 3, label: 'Game 3 Boss (Decider Auto-Pick)' },
         { team: 'admin',   type: 'roll',    target: 'terrain', game: 3, label: 'Game 3 Terrain (Admin Randomize)' },
-
         { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 1 (${gName})` },
         { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 2 (${gName})` },
         { team: 'red',  type: 'ban', target: 'student', game: 1, label: `Game 1 Student Ban 3 (${gName})` },
-
         { team: 'blue', type: 'ban', target: 'student', game: 2, label: `Game 2 Student Ban 1 (${hName})` },
         { team: 'blue', type: 'ban', target: 'student', game: 2, label: `Game 2 Student Ban 2 (${hName})` },
         { team: 'blue', type: 'ban', target: 'student', game: 2, label: `Game 2 Student Ban 3 (${hName})` },
-
         { team: 'blue', type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 1 (${hName})` },
         { team: 'blue', type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 2 (${hName})` },
         { team: 'red',  type: 'ban', target: 'student', game: 3, label: `Game 3 Student Ban 1 (${gName})` },
@@ -498,37 +377,8 @@
       ];
     }
 
-    const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbarka'];
-    const PERMA_BANNED_STUDENTS = ['10099', '10144'];
-
-    let currentStepIndex = 0;
-    let roleConfirmed = false;
-    let draftStarted = false;
-    let hostReady = false;
-    let guestReady = false;
-    let stepDeadline = 0;
-
-    let hostSessionId = null;
-    let guestSessionId = null;
-    let hostName = '';
-    let guestName = '';
-
-    let bannedBosses = [];
-    let pendingSelection = null;
-    let timerInterval = null;
-
-    function getEmptyGameData() {
-      return [
-        { boss: null, terrain: null, studentBans: [] },
-        { boss: null, terrain: null, studentBans: [] },
-        { boss: null, terrain: null, studentBans: [] }
-      ];
-    }
-
-    let gameData = getEmptyGameData();
-
     window.onload = function() {
-      const raid_boss_promise = fetch("https://schaledb.com/data/en/raids.min.json")
+      fetch("https://schaledb.com/data/en/raids.min.json")
         .then(r => r.json())
         .then(data => {
           data.Raid.forEach(x => {
@@ -543,123 +393,42 @@
               image: 'https://schaledb.com/images/raid/Boss_Portrait_' + x.DevName + '_Lobby.png'
             });
           });
+          buildDraftSequence();
+          connectToRoom();
         });
 
-      const student_promise = fetch("https://schaledb.com/data/en/students.min.json")
+      fetch("https://schaledb.com/data/en/students.min.json")
         .then(r => r.json())
         .then(data => {
-          Object.keys(data).forEach(x => {
-            if (PERMA_BANNED_STUDENTS.includes(x)) return;
-      
-            STUDENT_ROSTER.push({
-              id: x,
-              name: data[x].Name,
-              image: 'https://schaledb.com/images/student/collection/' + x + '.webp'
-            });
-          });
-      
-          STUDENT_ROSTER.sort((a, b) => a.name.localeCompare(b.name));
+          STUDENT_ROSTER = data.map(s => ({
+            id: s.Id,
+            name: s.Name,
+            image: `https://schaledb.com/images/student/icon/${s.Id}.png`
+          }));
         });
-
-      Promise.all([raid_boss_promise, student_promise]).then(() => {
-        buildDraftSequence();
-        connectToRoom();
-        openRoleModal();
-      });
     };
 
     function openRoleModal() {
-      if (roleConfirmed && currentRole !== 'admin') {
-        alert("Roles and player names are locked. Only the Admin can reset the session!");
-        return;
-      }
       document.getElementById('role-modal').classList.remove('hidden');
-      selectModalRole(currentRole);
     }
 
-    function selectModalRole(role) {
-      modalSelectedRole = role;
-      
-      document.querySelectorAll('.modal-role-btn').forEach(btn => {
-        btn.classList.remove('ring-4', 'ring-sky-400', 'ring-rose-400', 'ring-amber-400');
-      });
-
-      const selectedBtn = document.getElementById(`role-btn-${role}`);
-      if (selectedBtn) {
-        if (role === 'host') selectedBtn.classList.add('ring-4', 'ring-sky-400');
-        else if (role === 'guest') selectedBtn.classList.add('ring-4', 'ring-rose-400');
-        else if (role === 'admin') selectedBtn.classList.add('ring-4', 'ring-amber-400');
-      }
-
-      const inputSec = document.getElementById('modal-input-section');
-      const label = document.getElementById('modal-input-label');
-      const input = document.getElementById('modal-role-input');
-
-      if (role === 'host') {
-        inputSec.classList.remove('hidden');
-        label.innerText = "ENTER HOST NAME";
-        input.type = "text";
-        input.placeholder = "Player 1 Name...";
-        input.value = hostName || '';
-      } else if (role === 'guest') {
-        inputSec.classList.remove('hidden');
-        label.innerText = "ENTER GUEST NAME";
-        input.type = "text";
-        input.placeholder = "Player 2 Name...";
-        input.value = guestName || '';
-      } else if (role === 'admin') {
-        inputSec.classList.remove('hidden');
-        label.innerText = "ENTER ADMIN PASSWORD";
-        input.type = "password";
-        input.placeholder = "••••••••";
-        input.value = '';
-      }
-    }
-
-    function confirmModalRole() {
-      const inputVal = document.getElementById('modal-role-input').value.trim();
-
-      if (modalSelectedRole === 'admin') {
-        if (inputVal !== ADMIN_PASSWORD) {
-          alert("Incorrect Admin Password!");
-          return;
-        }
-      }
-
-      if (modalSelectedRole === 'host') {
-        if (!inputVal) { alert("Please enter a name for Host!"); return; }
-        if (hostName && hostName.toLowerCase() !== inputVal.toLowerCase()) {
-          alert(`Host role is already claimed by "${hostName}". You cannot join with a different name!`);
-          return;
-        }
-        hostSessionId = clientSessionId;
-        hostName = inputVal;
-      }
-
-      if (modalSelectedRole === 'guest') {
-        if (!inputVal) { alert("Please enter a name for Guest!"); return; }
-        if (guestName && guestName.toLowerCase() !== inputVal.toLowerCase()) {
-          alert(`Guest role is already claimed by "${guestName}". You cannot join with a different name!`);
-          return;
-        }
-        guestSessionId = clientSessionId;
-        guestName = inputVal;
-      }
-
-      currentRole = modalSelectedRole;
-      roleConfirmed = true;
-      pendingSelection = null;
-
-      localStorage.setItem('sh_draft_current_role', currentRole);
+    function selectRole(selectedRole) {
+      role = selectedRole;
       document.getElementById('role-modal').classList.add('hidden');
-      
-      updateRoleControls();
-      pushStateToFirebase();
+      document.getElementById('current-role-display').innerText = role.toUpperCase();
+      document.getElementById('change-role-btn').classList.remove('hidden');
+
+      if (role === 'admin') {
+        document.getElementById('header-reset-btn').classList.remove('hidden');
+      } else {
+        document.getElementById('header-reset-btn').classList.add('hidden');
+      }
+
+      updateUI();
     }
 
     function connectToRoom() {
       const roomCode = document.getElementById('room-code-input').value.trim() || 'default-room';
-      
       if (currentRoomRef) currentRoomRef.off();
       currentRoomRef = db.ref('draft_rooms/' + roomCode);
 
@@ -672,9 +441,6 @@
           guestReady = !!data.guestReady;
           stepDeadline = data.stepDeadline || 0;
           bannedBosses = data.bannedBosses || [];
-          
-          hostSessionId = data.hostSessionId || null;
-          guestSessionId = data.guestSessionId || null;
           hostName = data.hostName || '';
           guestName = data.guestName || '';
           
@@ -688,107 +454,115 @@
             };
           });
 
-          if (!hostSessionId && !guestSessionId && !draftStarted && currentRole !== 'admin') {
-            roleConfirmed = false;
-          }
-
           buildDraftSequence();
-          updateDraftState();
+          updateUI();
         } else {
-          pushStateToFirebase();
+          // Initialize new room
+          currentRoomRef.set({
+            currentStepIndex: 0,
+            draftStarted: false,
+            hostReady: false,
+            guestReady: false,
+            stepDeadline: 0,
+            bannedBosses: [],
+            gameData: [
+              { boss: null, terrain: null, studentBans: [] },
+              { boss: null, terrain: null, studentBans: [] },
+              { boss: null, terrain: null, studentBans: [] }
+            ]
+          });
         }
       });
+
+      if (!role) openRoleModal();
     }
 
-    function pushStateToFirebase(newDeadline = null) {
-      if (!currentRoomRef) return;
-      currentRoomRef.set({
-        currentStepIndex: currentStepIndex,
-        draftStarted: draftStarted,
-        hostReady: hostReady,
-        guestReady: guestReady,
-        stepDeadline: newDeadline !== null ? newDeadline : stepDeadline,
-        bannedBosses: bannedBosses,
-        gameData: gameData,
-        hostSessionId: hostSessionId,
-        guestSessionId: guestSessionId,
-        hostName: hostName,
-        guestName: guestName
-      });
-    }
-
-    function toggleReady(role) {
-      if (role === 'host' && currentRole === 'host') {
-        hostReady = !hostReady;
-        pushStateToFirebase();
-      } else if (role === 'guest' && currentRole === 'guest') {
-        guestReady = !guestReady;
-        pushStateToFirebase();
+    function toggleReadiness(targetTeam) {
+      if ((targetTeam === 'blue' && role === 'blue') || (targetTeam === 'red' && role === 'red') || role === 'admin') {
+        if (targetTeam === 'blue') {
+          currentRoomRef.update({ hostReady: !hostReady });
+        } else {
+          currentRoomRef.update({ guestReady: !guestReady });
+        }
       }
     }
 
     function startDraftByAdmin() {
-      if (currentRole !== 'admin') return;
-      if (!hostReady || !guestReady) return;
-      draftStarted = true;
-      pushStateToFirebase(Date.now() + 30000);
+      if (!isAdmin() || !hostReady || !guestReady) return;
+
+      const firstDeadline = Date.now() + (60 * 1000);
+      currentRoomRef.update({
+        draftStarted: true,
+        currentStepIndex: 0,
+        stepDeadline: firstDeadline
+      });
+    }
+
+    function nextStep() {
+      const currentStep = DRAFT_SEQUENCE[currentStepIndex];
+      
+      // Preserve deadline before step increment
+      preservedDeadline = stepDeadline;
+      currentStepIndex++;
+
+      if (currentStepIndex >= DRAFT_SEQUENCE.length) {
+        if (isAdmin()) {
+          currentRoomRef.update({
+            currentStepIndex: currentStepIndex,
+            gameData: gameData,
+            bannedBosses: bannedBosses
+          });
+        }
+        return;
+      }
+
+      const nextStepObj = DRAFT_SEQUENCE[currentStepIndex];
+
+      // Combined 1-minute logic: Boss Pick -> Terrain Pick in same game
+      const isTerrainAfterBoss = (
+        nextStepObj.type === 'pick' && 
+        nextStepObj.target === 'terrain' && 
+        currentStep && 
+        currentStep.type === 'pick' && 
+        currentStep.target === 'boss' && 
+        currentStep.game === nextStepObj.game
+      );
+
+      let newDeadline = 0;
+      if (isTerrainAfterBoss && preservedDeadline > Date.now()) {
+        newDeadline = preservedDeadline;
+      } else {
+        newDeadline = Date.now() + (60 * 1000);
+      }
+
+      stepDeadline = newDeadline;
+
+      if (isAdmin()) {
+        currentRoomRef.update({
+          currentStepIndex: currentStepIndex,
+          stepDeadline: stepDeadline,
+          gameData: gameData,
+          bannedBosses: bannedBosses
+        });
+      }
     }
 
     function resetDraft() {
-      if (currentRole !== 'admin') return;
-      stopTimer();
-      currentStepIndex = 0;
-      draftStarted = false;
-      hostReady = false;
-      guestReady = false;
-      stepDeadline = 0;
-      bannedBosses = [];
-      pendingSelection = null;
-      hostSessionId = null;
-      guestSessionId = null;
-      hostName = '';
-      guestName = '';
-      gameData = getEmptyGameData();
-
-      localStorage.removeItem('sh_draft_current_role');
-      pushStateToFirebase(0);
-    }
-
-    function updateRoleControls() {
-      document.getElementById('current-role-display').innerText = currentRole.toUpperCase();
-
-      const changeBtn = document.getElementById('change-role-btn');
-      const resetBtn = document.getElementById('header-reset-btn');
-
-      if (currentRole === 'admin') {
-        if (changeBtn) changeBtn.classList.remove('hidden');
-        if (resetBtn) resetBtn.classList.remove('hidden');
-      } else {
-        if (changeBtn) changeBtn.classList.add('hidden');
-        if (resetBtn) resetBtn.classList.add('hidden');
-      }
-
-      const hostReadyBtn = document.getElementById('host-ready-btn');
-      const guestReadyBtn = document.getElementById('guest-ready-btn');
-
-      if (!draftStarted && currentRole === 'host') hostReadyBtn.classList.remove('hidden');
-      else hostReadyBtn.classList.add('hidden');
-
-      if (!draftStarted && currentRole === 'guest') guestReadyBtn.classList.remove('hidden');
-      else guestReadyBtn.classList.add('hidden');
-
-      const adminStartBtn = document.getElementById('admin-start-btn');
-      if (currentRole === 'admin' && !draftStarted) {
-        adminStartBtn.classList.remove('hidden');
-        if (hostReady && guestReady) {
-          adminStartBtn.disabled = false;
-          adminStartBtn.className = "bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-black px-4 py-1.5 rounded-lg transition cursor-pointer shadow-md tracking-wider glow-halo-emerald flex items-center gap-1.5";
-        } else {
-          adminStartBtn.disabled = true;
-          adminStartBtn.className = "bg-emerald-50 text-slate-400 text-xs font-black px-4 py-1.5 rounded-lg border border-emerald-200 cursor-not-allowed transition tracking-wider flex items-center gap-1.5";
-        }
-      } else {
-        adminStartBtn.classList.add('hidden');
+      if (!isAdmin()) return;
+      if (confirm("Reset the draft for this room?")) {
+        currentRoomRef.set({
+          currentStepIndex: 0,
+          draftStarted: false,
+          hostReady: false,
+          guestReady: false,
+          stepDeadline: 0,
+          bannedBosses: [],
+          gameData: [
+            { boss: null, terrain: null, studentBans: [] },
+            { boss: null, terrain: null, studentBans: [] },
+            { boss: null, terrain: null, studentBans: [] }
+          ]
+        });
       }
     }
 
@@ -800,14 +574,12 @@
       }
 
       updateTimerDisplay(getRemainingSeconds());
-
       timerInterval = setInterval(() => {
         const remaining = getRemainingSeconds();
         updateTimerDisplay(remaining);
-
         if (remaining <= 0) {
           stopTimer();
-          autoHandleTimeout();
+          if (isAdmin()) handleTimeout();
         }
       }, 500);
     }
@@ -829,14 +601,15 @@
       if (!draftStarted) {
         timerText.innerText = "--:--";
         timerText.className = "text-xl font-black text-slate-400 tracking-wider leading-tight";
-        container.className = "flex flex-col items-center justify-center bg-sky-50/90 px-5 py-0.5 rounded-xl border border-sky-300 shadow-inner min-w-[220px] max-w-[280px]";
+        container.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-sky-50/90 px-5 py-0.5 rounded-xl border border-sky-300 shadow-inner min-w-[220px] max-w-[280px]";
         if (timerTitle) timerTitle.className = "text-[8px] font-black text-sky-600 uppercase tracking-widest leading-none";
         return;
       }
 
       const mins = Math.floor(sec / 60);
       const remainingSecs = sec % 60;
-      timerText.innerText = `${String(mins).padStart(2, '0')}:${String(remainingSecs).padStart(2, '0')}`;
+      const formatted = `${String(mins).padStart(2, '0')}:${String(remainingSecs).padStart(2, '0')}`;
+      timerText.innerText = formatted;
 
       const step = DRAFT_SEQUENCE[currentStepIndex];
       const isRedTeam = step?.team === 'red';
@@ -844,82 +617,59 @@
 
       if (sec <= 10) {
         timerText.className = "text-xl font-black text-rose-600 animate-pulse-fast tracking-wider leading-tight";
-        container.className = "flex flex-col items-center justify-center bg-rose-50 px-5 py-0.5 rounded-xl border border-rose-400 glow-halo-rose shadow-md min-w-[220px] max-w-[280px]";
+        container.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-rose-50 px-5 py-0.5 rounded-xl border border-rose-400 glow-halo-rose shadow-md min-w-[220px] max-w-[280px]";
         if (timerTitle) timerTitle.className = "text-[8px] font-black text-rose-600 uppercase tracking-widest leading-none";
       } else if (isRedTeam) {
         timerText.className = "text-xl font-black text-rose-600 tracking-wider leading-tight";
-        container.className = "flex flex-col items-center justify-center bg-rose-50/90 px-5 py-0.5 rounded-xl border border-rose-300 shadow-inner min-w-[220px] max-w-[280px]";
+        container.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-rose-50/90 px-5 py-0.5 rounded-xl border border-rose-300 shadow-inner min-w-[220px] max-w-[280px]";
         if (timerTitle) timerTitle.className = "text-[8px] font-black text-rose-600 uppercase tracking-widest leading-none";
       } else if (isBlueTeam) {
         timerText.className = "text-xl font-black text-sky-600 tracking-wider leading-tight";
-        container.className = "flex flex-col items-center justify-center bg-sky-50/90 px-5 py-0.5 rounded-xl border border-sky-300 shadow-inner min-w-[220px] max-w-[280px]";
+        container.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-sky-50/90 px-5 py-0.5 rounded-xl border border-sky-300 shadow-inner min-w-[220px] max-w-[280px]";
         if (timerTitle) timerTitle.className = "text-[8px] font-black text-sky-600 uppercase tracking-widest leading-none";
       } else {
         timerText.className = "text-xl font-black text-amber-600 tracking-wider leading-tight";
-        container.className = "flex flex-col items-center justify-center bg-amber-50/90 px-5 py-0.5 rounded-xl border border-amber-300 shadow-inner min-w-[220px] max-w-[280px]";
+        container.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-amber-50/90 px-5 py-0.5 rounded-xl border border-amber-300 shadow-inner min-w-[220px] max-w-[280px]";
         if (timerTitle) timerTitle.className = "text-[8px] font-black text-amber-600 uppercase tracking-widest leading-none";
       }
     }
 
-    function autoHandleTimeout() {
-      if (!draftStarted || currentStepIndex >= DRAFT_SEQUENCE.length) return;
-
+    function handleTimeout() {
       const step = DRAFT_SEQUENCE[currentStepIndex];
-      const isMyTurnToCommit = (step.team === 'blue' && currentRole === 'host') || 
-                               (step.team === 'red' && currentRole === 'guest') || 
-                               (currentRole === 'admin' && step.type === 'roll');
+      if (!step) return;
 
-      if (!isMyTurnToCommit) return;
-
-      if (pendingSelection) {
-        confirmCurrentSelection();
-        return;
-      }
-
-      if (step.target === 'boss') {
-        const usedIds = [...bannedBosses.map(b => b.id), gameData[0].boss?.id, gameData[1].boss?.id].filter(Boolean);
-        const availableBosses = BOSS_ROSTER.filter(b => !usedIds.includes(b.id));
-        if (availableBosses.length > 0) {
-          pendingSelection = availableBosses[Math.floor(Math.random() * availableBosses.length)];
-          confirmCurrentSelection();
+      if (step.target === 'boss' && step.type === 'ban') {
+        const remainingBosses = BOSS_ROSTER.filter(b => !bannedBosses.some(x => x.id === b.id));
+        if (remainingBosses.length > 0) {
+          const autoBan = remainingBosses[Math.floor(Math.random() * remainingBosses.length)];
+          bannedBosses.push({ id: autoBan.id, team: step.team });
         }
-      } else if (step.target === 'terrain') {
-        const activeBoss = gameData[step.game - 1].boss;
-        const allowedTerrains = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
-        const availableTerrains = TERRAIN_ROSTER.filter(t => allowedTerrains.includes(t.id));
+      } else if (step.target === 'boss' && step.type === 'pick') {
+        const remainingBosses = BOSS_ROSTER.filter(b => !bannedBosses.some(x => x.id === b.id) && !gameData.some(g => g.boss?.id === b.id));
+        if (remainingBosses.length > 0) {
+          gameData[step.game - 1].boss = remainingBosses[0];
+        }
+      } else if (step.target === 'terrain' && step.type === 'pick') {
+        const pickedBoss = gameData[step.game - 1].boss;
+        const availableTerrains = TERRAIN_ROSTER.filter(t => !pickedBoss || pickedBoss.terrains.includes(t.id));
         if (availableTerrains.length > 0) {
-          pendingSelection = availableTerrains[Math.floor(Math.random() * availableTerrains.length)];
-          confirmCurrentSelection();
-        }
-      } else if (step.target === 'student') {
-        const activeGameBans = gameData[step.game - 1].studentBans || [];
-        const availableStudents = STUDENT_ROSTER.filter(s => !activeGameBans.some(b => b.id === s.id));
-        if (availableStudents.length > 0) {
-          pendingSelection = availableStudents[Math.floor(Math.random() * availableStudents.length)];
-          confirmCurrentSelection();
+          gameData[step.game - 1].terrain = availableTerrains[0];
         }
       }
+
+      nextStep();
     }
 
-    function updateDraftState() {
-      const hostDisplay = hostName ? `${hostName} (Blue)` : 'Host (Blue)';
-      const guestDisplay = guestName ? `${guestName} (Red)` : 'Guest (Red)';
-
-      document.getElementById('bar-host-label').innerText = hostDisplay + ':';
-      document.getElementById('bar-guest-label').innerText = guestDisplay + ':';
-
-      document.getElementById('host-ban-header-title').innerText = hostName ? `${hostName} Boss Bans` : 'Host Boss Bans';
-      document.getElementById('guest-ban-header-title').innerText = guestName ? `${guestName} Boss Bans` : 'Guest Boss Bans';
-
-      document.getElementById('g1-title').innerText = hostName ? `GAME 1 (${hostName.toUpperCase()} PICK)` : 'GAME 1 (HOST PICK)';
-      document.getElementById('g2-title').innerText = guestName ? `GAME 2 (${guestName.toUpperCase()} PICK)` : 'GAME 2 (GUEST PICK)';
-      
-      document.getElementById('g1-bans-label').innerText = guestName ? `${guestName} Student Bans (3):` : 'Guest Student Bans (3):';
-      document.getElementById('g2-bans-label').innerText = hostName ? `${hostName} Student Bans (3):` : 'Host Student Bans (3):';
-      document.getElementById('g3-bans-label').innerText = `${hostName || 'Host'} (2) & ${guestName || 'Guest'} (2) Bans (4):`;
-
+    function updateUI() {
+      // Lobby status display
       const hostBadge = document.getElementById('host-ready-badge');
       const guestBadge = document.getElementById('guest-ready-badge');
+      const hostBtn = document.getElementById('host-ready-btn');
+      const guestBtn = document.getElementById('guest-ready-btn');
+      const startBtn = document.getElementById('admin-start-btn');
+
+      document.getElementById('bar-host-label').innerText = (hostName ? `${hostName} (Blue)` : 'Host (Blue)') + ':';
+      document.getElementById('bar-guest-label').innerText = (guestName ? `${guestName} (Red)` : 'Guest (Red)') + ':';
 
       if (hostReady) {
         hostBadge.innerText = "READY";
@@ -937,33 +687,28 @@
         guestBadge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
       }
 
-      const hostReadyBtn = document.getElementById('host-ready-btn');
-      if (hostReadyBtn) {
-        if (hostReady) {
-          hostReadyBtn.innerText = "CANCEL READY";
-          hostReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider";
+      if (role === 'blue' || role === 'admin') hostBtn.classList.remove('hidden'); else hostBtn.classList.add('hidden');
+      if (role === 'red' || role === 'admin') guestBtn.classList.remove('hidden'); else guestBtn.classList.add('hidden');
+
+      if (isAdmin()) {
+        if (hostReady && guestReady && !draftStarted) {
+          startBtn.disabled = false;
+          startBtn.className = "bg-emerald-500 hover:bg-emerald-400 text-white cursor-pointer text-xs font-black px-4 py-1.5 rounded-lg border border-emerald-400 shadow-md transition tracking-wider flex items-center gap-1.5 glow-halo-emerald";
         } else {
-          hostReadyBtn.innerText = "READY UP";
-          hostReadyBtn.className = "bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-cyan";
+          startBtn.disabled = true;
+          startBtn.className = "bg-emerald-50 text-slate-400 cursor-not-allowed text-xs font-black px-4 py-1.5 rounded-lg border border-emerald-200 transition tracking-wider flex items-center gap-1.5";
         }
+      } else {
+        startBtn.classList.add('hidden');
       }
 
-      const guestReadyBtn = document.getElementById('guest-ready-btn');
-      if (guestReadyBtn) {
-        if (guestReady) {
-          guestReadyBtn.innerText = "CANCEL READY";
-          guestReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider";
-        } else {
-          guestReadyBtn.innerText = "READY UP";
-          guestReadyBtn.className = "bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-rose";
-        }
-      }
+      updateTopBossBansUI();
+      updateGameCardsUI();
 
-      updateRoleControls();
+      const headerTurnText = document.getElementById('header-turn-label');
 
       if (!draftStarted) {
         stopTimer();
-        lastNotifiedStep = -1;
         const banner = document.getElementById('turn-banner');
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden";
         document.getElementById('phase-title').innerText = "PRE-DRAFT LOBBY";
@@ -971,243 +716,64 @@
         document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
         document.getElementById('turn-subtitle').innerText = "Host and Guest must ready up before Admin can start the draft.";
         
-        document.getElementById('header-turn-label').innerText = "LOBBY WAITING";
-        document.getElementById('header-turn-label').className = "text-[9px] font-black text-slate-500 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
+        if (headerTurnText) {
+          headerTurnText.innerText = "LOBBY WAITING";
+          headerTurnText.className = "text-[9px] font-black text-slate-500 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
+        }
 
-        updateGameCardsUI();
-        updateTopBossBansUI();
-        renderLobbyGrid();
+        document.getElementById('selection-grid-section').classList.add('hidden');
         return;
       }
 
       if (currentStepIndex >= DRAFT_SEQUENCE.length) {
         stopTimer();
-        renderCompleteState();
+        const banner = document.getElementById('turn-banner');
+        banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-emerald relative overflow-hidden";
+        document.getElementById('phase-title').innerText = "STATUS: COMPLETED";
+        document.getElementById('turn-label').className = "text-2xl font-black text-emerald-600 tracking-wide";
+        document.getElementById('turn-label').innerText = "BO3 DRAFT COMPLETE!";
+        document.getElementById('turn-subtitle').innerText = "All maps and student bans are locked in.";
+        
+        const timerText = document.getElementById('timer-text');
+        if (timerText) {
+          timerText.innerText = "00:00";
+          timerText.className = "text-xl font-black text-emerald-600 tracking-wider leading-tight";
+        }
+        if (headerTurnText) {
+          headerTurnText.innerText = "DRAFT COMPLETED";
+          headerTurnText.className = "text-[9px] font-black text-emerald-600 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
+        }
+
+        document.getElementById('selection-grid-section').classList.add('hidden');
         return;
       }
 
       const step = DRAFT_SEQUENCE[currentStepIndex];
-
-      if (step.type === 'decider' && step.target === 'boss') {
-        const usedIds = [...bannedBosses.map(b => b.id), gameData[0].boss?.id, gameData[1].boss?.id].filter(Boolean);
-        const rem = BOSS_ROSTER.find(b => !usedIds.includes(b.id));
-        if (rem) gameData[2].boss = rem;
-        currentStepIndex++;
-        pushStateToFirebase(Date.now() + 30000);
-        return;
-      }
-
-      const isMyTurn = (step.team === 'blue' && currentRole === 'host') || 
-                       (step.team === 'red' && currentRole === 'guest');
-
-      if (isMyTurn && lastNotifiedStep !== currentStepIndex) {
-        playTurnChime();
-        lastNotifiedStep = currentStepIndex;
-      }
-
       const banner = document.getElementById('turn-banner');
       document.getElementById('phase-title').innerText = `STEP ${currentStepIndex + 1} OF ${DRAFT_SEQUENCE.length}`;
       document.getElementById('turn-label').innerText = step.label.toUpperCase();
       document.getElementById('turn-subtitle').innerText = `Current turn in progress...`;
 
-      // UPDATE HEADER TOP TURN LABEL BELOW TIMER
-      const headerTurnText = document.getElementById('header-turn-label');
-      headerTurnText.innerText = step.label.toUpperCase();
+      if (headerTurnText) {
+        headerTurnText.innerText = step.label.toUpperCase();
+      }
 
       if (step.team === 'blue') {
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-cyan relative overflow-hidden";
         document.getElementById('turn-label').className = "text-2xl font-black text-sky-600 tracking-wide";
-        headerTurnText.className = "text-[9px] font-black text-sky-600 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
+        if (headerTurnText) headerTurnText.className = "text-[9px] font-black text-sky-600 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
       } else if (step.team === 'red') {
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-rose relative overflow-hidden";
         document.getElementById('turn-label').className = "text-2xl font-black text-rose-600 tracking-wide";
-        headerTurnText.className = "text-[9px] font-black text-rose-600 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
+        if (headerTurnText) headerTurnText.className = "text-[9px] font-black text-rose-600 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
       } else {
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-gold relative overflow-hidden";
         document.getElementById('turn-label').className = "text-2xl font-black text-amber-600 tracking-wide";
-        headerTurnText.className = "text-[9px] font-black text-amber-600 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
+        if (headerTurnText) headerTurnText.className = "text-[9px] font-black text-amber-600 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
       }
 
-      updateGameCardsUI();
-      updateTopBossBansUI();
-      renderGridForStep(step);
+      renderSelectionGrid(step);
       syncServerTimer();
-    }
-
-    function renderLobbyGrid() {
-      const grid = document.getElementById('selection-grid');
-      document.getElementById('grid-title').innerText = "PRE-DRAFT PREVIEW";
-      document.getElementById('grid-count').innerText = "Waiting";
-      document.getElementById('confirm-selection-btn').classList.add('hidden');
-      document.getElementById('admin-roll-btn').classList.add('hidden');
-
-      grid.innerHTML = `
-        <div class="col-span-full schale-card-inner p-8 rounded-xl border border-sky-200 text-center flex flex-col items-center justify-center my-6">
-          <h3 class="font-bold text-lg text-slate-800 mb-1">BO3 Draft Lobby</h3>
-          <p class="text-xs text-slate-500 max-w-md">Both Host and Guest must click <b>READY UP</b> to begin.</p>
-        </div>
-      `;
-    }
-
-    function handleCardClick(item) {
-      if (!draftStarted) return;
-      const searchInput = document.getElementById('student-search-input');
-      const currentQuery = searchInput ? searchInput.value : '';
-
-      if (pendingSelection && pendingSelection.id === item.id) {
-        pendingSelection = null;
-      } else {
-        pendingSelection = item;
-      }
-      
-      const step = DRAFT_SEQUENCE[currentStepIndex];
-      renderGridForStep(step);
-
-      if (step.target === 'student' && searchInput) {
-        searchInput.value = currentQuery;
-        filterStudents(currentQuery);
-        searchInput.focus();
-      }
-    }
-
-    function confirmCurrentSelection() {
-      if (!pendingSelection || !draftStarted) return;
-
-      const step = DRAFT_SEQUENCE[currentStepIndex];
-      if (step.type === 'ban' && step.target === 'boss') {
-        bannedBosses.push({ id: pendingSelection.id, team: step.team });
-      } else if (step.type === 'pick' && step.target === 'boss') {
-        gameData[step.game - 1].boss = pendingSelection;
-      } else if (step.type === 'pick' && step.target === 'terrain') {
-        gameData[step.game - 1].terrain = pendingSelection;
-      } else if (step.type === 'ban' && step.target === 'student') {
-        if (!gameData[step.game - 1].studentBans) gameData[step.game - 1].studentBans = [];
-        gameData[step.game - 1].studentBans.push(pendingSelection);
-      }
-
-      const searchInput = document.getElementById('student-search-input');
-      if (searchInput) { searchInput.value = ''; filterStudents(''); }
-
-      pendingSelection = null;
-      currentStepIndex++;
-      pushStateToFirebase(Date.now() + 30000);
-    }
-
-    function renderGridForStep(step) {
-      const grid = document.getElementById('selection-grid');
-      const searchBox = document.getElementById('student-search-box');
-      const rollBtn = document.getElementById('admin-roll-btn');
-      const confirmBtn = document.getElementById('confirm-selection-btn');
-
-      grid.innerHTML = '';
-      searchBox.classList.add('hidden');
-      rollBtn.classList.add('hidden');
-
-      if (pendingSelection) confirmBtn.classList.remove('hidden');
-      else confirmBtn.classList.add('hidden');
-
-      const isAllowedRole = (step.team === 'blue' && currentRole === 'host') || 
-                            (step.team === 'red' && currentRole === 'guest') ||
-                            (currentRole === 'admin' && step.type === 'roll');
-
-      if (step.target === 'boss') {
-        document.getElementById('grid-title').innerText = "SELECTABLE BOSS POOL";
-        
-        BOSS_ROSTER.forEach(boss => {
-          const banRecord = bannedBosses.find(b => b.id === boss.id);
-          const isBanned = !!banRecord;
-          const isPicked = gameData.some(g => g.boss?.id === boss.id);
-          const isAvailable = !isBanned && !isPicked;
-          const isPending = pendingSelection?.id === boss.id;
-
-          const card = document.createElement('div');
-          let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (isAvailable ? 'border-sky-200 hover:border-sky-500' : 'border-slate-200 opacity-40 cursor-not-allowed');
-
-          card.className = `slot-card schale-card-inner border rounded-xl p-2 text-center relative flex flex-col justify-between items-center ${borderStyle}`;
-          card.innerHTML = `
-            <div class="w-full h-16 bg-slate-200/80 rounded-lg mb-1 overflow-hidden relative">
-              <img src="${boss.image}" class="w-full h-full object-cover">
-            </div>
-            <span class="font-bold text-xs text-slate-800">${boss.name}</span>
-          `;
-
-          if (isAvailable && isAllowedRole) card.onclick = () => handleCardClick(boss);
-          grid.appendChild(card);
-        });
-
-      } else if (step.target === 'terrain') {
-        document.getElementById('grid-title').innerText = "SELECT TERRAIN";
-        const activeBoss = gameData[step.game - 1].boss;
-        const allowed = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
-
-        if (step.type === 'roll' && currentRole === 'admin') rollBtn.classList.remove('hidden');
-
-        TERRAIN_ROSTER.forEach(terrain => {
-          const isAllowed = allowed.includes(terrain.id);
-          const isPending = pendingSelection?.id === terrain.id;
-          const card = document.createElement('div');
-          let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (isAllowed ? 'border-sky-200 hover:border-amber-500' : 'border-slate-200 opacity-20 cursor-not-allowed');
-
-          card.className = `slot-card schale-card-inner border rounded-xl p-2 text-center relative ${borderStyle}`;
-          card.innerHTML = `
-            <div class="w-full h-12 bg-slate-900 rounded-lg mb-1 overflow-hidden p-1 flex items-center justify-center">
-              <img src="${terrain.image}" class="w-full h-full object-contain filter brightness-0 invert">
-            </div>
-            <span class="font-bold text-xs text-slate-800">${terrain.name}</span>
-          `;
-
-          if (isAllowed && step.type !== 'roll' && isAllowedRole) card.onclick = () => handleCardClick(terrain);
-          grid.appendChild(card);
-        });
-
-      } else if (step.target === 'student') {
-        document.getElementById('grid-title').innerText = `GAME ${step.game} STUDENT BANS`;
-        searchBox.classList.remove('hidden');
-
-        const searchInput = document.getElementById('student-search-input');
-        const activeQuery = searchInput ? searchInput.value.trim() : '';
-        const activeGameBans = gameData[step.game - 1].studentBans || [];
-
-        STUDENT_ROSTER.forEach(student => {
-          const isBanned = activeGameBans.some(s => s.id === student.id);
-          const isPending = pendingSelection?.id === student.id;
-          const card = document.createElement('div');
-          let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (!isBanned ? 'border-sky-200 hover:border-rose-500' : 'border-slate-200 opacity-40 cursor-not-allowed');
-
-          const matchesQuery = student.name.toLowerCase().includes(activeQuery.toLowerCase());
-          const visibilityClass = (activeQuery && !matchesQuery) ? 'hidden' : '';
-
-          card.className = `student-card slot-card schale-card-inner border rounded-xl p-2 text-center relative ${borderStyle} ${visibilityClass}`;
-          card.setAttribute('data-name', student.name.toLowerCase());
-          card.innerHTML = `
-            <div class="w-12 h-12 bg-slate-200/80 rounded-full mx-auto mb-1 overflow-hidden border border-sky-200">
-              <img src="${student.image}" class="w-full h-full object-cover">
-            </div>
-            <span class="font-bold text-[10px] text-slate-800 block truncate">${student.name}</span>
-          `;
-
-          if (!isBanned && isAllowedRole) card.onclick = () => handleCardClick(student);
-          grid.appendChild(card);
-        });
-      }
-    }
-
-    function executeAdminRoll() {
-      if (currentRole !== 'admin') return;
-      const step = DRAFT_SEQUENCE[currentStepIndex];
-      const activeBoss = gameData[step.game - 1].boss;
-      const allowed = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
-      const rolledId = allowed[Math.floor(Math.random() * allowed.length)];
-      gameData[step.game - 1].terrain = TERRAIN_ROSTER.find(t => t.id === rolledId);
-      currentStepIndex++;
-      pushStateToFirebase(Date.now() + 30000);
-    }
-
-    function filterStudents(q) {
-      document.querySelectorAll('.student-card').forEach(card => {
-        if (card.getAttribute('data-name').includes(q.toLowerCase().trim())) card.classList.remove('hidden');
-        else card.classList.add('hidden');
-      });
     }
 
     function updateTopBossBansUI() {
@@ -1317,158 +883,90 @@
       }
     }
 
-    function renderCompleteState() {
-      stopTimer();
-      updateGameCardsUI();
-      updateTopBossBansUI();
-
-      const banner = document.getElementById('turn-banner');
-      banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-emerald relative overflow-hidden";
-      document.getElementById('phase-title').innerText = "STATUS: COMPLETED";
-      document.getElementById('turn-label').className = "text-2xl font-black text-emerald-600 tracking-wide";
-      document.getElementById('turn-label').innerText = "BO3 DRAFT COMPLETE!";
-      document.getElementById('turn-subtitle').innerText = "All maps and student bans are locked in.";
-
-      const headerTurnText = document.getElementById('header-turn-label');
-      if (headerTurnText) {
-        headerTurnText.innerText = "DRAFT COMPLETED";
-        headerTurnText.className = "text-[9px] font-black text-emerald-600 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
-      }
-
+    function renderSelectionGrid(step) {
+      const gridContainer = document.getElementById('selection-grid-section');
       const grid = document.getElementById('selection-grid');
-      document.getElementById('grid-title').innerText = "DRAFT SUMMARY";
-      document.getElementById('grid-count').innerText = "Finished";
-      document.getElementById('confirm-selection-btn').classList.add('hidden');
+      grid.innerHTML = '';
 
-      grid.innerHTML = `
-        <div class="col-span-full schale-card-inner p-6 rounded-xl border border-emerald-300 text-center flex flex-col items-center justify-center">
-          <svg class="w-10 h-10 text-emerald-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <h3 class="font-bold text-lg text-slate-800 mb-1">Match Ready to Begin</h3>
-          <p class="text-xs text-slate-500 mb-4">All pick and ban selections are finalized for this BO3 set.</p>
+      const isMyTurn = (step.team === role) || (role === 'admin');
 
-          ${currentRole === 'admin' ? `
-            <div class="flex flex-wrap items-center justify-center gap-3">
-              <button id="submit-sheet-btn" onclick="submitResultsToSheet()" class="bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs px-5 py-2.5 rounded-lg transition tracking-wider flex items-center justify-center gap-1.5 shadow-md glow-halo-emerald">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                </svg>
-                SUBMIT RESULTS TO SHEET
-              </button>
-
-              <button onclick="resetDraft()" class="bg-sky-500 hover:bg-sky-400 text-white font-black text-xs px-5 py-2.5 rounded-lg transition tracking-wider flex items-center justify-center gap-1.5 shadow-md">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                START NEW DRAFT
-              </button>
-            </div>
-            <div id="submit-status-msg" class="text-xs font-bold text-emerald-600 mt-2 hidden"></div>
-          ` : `
-            <p class="text-xs font-bold text-sky-600">Waiting for Admin to submit and finalize results...</p>
-          `}
-        </div>
-      `;
-    }
-
-    function submitResultsToSheet() {
-      if (currentRole !== 'admin') return;
-
-      const submitBtn = document.getElementById('submit-sheet-btn');
-      const statusMsg = document.getElementById('submit-status-msg');
-
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        submitBtn.innerText = "SUBMITTING...";
+      if (!isMyTurn) {
+        gridContainer.classList.add('hidden');
+        return;
       }
 
-      const hostBannedBosses = bannedBosses
-        .filter(b => b.team === 'blue')
-        .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
+      gridContainer.classList.remove('hidden');
 
-      const guestBannedBosses = bannedBosses
-        .filter(b => b.team === 'red')
-        .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
-
-      const formattedGames = gameData.map((g, idx) => {
-        const gameNum = idx + 1;
-        let studentBans = [];
-
-        if (g.studentBans && Array.isArray(g.studentBans)) {
-          studentBans = g.studentBans.map((s, banIdx) => {
-            let bannedByRole = '';
-            let bannedByName = '';
-
-            if (gameNum === 1) {
-              bannedByRole = 'Guest';
-              bannedByName = guestName || 'Guest';
-            } else if (gameNum === 2) {
-              bannedByRole = 'Host';
-              bannedByName = hostName || 'Host';
-            } else if (gameNum === 3) {
-              if (banIdx < 2) {
-                bannedByRole = 'Host';
-                bannedByName = hostName || 'Host';
-              } else {
-                bannedByRole = 'Guest';
-                bannedByName = guestName || 'Guest';
-              }
-            }
-
-            return {
-              name: s.name,
-              bannedByRole: bannedByRole,
-              bannedByName: bannedByName
-            };
-          });
+      if (step.target === 'boss' && step.type === 'ban') {
+        const available = BOSS_ROSTER.filter(b => !bannedBosses.some(x => x.id === b.id));
+        available.forEach(boss => {
+          const btn = document.createElement('button');
+          btn.className = "schale-card-inner hover:border-sky-400 p-2 rounded-xl flex flex-col items-center transition shadow-sm hover:scale-105";
+          btn.innerHTML = `<img src="${boss.image}" class="w-full h-16 object-cover rounded mb-1"><span class="text-xs font-bold text-slate-700 truncate w-full text-center">${boss.name}</span>`;
+          btn.onclick = () => {
+            bannedBosses.push({ id: boss.id, team: step.team });
+            nextStep();
+          };
+          grid.appendChild(btn);
+        });
+      } else if (step.target === 'boss' && step.type === 'pick') {
+        const available = BOSS_ROSTER.filter(b => !bannedBosses.some(x => x.id === b.id) && !gameData.some(g => g.boss?.id === b.id));
+        available.forEach(boss => {
+          const btn = document.createElement('button');
+          btn.className = "schale-card-inner hover:border-sky-400 p-2 rounded-xl flex flex-col items-center transition shadow-sm hover:scale-105";
+          btn.innerHTML = `<img src="${boss.image}" class="w-full h-16 object-cover rounded mb-1"><span class="text-xs font-bold text-slate-700 truncate w-full text-center">${boss.name}</span>`;
+          btn.onclick = () => {
+            gameData[step.game - 1].boss = boss;
+            nextStep();
+          };
+          grid.appendChild(btn);
+        });
+      } else if (step.target === 'terrain' && step.type === 'pick') {
+        const pickedBoss = gameData[step.game - 1].boss;
+        const available = TERRAIN_ROSTER.filter(t => !pickedBoss || pickedBoss.terrains.includes(t.id));
+        available.forEach(terrain => {
+          const btn = document.createElement('button');
+          btn.className = "schale-card-inner hover:border-amber-400 p-3 rounded-xl flex flex-col items-center transition shadow-sm hover:scale-105";
+          btn.innerHTML = `<img src="${terrain.image}" class="w-10 h-10 object-contain mb-2"><span class="text-xs font-bold text-slate-700 truncate w-full text-center">${terrain.name}</span>`;
+          btn.onclick = () => {
+            gameData[step.game - 1].terrain = terrain;
+            nextStep();
+          };
+          grid.appendChild(btn);
+        });
+      } else if (step.target === 'boss' && step.type === 'decider') {
+        // Auto-select remaining boss for Game 3 Decider
+        const remaining = BOSS_ROSTER.filter(b => !bannedBosses.some(x => x.id === b.id) && !gameData.some(g => g.boss?.id === b.id));
+        if (remaining.length > 0) {
+          gameData[2].boss = remaining[0];
         }
-
-        return {
-          gameNumber: gameNum,
-          boss: g.boss,
-          terrain: g.terrain,
-          studentBans: studentBans
+        nextStep();
+      } else if (step.target === 'terrain' && step.type === 'roll') {
+        const btn = document.createElement('button');
+        btn.className = "col-span-full bg-amber-500 hover:bg-amber-400 text-white font-black py-3 rounded-xl transition text-sm tracking-wider shadow-md";
+        btn.innerText = "ROLL DECIDER TERRAIN (RANDOM)";
+        btn.onclick = () => {
+          const pickedBoss = gameData[2].boss;
+          const available = TERRAIN_ROSTER.filter(t => !pickedBoss || pickedBoss.terrains.includes(t.id));
+          const rolled = available[Math.floor(Math.random() * available.length)];
+          gameData[2].terrain = rolled;
+          nextStep();
         };
-      });
-
-      fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          roomCode: document.getElementById('room-code-input').value,
-          hostName: hostName,
-          guestName: guestName,
-          hostBossBans: hostBannedBosses,
-          guestBossBans: guestBannedBosses,
-          games: formattedGames
-        })
-      })
-      .then(() => {
-        if (submitBtn) {
-          submitBtn.innerText = "SUBMITTED TO SHEET!";
-          submitBtn.className = "bg-emerald-600 text-white font-black text-xs px-5 py-2.5 rounded-lg tracking-wider flex items-center justify-center gap-1.5 shadow-md";
-        }
-        if (statusMsg) {
-          statusMsg.innerText = "Draft results successfully logged into Google Sheet!";
-          statusMsg.classList.remove('hidden');
-        }
-      })
-      .catch(err => {
-        console.error('Error logging draft to Google Sheet:', err);
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          submitBtn.innerText = "RETRY SUBMIT";
-        }
-        if (statusMsg) {
-          statusMsg.innerText = "Failed to submit. Please try again.";
-          statusMsg.className = "text-xs font-bold text-rose-600 mt-2";
-          statusMsg.classList.remove('hidden');
-        }
-      });
+        grid.appendChild(btn);
+      } else if (step.target === 'student' && step.type === 'ban') {
+        const currentBans = gameData[step.game - 1].studentBans || [];
+        const available = STUDENT_ROSTER.filter(s => !currentBans.some(x => x.id === s.id));
+        available.forEach(student => {
+          const btn = document.createElement('button');
+          btn.className = "schale-card-inner hover:border-rose-400 p-2 rounded-xl flex flex-col items-center transition shadow-sm hover:scale-105";
+          btn.innerHTML = `<img src="${student.image}" class="w-12 h-12 object-cover rounded-full mb-1"><span class="text-[10px] font-bold text-slate-700 truncate w-full text-center">${student.name}</span>`;
+          btn.onclick = () => {
+            gameData[step.game - 1].studentBans.push(student);
+            nextStep();
+          };
+          grid.appendChild(btn);
+        });
+      }
     }
   </script>
 </body>
