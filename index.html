@@ -122,9 +122,9 @@
     </div>
   </div>
 
-  <!-- STICKY HEADER WITH WIDER TOP-CENTER TIMER -->
+  <!-- STICKY HEADER WITH ABSOLUTE CENTERED TOP TIMER -->
   <header class="bg-white/95 border-b border-sky-200 px-6 py-2 sticky top-0 z-50 backdrop-blur-md shadow-sm">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 relative">
       
       <!-- LEFT BRANDING -->
       <div class="flex items-center gap-3">
@@ -139,8 +139,8 @@
         </div>
       </div>
 
-      <!-- CENTER PINNED TOP TIMER & CURRENT TURN INDICATOR (WIDER FIT) -->
-      <div id="header-timer-container" class="flex flex-col items-center justify-center bg-sky-50/90 px-5 py-0.5 rounded-xl border border-sky-300 shadow-inner min-w-[220px] max-w-[280px]">
+      <!-- ABSOLUTE CENTERED TOP TIMER & CURRENT TURN INDICATOR -->
+      <div id="header-timer-container" class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-sky-50/90 px-5 py-0.5 rounded-xl border border-sky-300 shadow-inner min-w-[220px] max-w-[280px]">
         <span id="header-timer-title" class="text-[8px] font-black text-sky-600 uppercase tracking-widest leading-none">TIME REMAINING</span>
         <span id="timer-text" class="text-xl font-black text-slate-400 tracking-wider leading-tight">--:--</span>
         <span id="header-turn-label" class="text-[9px] font-black text-slate-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none">
