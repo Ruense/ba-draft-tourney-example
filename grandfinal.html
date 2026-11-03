@@ -219,19 +219,19 @@
   <!-- MAIN AREA -->
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- TURN STATUS BANNER WITH READY UP BUTTON -->
-    <div id="turn-banner" class="schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden transition-all duration-300">
-      <div class="text-left flex-1">
+    <!-- CENTERED STEP BANNER -->
+    <div id="turn-banner" class="schale-card rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden transition-all duration-300">
+      <div class="text-center w-full">
         <div class="text-[10px] uppercase tracking-widest font-black text-amber-600 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
-        <div class="text-2xl font-black text-slate-800 tracking-wide" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
+        <div class="text-3xl font-black text-slate-800 tracking-wide uppercase" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
         <div class="text-xs text-slate-500 mt-1 font-semibold" id="turn-subtitle">Host and Guest must ready up before Admin starts the Grand Final.</div>
       </div>
 
-      <div class="flex items-center gap-3">
-        <button id="host-ready-btn" onclick="toggleReady('host')" class="hidden bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-cyan">
+      <div id="ready-btns-container" class="flex items-center justify-center gap-3 mt-3 hidden">
+        <button id="host-ready-btn" onclick="toggleReady('host')" class="hidden bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-cyan">
           READY UP
         </button>
-        <button id="guest-ready-btn" onclick="toggleReady('guest')" class="hidden bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-rose">
+        <button id="guest-ready-btn" onclick="toggleReady('guest')" class="hidden bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-rose">
           READY UP
         </button>
       </div>
@@ -771,7 +771,7 @@
     function startDraftByAdmin() {
       if (currentRole !== 'admin' || !hostReady || !guestReady) return;
       draftStarted = true;
-      pushStateToFirebase(Date.now() + 30000);
+      pushStateToFirebase(Date.now() + 30000); // Step 1 is Boss Ban = 30s
     }
 
     function resetDraft() {
@@ -803,7 +803,6 @@
       if (currentRole === 'admin') {
         if (changeBtn) { changeBtn.classList.remove('hidden'); changeBtn.disabled = false; }
         if (resetBtn) { resetBtn.classList.remove('hidden'); resetBtn.disabled = false; }
-        // HIDE SPECTATOR VIEW BUTTON FOR ADMIN
         if (spectatorBtn) spectatorBtn.classList.add('hidden');
       } else {
         if (changeBtn) changeBtn.classList.add('hidden');
@@ -811,14 +810,30 @@
         if (spectatorBtn) spectatorBtn.classList.add('hidden');
       }
 
+      const readyContainer = document.getElementById('ready-btns-container');
       const hostReadyBtn = document.getElementById('host-ready-btn');
       const guestReadyBtn = document.getElementById('guest-ready-btn');
 
-      if (!draftStarted && currentRole === 'host') hostReadyBtn.classList.remove('hidden');
-      else hostReadyBtn.classList.add('hidden');
+      let hasVisibleReadyBtn = false;
 
-      if (!draftStarted && currentRole === 'guest') guestReadyBtn.classList.remove('hidden');
-      else guestReadyBtn.classList.add('hidden');
+      if (!draftStarted && currentRole === 'host') {
+        hostReadyBtn.classList.remove('hidden');
+        hasVisibleReadyBtn = true;
+      } else {
+        hostReadyBtn.classList.add('hidden');
+      }
+
+      if (!draftStarted && currentRole === 'guest') {
+        guestReadyBtn.classList.remove('hidden');
+        hasVisibleReadyBtn = true;
+      } else {
+        guestReadyBtn.classList.add('hidden');
+      }
+
+      if (readyContainer) {
+        if (hasVisibleReadyBtn) readyContainer.classList.remove('hidden');
+        else readyContainer.classList.add('hidden');
+      }
 
       const adminStartBtn = document.getElementById('admin-start-btn');
       if (currentRole === 'admin' && !draftStarted) {
@@ -924,6 +939,7 @@
           confirmCurrentSelection();
         }
       } else if (step.target === 'terrain') {
+        // Random Terrain Selection if timer ran out
         const activeBoss = gameData[step.game - 1].boss;
         const allowedTerrains = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
         const availableTerrains = TERRAIN_ROSTER.filter(t => allowedTerrains.includes(t.id));
@@ -979,10 +995,10 @@
       if (hostReadyBtn) {
         if (hostReady) {
           hostReadyBtn.innerText = "CANCEL READY";
-          hostReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider";
+          hostReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider";
         } else {
           hostReadyBtn.innerText = "READY UP";
-          hostReadyBtn.className = "bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-cyan";
+          hostReadyBtn.className = "bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-cyan";
         }
       }
 
@@ -990,10 +1006,10 @@
       if (guestReadyBtn) {
         if (guestReady) {
           guestReadyBtn.innerText = "CANCEL READY";
-          guestReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider";
+          guestReadyBtn.className = "bg-slate-600 hover:bg-slate-500 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider";
         } else {
           guestReadyBtn.innerText = "READY UP";
-          guestReadyBtn.className = "bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-rose";
+          guestReadyBtn.className = "bg-rose-500 hover:bg-rose-400 text-white text-xs font-black px-4 py-2.5 rounded-xl transition shadow tracking-wider glow-halo-rose";
         }
       }
 
@@ -1003,13 +1019,12 @@
         stopTimer();
         lastNotifiedStep = -1;
         const banner = document.getElementById('turn-banner');
-        banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden";
+        banner.className = "schale-card rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden";
         document.getElementById('phase-title').innerText = "PRE-DRAFT LOBBY";
-        document.getElementById('turn-label').className = "text-2xl font-black text-slate-800 tracking-wide";
+        document.getElementById('turn-label').className = "text-3xl font-black text-slate-800 tracking-wide uppercase";
         document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
         document.getElementById('turn-subtitle').innerText = "Host and Guest must ready up before Admin starts the Grand Final.";
 
-        // UPDATE TOP-CENTER TURN LABEL FOR PRE-DRAFT
         document.getElementById('header-turn-label').innerText = "LOBBY WAITING";
 
         updateGameCardsUI();
@@ -1040,7 +1055,7 @@
           gameData[4].boss = lastBoss;
         }
         currentStepIndex++;
-        pushStateToFirebase(Date.now() + 30000);
+        pushStateToFirebase(Date.now() + 30000); // Decider auto-pick moves to Terrain roll
         return;
       }
 
@@ -1057,18 +1072,17 @@
       document.getElementById('turn-label').innerText = step.label.toUpperCase();
       document.getElementById('turn-subtitle').innerText = `BO5 Grand Final Step`;
 
-      // UPDATE TOP-CENTER TURN LABEL FOR ACTIVE DRAFT STEP
       document.getElementById('header-turn-label').innerText = step.label.toUpperCase();
 
       if (step.team === 'blue') {
-        banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-cyan relative overflow-hidden";
-        document.getElementById('turn-label').className = "text-2xl font-black text-sky-600 tracking-wide";
+        banner.className = "schale-card rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-md glow-halo-cyan relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-3xl font-black text-sky-600 tracking-wide uppercase";
       } else if (step.team === 'red') {
-        banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-rose relative overflow-hidden";
-        document.getElementById('turn-label').className = "text-2xl font-black text-rose-600 tracking-wide";
+        banner.className = "schale-card rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-md glow-halo-rose relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-3xl font-black text-rose-600 tracking-wide uppercase";
       } else {
-        banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-gold relative overflow-hidden";
-        document.getElementById('turn-label').className = "text-2xl font-black text-amber-600 tracking-wide";
+        banner.className = "schale-card rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-md glow-halo-gold relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-3xl font-black text-amber-600 tracking-wide uppercase";
       }
 
       updateGameCardsUI();
@@ -1118,6 +1132,8 @@
       if (!pendingSelection || !draftStarted) return;
     
       const step = DRAFT_SEQUENCE[currentStepIndex];
+      const remainingMs = Math.max(0, stepDeadline - Date.now());
+
       if (step.type === 'ban' && step.target === 'boss') {
         bannedBosses.push({ id: pendingSelection.id, team: step.team });
       } else if (step.type === 'pick' && step.target === 'boss') {
@@ -1137,7 +1153,20 @@
   
       pendingSelection = null;
       currentStepIndex++;
-      pushStateToFirebase(Date.now() + 30000);
+
+      const nextStep = DRAFT_SEQUENCE[currentStepIndex];
+      let nextDuration = 30000; // Default 30s for bans
+
+      if (nextStep) {
+        if (nextStep.type === 'pick' && nextStep.target === 'boss') {
+          nextDuration = 60000; // Boss Pick = 1 Minute (60s)
+        } else if (nextStep.type === 'pick' && nextStep.target === 'terrain') {
+          // Terrain gets the remaining time left from the boss pick
+          nextDuration = remainingMs; 
+        }
+      }
+
+      pushStateToFirebase(Date.now() + nextDuration);
     }
 
     function renderGridForStep(step) {
@@ -1382,9 +1411,9 @@
       updateTopBossBansUI();
 
       const banner = document.getElementById('turn-banner');
-      banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-emerald relative overflow-hidden";
+      banner.className = "schale-card rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-md glow-halo-emerald relative overflow-hidden";
       document.getElementById('phase-title').innerText = "STATUS: COMPLETED";
-      document.getElementById('turn-label').className = "text-2xl font-black text-emerald-600 tracking-wide";
+      document.getElementById('turn-label').className = "text-3xl font-black text-emerald-600 tracking-wide uppercase";
       document.getElementById('turn-label').innerText = "BO5 GRAND FINAL DRAFT LOCKED IN!";
       document.getElementById('turn-subtitle').innerText = "All 5 games have been finalized.";
 
