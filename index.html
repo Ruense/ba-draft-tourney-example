@@ -122,7 +122,7 @@
     </div>
   </div>
 
-  <!-- STICKY HEADER WITH COMPACT TOP-CENTER TIMER -->
+  <!-- STICKY HEADER WITH WIDER TOP-CENTER TIMER -->
   <header class="bg-white/95 border-b border-sky-200 px-6 py-2 sticky top-0 z-50 backdrop-blur-md shadow-sm">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
       
@@ -139,11 +139,11 @@
         </div>
       </div>
 
-      <!-- CENTER PINNED TOP TIMER & CURRENT TURN INDICATOR -->
-      <div id="header-timer-container" class="flex flex-col items-center justify-center bg-sky-50/90 px-4 py-0.5 rounded-xl border border-sky-300 shadow-inner min-w-[150px] max-w-[180px]">
+      <!-- CENTER PINNED TOP TIMER & CURRENT TURN INDICATOR (WIDER FIT) -->
+      <div id="header-timer-container" class="flex flex-col items-center justify-center bg-sky-50/90 px-5 py-0.5 rounded-xl border border-sky-300 shadow-inner min-w-[220px] max-w-[280px]">
         <span id="header-timer-title" class="text-[8px] font-black text-sky-600 uppercase tracking-widest leading-none">TIME REMAINING</span>
         <span id="timer-text" class="text-xl font-black text-slate-400 tracking-wider leading-tight">--:--</span>
-        <span id="header-turn-label" class="text-[9px] font-black text-slate-700 tracking-wider uppercase truncate w-full text-center leading-none">
+        <span id="header-turn-label" class="text-[9px] font-black text-slate-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none">
           LOBBY WAITING
         </span>
       </div>
@@ -165,10 +165,6 @@
             CHANGE
           </button>
         </div>
-
-        <a id="header-spectator-btn" href="spectator.html" target="_blank" class="hidden bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-amber-300 transition flex items-center gap-1 shadow-sm">
-          SPECTATOR
-        </a>
 
         <button id="header-reset-btn" onclick="resetDraft()" class="hidden bg-white hover:bg-rose-50 text-rose-600 text-xs font-bold px-2.5 py-1 rounded-lg border border-rose-200 transition shadow-sm">
           RESET
@@ -760,16 +756,13 @@
 
       const changeBtn = document.getElementById('change-role-btn');
       const resetBtn = document.getElementById('header-reset-btn');
-      const spectatorBtn = document.getElementById('header-spectator-btn');
 
       if (currentRole === 'admin') {
         if (changeBtn) changeBtn.classList.remove('hidden');
         if (resetBtn) resetBtn.classList.remove('hidden');
-        if (spectatorBtn) spectatorBtn.classList.remove('hidden');
       } else {
         if (changeBtn) changeBtn.classList.add('hidden');
         if (resetBtn) resetBtn.classList.add('hidden');
-        if (spectatorBtn) spectatorBtn.classList.add('hidden');
       }
 
       const hostReadyBtn = document.getElementById('host-ready-btn');
@@ -833,7 +826,7 @@
       if (!draftStarted) {
         timerText.innerText = "--:--";
         timerText.className = "text-xl font-black text-slate-400 tracking-wider leading-tight";
-        container.className = "flex flex-col items-center justify-center bg-sky-50/90 px-4 py-0.5 rounded-xl border border-sky-300 shadow-inner min-w-[150px] max-w-[180px]";
+        container.className = "flex flex-col items-center justify-center bg-sky-50/90 px-5 py-0.5 rounded-xl border border-sky-300 shadow-inner min-w-[220px] max-w-[280px]";
         if (timerTitle) timerTitle.className = "text-[8px] font-black text-sky-600 uppercase tracking-widest leading-none";
         return;
       }
@@ -848,19 +841,19 @@
 
       if (sec <= 10) {
         timerText.className = "text-xl font-black text-rose-600 animate-pulse-fast tracking-wider leading-tight";
-        container.className = "flex flex-col items-center justify-center bg-rose-50 px-4 py-0.5 rounded-xl border border-rose-400 glow-halo-rose shadow-md min-w-[150px] max-w-[180px]";
+        container.className = "flex flex-col items-center justify-center bg-rose-50 px-5 py-0.5 rounded-xl border border-rose-400 glow-halo-rose shadow-md min-w-[220px] max-w-[280px]";
         if (timerTitle) timerTitle.className = "text-[8px] font-black text-rose-600 uppercase tracking-widest leading-none";
       } else if (isRedTeam) {
         timerText.className = "text-xl font-black text-rose-600 tracking-wider leading-tight";
-        container.className = "flex flex-col items-center justify-center bg-rose-50/90 px-4 py-0.5 rounded-xl border border-rose-300 shadow-inner min-w-[150px] max-w-[180px]";
+        container.className = "flex flex-col items-center justify-center bg-rose-50/90 px-5 py-0.5 rounded-xl border border-rose-300 shadow-inner min-w-[220px] max-w-[280px]";
         if (timerTitle) timerTitle.className = "text-[8px] font-black text-rose-600 uppercase tracking-widest leading-none";
       } else if (isBlueTeam) {
         timerText.className = "text-xl font-black text-sky-600 tracking-wider leading-tight";
-        container.className = "flex flex-col items-center justify-center bg-sky-50/90 px-4 py-0.5 rounded-xl border border-sky-300 shadow-inner min-w-[150px] max-w-[180px]";
+        container.className = "flex flex-col items-center justify-center bg-sky-50/90 px-5 py-0.5 rounded-xl border border-sky-300 shadow-inner min-w-[220px] max-w-[280px]";
         if (timerTitle) timerTitle.className = "text-[8px] font-black text-sky-600 uppercase tracking-widest leading-none";
       } else {
         timerText.className = "text-xl font-black text-amber-600 tracking-wider leading-tight";
-        container.className = "flex flex-col items-center justify-center bg-amber-50/90 px-4 py-0.5 rounded-xl border border-amber-300 shadow-inner min-w-[150px] max-w-[180px]";
+        container.className = "flex flex-col items-center justify-center bg-amber-50/90 px-5 py-0.5 rounded-xl border border-amber-300 shadow-inner min-w-[220px] max-w-[280px]";
         if (timerTitle) timerTitle.className = "text-[8px] font-black text-amber-600 uppercase tracking-widest leading-none";
       }
     }
@@ -976,7 +969,7 @@
         document.getElementById('turn-subtitle').innerText = "Host and Guest must ready up before Admin can start the draft.";
         
         document.getElementById('header-turn-label').innerText = "LOBBY WAITING";
-        document.getElementById('header-turn-label').className = "text-[9px] font-black text-slate-500 tracking-wider uppercase truncate w-full text-center leading-none";
+        document.getElementById('header-turn-label').className = "text-[9px] font-black text-slate-500 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
 
         updateGameCardsUI();
         updateTopBossBansUI();
@@ -1021,15 +1014,15 @@
       if (step.team === 'blue') {
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-cyan relative overflow-hidden";
         document.getElementById('turn-label').className = "text-2xl font-black text-sky-600 tracking-wide";
-        headerTurnText.className = "text-[9px] font-black text-sky-600 tracking-wider uppercase truncate w-full text-center leading-none";
+        headerTurnText.className = "text-[9px] font-black text-sky-600 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
       } else if (step.team === 'red') {
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-rose relative overflow-hidden";
         document.getElementById('turn-label').className = "text-2xl font-black text-rose-600 tracking-wide";
-        headerTurnText.className = "text-[9px] font-black text-rose-600 tracking-wider uppercase truncate w-full text-center leading-none";
+        headerTurnText.className = "text-[9px] font-black text-rose-600 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
       } else {
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md glow-halo-gold relative overflow-hidden";
         document.getElementById('turn-label').className = "text-2xl font-black text-amber-600 tracking-wide";
-        headerTurnText.className = "text-[9px] font-black text-amber-600 tracking-wider uppercase truncate w-full text-center leading-none";
+        headerTurnText.className = "text-[9px] font-black text-amber-600 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
       }
 
       updateGameCardsUI();
@@ -1336,7 +1329,7 @@
       const headerTurnText = document.getElementById('header-turn-label');
       if (headerTurnText) {
         headerTurnText.innerText = "DRAFT COMPLETED";
-        headerTurnText.className = "text-[9px] font-black text-emerald-600 tracking-wider uppercase mt-0.5 truncate w-full text-center leading-none";
+        headerTurnText.className = "text-[9px] font-black text-emerald-600 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate w-full text-center leading-none";
       }
 
       const grid = document.getElementById('selection-grid');
