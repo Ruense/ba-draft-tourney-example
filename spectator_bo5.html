@@ -112,33 +112,34 @@
   <!-- BROADCAST MAIN CONTAINER -->
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- CENTERED LIVE TURN BANNER -->
-    <div id="turn-banner" class="schale-card rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden transition-all duration-300">
+    <!-- REVERTED LIVE TURN BANNER -->
+    <div id="turn-banner" class="schale-card rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden transition-all duration-300">
       <div class="text-center w-full">
-        <div class="text-xs uppercase tracking-widest font-black text-amber-600 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
-        <div class="text-3xl font-black text-slate-800 tracking-wide uppercase" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
+        <div class="text-[11px] uppercase tracking-widest font-black text-amber-500 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
+        <div class="text-3xl md:text-4xl font-black text-slate-800 tracking-wide uppercase" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
         <div class="text-xs text-slate-500 mt-1 font-semibold" id="turn-subtitle">Live sync in progress...</div>
       </div>
     </div>
 
-    <!-- TOP BOSS BANS BAR -->
-    <div class="schale-card rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-md">
-      <div class="flex flex-col items-center md:items-start gap-2">
+    <!-- PERFECTLY CENTERED TOP BOSS BANS BAR -->
+    <div class="schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative min-h-[105px]">
+      <div class="flex flex-col items-start gap-1.5 z-10">
         <span class="text-xs font-black text-sky-600 uppercase tracking-widest" id="host-ban-header-title">Host Boss Bans (4)</span>
         <div id="host-boss-bans-container" class="flex gap-2"></div>
       </div>
 
-      <div class="text-center px-4">
-        <div class="w-12 h-12 mx-auto mb-1 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center shadow-sm">
-          <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- CENTERED EMBLEM & TITLE -->
+      <div class="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none z-10">
+        <div class="w-9 h-9 mx-auto mb-1 rounded-full bg-amber-50 border border-amber-300 flex items-center justify-center shadow-sm">
+          <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
           </svg>
         </div>
         <h2 class="text-xs font-black text-slate-800 tracking-widest uppercase">BO5 GRAND FINAL</h2>
-        <p class="text-[10px] text-amber-600 font-bold">4 HOST VETOES • 2 GUEST VETOES</p>
+        <p class="text-[10px] text-amber-600 font-bold whitespace-nowrap">4 HOST VETOES • 2 GUEST VETOES</p>
       </div>
 
-      <div class="flex flex-col items-center md:items-end gap-2">
+      <div class="flex flex-col items-end gap-1.5 z-10">
         <span class="text-xs font-black text-rose-600 uppercase tracking-widest" id="guest-ban-header-title">Guest Boss Bans (2)</span>
         <div id="guest-boss-bans-container" class="flex gap-2"></div>
       </div>
@@ -486,11 +487,11 @@
       if (!draftStarted) {
         stopTimer();
         const banner = document.getElementById('turn-banner');
-        banner.className = "schale-card rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden";
+        banner.className = "schale-card rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md relative overflow-hidden";
         document.getElementById('phase-title').innerText = "PRE-DRAFT LOBBY";
-        document.getElementById('turn-label').className = "text-3xl font-black text-slate-800 tracking-wide uppercase";
+        document.getElementById('turn-label').className = "text-3xl md:text-4xl font-black text-slate-800 tracking-wide uppercase";
         document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
-        document.getElementById('turn-subtitle').innerText = "Host and Guest are preparing in lobby...";
+        document.getElementById('turn-subtitle').innerText = "Live sync in progress...";
 
         document.getElementById('header-turn-label').innerText = "LOBBY WAITING";
 
@@ -504,9 +505,9 @@
         updateGameCardsUI();
         updateTopBossBansUI();
         const banner = document.getElementById('turn-banner');
-        banner.className = "schale-card rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-md glow-halo-emerald relative overflow-hidden";
+        banner.className = "schale-card rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md glow-halo-emerald relative overflow-hidden";
         document.getElementById('phase-title').innerText = "STATUS: COMPLETED";
-        document.getElementById('turn-label').className = "text-3xl font-black text-emerald-600 tracking-wide uppercase";
+        document.getElementById('turn-label').className = "text-3xl md:text-4xl font-black text-emerald-600 tracking-wide uppercase";
         document.getElementById('turn-label').innerText = "BO5 GRAND FINAL COMPLETE!";
         document.getElementById('turn-subtitle').innerText = "All 5 games are locked in.";
         
@@ -525,14 +526,14 @@
       document.getElementById('header-turn-label').innerText = step.label.toUpperCase();
 
       if (step.team === 'blue') {
-        banner.className = "schale-card rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-md glow-halo-cyan relative overflow-hidden";
-        document.getElementById('turn-label').className = "text-3xl font-black text-sky-600 tracking-wide uppercase";
+        banner.className = "schale-card rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md glow-halo-cyan relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-3xl md:text-4xl font-black text-sky-600 tracking-wide uppercase";
       } else if (step.team === 'red') {
-        banner.className = "schale-card rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-md glow-halo-rose relative overflow-hidden";
-        document.getElementById('turn-label').className = "text-3xl font-black text-rose-600 tracking-wide uppercase";
+        banner.className = "schale-card rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md glow-halo-rose relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-3xl md:text-4xl font-black text-rose-600 tracking-wide uppercase";
       } else {
-        banner.className = "schale-card rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-md glow-halo-gold relative overflow-hidden";
-        document.getElementById('turn-label').className = "text-3xl font-black text-amber-600 tracking-wide uppercase";
+        banner.className = "schale-card rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md glow-halo-gold relative overflow-hidden";
+        document.getElementById('turn-label').className = "text-3xl md:text-4xl font-black text-amber-600 tracking-wide uppercase";
       }
 
       updateGameCardsUI();
