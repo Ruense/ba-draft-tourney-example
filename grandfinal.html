@@ -527,6 +527,14 @@
       ];
     }
 
+    function getStepDuration(step) {
+      if (!step) return 30000;
+      if (step.target === 'boss' && step.type === 'ban') return 30000;
+      if (step.target === 'boss' && step.type === 'pick') return 60000;
+      if (step.target === 'student' && step.type === 'ban') return 30000;
+      return 30000;
+    }
+
     const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbarka'];
     const PERMA_BANNED_STUDENTS = ['10099', '10144'];
 
@@ -771,7 +779,8 @@
     function startDraftByAdmin() {
       if (currentRole !== 'admin' || !hostReady || !guestReady) return;
       draftStarted = true;
-      pushStateToFirebase(Date.now() + 30000);
+      const initialStep = DRAFT_SEQUENCE[0];
+      pushStateToFirebase(Date.now() + getStepDuration(initialStep));
     }
 
     function resetDraft() {
@@ -803,7 +812,6 @@
       if (currentRole === 'admin') {
         if (changeBtn) { changeBtn.classList.remove('hidden'); changeBtn.disabled = false; }
         if (resetBtn) { resetBtn.classList.remove('hidden'); resetBtn.disabled = false; }
-        // HIDE SPECTATOR VIEW BUTTON FOR ADMIN
         if (spectatorBtn) spectatorBtn.classList.add('hidden');
       } else {
         if (changeBtn) changeBtn.classList.add('hidden');
@@ -1009,7 +1017,6 @@
         document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
         document.getElementById('turn-subtitle').innerText = "Host and Guest must ready up before Admin starts the Grand Final.";
 
-        // UPDATE TOP-CENTER TURN LABEL FOR PRE-DRAFT
         document.getElementById('header-turn-label').innerText = "LOBBY WAITING";
 
         updateGameCardsUI();
@@ -1040,7 +1047,8 @@
           gameData[4].boss = lastBoss;
         }
         currentStepIndex++;
-        pushStateToFirebase(Date.now() + 30000);
+        const nextStep = DRAFT_SEQUENCE[currentStepIndex];
+        pushStateToFirebase(Date.now() + getStepDuration(nextStep));
         return;
       }
 
@@ -1057,7 +1065,6 @@
       document.getElementById('turn-label').innerText = step.label.toUpperCase();
       document.getElementById('turn-subtitle').innerText = `BO5 Grand Final Step`;
 
-      // UPDATE TOP-CENTER TURN LABEL FOR ACTIVE DRAFT STEP
       document.getElementById('header-turn-label').innerText = step.label.toUpperCase();
 
       if (step.team === 'blue') {
@@ -1118,10 +1125,14 @@
       if (!pendingSelection || !draftStarted) return;
     
       const step = DRAFT_SEQUENCE[currentStepIndex];
+      let carryOverDeadline = null;
+
       if (step.type === 'ban' && step.target === 'boss') {
         bannedBosses.push({ id: pendingSelection.id, team: step.team });
       } else if (step.type === 'pick' && step.target === 'boss') {
         gameData[step.game - 1].boss = pendingSelection;
+        // Terrain pick inherits the remaining timer from Boss pick
+        carryOverDeadline = stepDeadline;
       } else if (step.type === 'pick' && step.target === 'terrain') {
         gameData[step.game - 1].terrain = pendingSelection;
       } else if (step.type === 'ban' && step.target === 'student') {
@@ -1137,7 +1148,13 @@
   
       pendingSelection = null;
       currentStepIndex++;
-      pushStateToFirebase(Date.now() + 30000);
+      const nextStep = DRAFT_SEQUENCE[currentStepIndex];
+      
+      const nextDeadline = (step.target === 'boss' && step.type === 'pick' && nextStep?.target === 'terrain')
+        ? carryOverDeadline
+        : Date.now() + getStepDuration(nextStep);
+
+      pushStateToFirebase(nextDeadline);
     }
 
     function renderGridForStep(step) {
@@ -1260,7 +1277,8 @@
       const rolledId = allowed[Math.floor(Math.random() * allowed.length)];
       gameData[step.game - 1].terrain = TERRAIN_ROSTER.find(t => t.id === rolledId);
       currentStepIndex++;
-      pushStateToFirebase(Date.now() + 30000);
+      const nextStep = DRAFT_SEQUENCE[currentStepIndex];
+      pushStateToFirebase(Date.now() + getStepDuration(nextStep));
     }
 
     function filterStudents(q) {
