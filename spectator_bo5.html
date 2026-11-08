@@ -492,7 +492,6 @@
         document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
         document.getElementById('turn-subtitle').innerText = "Host and Guest are preparing in lobby...";
 
-        // UPDATE TOP-CENTER TURN LABEL FOR PRE-DRAFT
         document.getElementById('header-turn-label').innerText = "LOBBY WAITING";
 
         updateGameCardsUI();
@@ -523,7 +522,6 @@
       document.getElementById('turn-label').innerText = step.label.toUpperCase();
       document.getElementById('turn-subtitle').innerText = `Current turn in progress...`;
 
-      // UPDATE TOP-CENTER TURN LABEL FOR ACTIVE DRAFT STEP
       document.getElementById('header-turn-label').innerText = step.label.toUpperCase();
 
       if (step.team === 'blue') {
