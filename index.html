@@ -65,7 +65,7 @@
       backface-visibility: hidden;
       border-radius: 9999px;
       display: flex;
-      items-center: center;
+      align-items: center;
       justify-content: center;
     }
     .coin-back { transform: rotateY(180deg); }
@@ -173,7 +173,7 @@
 
       <div id="coin-result-label" class="text-sm font-black text-amber-600 tracking-wider">FLIPPING FOR FIRST PICK PRIORITY</div>
       
-      <!-- WINNER SELECTION BUTTONS (HIDDEN UNTIL FLIP ENDS) -->
+      <!-- WINNER SELECTION BUTTONS -->
       <div id="coin-winner-actions" class="w-full hidden flex flex-col gap-2 mt-2">
         <span class="text-xs font-bold text-slate-600 mb-1">CHOOSE YOUR TEAM / DRAFT ORDER:</span>
         <button onclick="chooseCoinWinnerRole('blue')" class="w-full bg-sky-500 hover:bg-sky-400 text-white font-black text-xs py-2.5 rounded-xl shadow tracking-wider uppercase">
@@ -238,7 +238,7 @@
           </button>
         </div>
 
-        <!-- SPECTATOR LINK (HIDDEN FOR ADMIN) -->
+        <!-- SPECTATOR LINK -->
         <a id="header-spectator-btn" href="spectator.html" target="_blank" class="hidden bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-sky-200 transition flex items-center gap-1 shadow-sm">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -495,7 +495,7 @@
 
     let currentRole = 'player';
     let modalSelectedRole = 'player';
-    let assignedPlayerNum = null; // 1 or 2
+    let assignedPlayerNum = null;
 
     const ADMIN_PASSWORD = "Senseihood1234";
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwexc3_lsvhadskAmSTKe65PWZnxU65h-xGO_6JlxcKrxse6bB65Bd6zXIDTrc1bqIJqw/exec";
@@ -718,7 +718,6 @@
         return;
       }
 
-      // PLAYER ACCESS CHECK & 2-PLAYER MAX ROOM GUARD
       if (!roomCodeVal) {
         alert("Please enter the Room Code provided by Admin!");
         return;
@@ -745,13 +744,11 @@
         let p1Sess = data.player1SessionId;
         let p2Sess = data.player2SessionId;
 
-        // Check if user is already one of the connected players
         if (p1Sess === clientSessionId) {
           assignedPlayerNum = 1;
         } else if (p2Sess === clientSessionId) {
           assignedPlayerNum = 2;
         } else {
-          // If new session, check room occupancy (Max 2 Players)
           if (p1Sess && p2Sess) {
             alert("Room is full! (2/2 Players occupied). Access rejected.");
             return;
@@ -831,7 +828,6 @@
           if (player1SessionId === clientSessionId) assignedPlayerNum = 1;
           else if (player2SessionId === clientSessionId) assignedPlayerNum = 2;
 
-          // Deduce player role based on coin flip winner choice
           if (assignedPlayerNum) {
             if (coinState.roleChoice) {
               if ((coinState.winnerNum === assignedPlayerNum && coinState.roleChoice === 'blue') ||
@@ -916,44 +912,59 @@
         winnerActions.classList.add('hidden');
         resultLabel.innerText = "COIN IS SPINNING IN REAL-TIME...";
         
-        // 3D Spin logic
         const rotations = 10; 
         const deg = (rotations * 360) + (coinState.result === 'HEADS' ? 0 : 180);
         spinner.style.transform = `rotateY(${deg}deg)`;
 
         setTimeout(() => {
           if (!currentRoomRef) return;
-          const winnerName = coinState.winnerNum === 1 ? player1Name : player2Name;
+          
+          const winnerName = coinState.winnerNum === 1 
+            ? (player1Name || 'Player 1') 
+            : (player2Name || 'Player 2');
+
           resultLabel.innerText = `RESULT: ${coinState.result}! WINNER: ${winnerName.toUpperCase()}`;
 
-          if (assignedPlayerNum === coinState.winnerNum && !coinState.roleChoice) {
-            winnerActions.classList.remove('hidden');
+          if (assignedPlayerNum && assignedPlayerNum === coinState.winnerNum) {
+            if (!coinState.roleChoice) {
+              winnerActions.classList.remove('hidden');
+            }
+          } else {
+            winnerActions.classList.add('hidden');
+            if (!coinState.roleChoice) {
+              resultLabel.innerText = `RESULT: ${coinState.result}! WINNER: ${winnerName.toUpperCase()} — WAITING FOR SIDE SELECTION...`;
+            }
           }
         }, 3100);
 
       } else if (coinState.roleChoice) {
         modal.classList.add('hidden');
+        winnerActions.classList.add('hidden');
       } else {
         modal.classList.add('hidden');
+        winnerActions.classList.add('hidden');
       }
     }
 
     function chooseCoinWinnerRole(choice) {
       if (assignedPlayerNum !== coinState.winnerNum) return;
+      
       coinState.roleChoice = choice;
       coinState.flipping = false;
 
       const p1IsWinner = (coinState.winnerNum === 1);
+      const p1NameFinal = player1Name || 'Player 1';
+      const p2NameFinal = player2Name || 'Player 2';
       
       if (choice === 'blue') {
-        hostName = p1IsWinner ? player1Name : player2Name;
+        hostName = p1IsWinner ? p1NameFinal : p2NameFinal;
         hostSessionId = p1IsWinner ? player1SessionId : player2SessionId;
-        guestName = p1IsWinner ? player2Name : player1Name;
+        guestName = p1IsWinner ? p2NameFinal : p1NameFinal;
         guestSessionId = p1IsWinner ? player2SessionId : player1SessionId;
       } else {
-        guestName = p1IsWinner ? player1Name : player2Name;
+        guestName = p1IsWinner ? p1NameFinal : p2NameFinal;
         guestSessionId = p1IsWinner ? player1SessionId : player2SessionId;
-        hostName = p1IsWinner ? player2Name : player1Name;
+        hostName = p1IsWinner ? p2NameFinal : p1NameFinal;
         hostSessionId = p1IsWinner ? player2SessionId : player1SessionId;
       }
 
@@ -1182,7 +1193,6 @@
     }
 
     function updateDraftState() {
-      // Update Player Labels & Badges
       const p1Badge = document.getElementById('p1-status-badge');
       const p2Badge = document.getElementById('p2-status-badge');
       const coinStatusDisp = document.getElementById('coin-status-display');
@@ -1209,7 +1219,6 @@
         p2Badge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
       }
 
-      // Coin status display
       if (coinState.p1Call) {
         coinStatusDisp.classList.remove('hidden');
         const p2Call = coinState.p1Call === 'HEADS' ? 'TAILS' : 'HEADS';
@@ -1218,14 +1227,12 @@
         coinStatusDisp.classList.add('hidden');
       }
 
-      // P1 Call Control
       if (assignedPlayerNum === 1 && !coinState.p1Call && !draftStarted) {
         p1CallCtrl.classList.remove('hidden');
       } else {
         p1CallCtrl.classList.add('hidden');
       }
 
-      // Admin Flip Coin Control
       if (currentRole === 'admin' && coinState.p1Call && !coinState.roleChoice && !draftStarted) {
         adminFlipBtn.classList.remove('hidden');
       } else {
