@@ -856,45 +856,35 @@
 
     function updateRoleControls() {
       document.getElementById('current-role-display').innerText = currentRole.toUpperCase();
-
+    
       const changeBtn = document.getElementById('change-role-btn');
       const resetBtn = document.getElementById('header-reset-btn');
       const spectatorBtn = document.getElementById('header-spectator-btn');
       const adminGenBtn = document.getElementById('admin-gen-code-btn');
-
+    
       if (currentRole === 'admin') {
-        if (changeBtn) {
-          changeBtn.classList.remove('hidden');
-          changeBtn.disabled = false;
-          changeBtn.classList.remove('opacity-40', 'cursor-not-allowed');
-        }
-        if (resetBtn) {
-          resetBtn.classList.remove('hidden');
-          resetBtn.disabled = false;
-          resetBtn.classList.remove('opacity-40', 'cursor-not-allowed');
-        }
-        if (spectatorBtn) {
-          spectatorBtn.classList.remove('hidden');
-        }
-        if (adminGenBtn) {
-          adminGenBtn.classList.remove('hidden');
-        }
+        if (changeBtn) changeBtn.classList.remove('hidden');
+        if (resetBtn) resetBtn.classList.remove('hidden');
+        if (adminGenBtn) adminGenBtn.classList.remove('hidden');
+        
+        // HIDE SPECTATOR VIEW BUTTON FROM ADMIN POV
+        if (spectatorBtn) spectatorBtn.classList.add('hidden');
       } else {
         if (changeBtn) changeBtn.classList.add('hidden');
         if (resetBtn) resetBtn.classList.add('hidden');
         if (spectatorBtn) spectatorBtn.classList.add('hidden');
         if (adminGenBtn) adminGenBtn.classList.add('hidden');
       }
-
+    
       const hostReadyBtn = document.getElementById('host-ready-btn');
       const guestReadyBtn = document.getElementById('guest-ready-btn');
-
+    
       if (!draftStarted && currentRole === 'host') hostReadyBtn.classList.remove('hidden');
       else hostReadyBtn.classList.add('hidden');
-
+    
       if (!draftStarted && currentRole === 'guest') guestReadyBtn.classList.remove('hidden');
       else guestReadyBtn.classList.add('hidden');
-
+    
       const adminStartBtn = document.getElementById('admin-start-btn');
       if (currentRole === 'admin' && !draftStarted) {
         adminStartBtn.classList.remove('hidden');
