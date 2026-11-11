@@ -49,7 +49,6 @@
       box-shadow: 0 6px 18px rgba(18, 180, 255, 0.25);
     }
 
-    /* 3D COIN SPIN ANIMATION */
     .coin-perspective { perspective: 1000px; }
     .coin-inner {
       width: 100%;
@@ -117,7 +116,6 @@
         <p class="text-xs text-sky-600 font-bold tracking-wide mt-0.5">SENSEIHOOD TOURNAMENT DRAFT</p>
       </div>
 
-      <!-- ROLE CHOICE BUTTONS -->
       <div class="grid grid-cols-2 gap-3 mb-5">
         <button onclick="selectModalRole('player')" id="role-btn-player" class="modal-role-btn border-2 border-sky-200 bg-sky-50/50 hover:bg-sky-100 p-4 rounded-xl flex flex-col items-center justify-center transition">
           <span class="font-black text-base text-sky-600">PLAYER</span>
@@ -130,7 +128,6 @@
         </button>
       </div>
 
-      <!-- CONDITIONAL INPUT FIELDS -->
       <div id="modal-input-section" class="mb-5 hidden flex flex-col gap-3">
         <div id="modal-player-name-wrapper">
           <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1 text-center">
@@ -147,7 +144,6 @@
         </div>
       </div>
 
-      <!-- SUBMIT BUTTON -->
       <button onclick="confirmModalRole()" id="modal-submit-btn" class="w-full bg-sky-500 hover:bg-sky-400 text-white font-black text-xs py-3 rounded-xl shadow-md transition tracking-widest uppercase">
         ENTER DRAFT
       </button>
@@ -159,7 +155,6 @@
     <div class="schale-card rounded-2xl max-w-sm w-full p-6 text-center flex flex-col items-center gap-4 shadow-2xl border-2 border-amber-300 relative">
       <h3 id="coin-modal-title" class="text-base font-black text-slate-800 uppercase tracking-widest">COIN FLIPPING...</h3>
       
-      <!-- 3D COIN CONTAINER -->
       <div class="coin-perspective w-32 h-32 my-4">
         <div id="coin-spinner" class="coin-inner">
           <div class="coin-face border-4 border-amber-500 bg-amber-400 text-amber-900 font-black text-xl shadow-lg">
@@ -173,7 +168,6 @@
 
       <div id="coin-result-label" class="text-sm font-black text-amber-600 tracking-wider">FLIPPING FOR FIRST PICK PRIORITY</div>
       
-      <!-- WINNER SELECTION BUTTONS -->
       <div id="coin-winner-actions" class="w-full hidden flex flex-col gap-2 mt-2">
         <span class="text-xs font-bold text-slate-600 mb-1">CHOOSE YOUR TEAM / DRAFT ORDER:</span>
         <button onclick="chooseCoinWinnerRole('blue')" class="w-full bg-sky-500 hover:bg-sky-400 text-white font-black text-xs py-2.5 rounded-xl shadow tracking-wider uppercase">
@@ -190,7 +184,6 @@
   <header class="bg-white/90 border-b border-sky-200 px-4 md:px-6 py-2.5 sticky top-0 z-50 backdrop-blur-md shadow-sm relative">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 relative">
       
-      <!-- BRANDING -->
       <div class="flex items-center gap-3 shrink-0 z-10">
         <div class="w-10 h-10 rounded-xl bg-sky-500 border border-sky-400 flex items-center justify-center shadow-md overflow-hidden p-1">
           <img src="sh_logo_norm_white.png" alt="Senseihood Emblem" class="w-full h-full object-contain">
@@ -203,7 +196,6 @@
         </div>
       </div>
 
-      <!-- ABSOLUTE FIXED CENTER TIMER -->
       <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
         <div id="header-timer-container" class="pointer-events-auto flex flex-col items-center justify-center schale-card-inner px-4 py-1 rounded-xl border border-sky-300 min-w-[190px] text-center shadow-md transition-all duration-300">
           <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest leading-none">TIME LEFT</span>
@@ -214,10 +206,7 @@
         </div>
       </div>
 
-      <!-- RIGHT CONTROLS GROUP -->
       <div class="flex items-center gap-2 shrink-0 z-10">
-        
-        <!-- ROOM CODE CONTROLS -->
         <div class="flex items-center bg-sky-50/80 px-2 py-1 rounded-lg border border-sky-200 text-xs gap-1 shadow-inner">
           <span class="text-sky-700 font-bold uppercase tracking-wider text-[10px]">ROOM:</span>
           <input type="text" id="room-code-input" value="" placeholder="CODE" class="bg-white px-1.5 py-0.5 rounded text-sky-800 font-black border border-sky-300 w-20 text-center outline-none focus:border-sky-500 shadow-sm uppercase text-xs">
@@ -229,7 +218,6 @@
           </button>
         </div>
 
-        <!-- ROLE DISPLAY -->
         <div class="flex items-center bg-sky-50/80 px-2 py-1 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
           <span class="text-sky-700 font-bold uppercase tracking-wider text-[10px]">ROLE:</span>
           <span id="current-role-display" class="font-black text-sky-800 uppercase text-xs">UNASSIGNED</span>
@@ -238,7 +226,6 @@
           </button>
         </div>
 
-        <!-- SPECTATOR LINK -->
         <a id="header-spectator-btn" href="spectator.html" target="_blank" class="hidden bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-sky-200 transition flex items-center gap-1 shadow-sm">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -254,7 +241,6 @@
   <div id="lobby-bar" class="bg-white/80 border-b border-sky-200/60 px-6 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
       
-      <!-- PLAYERS LOBBY & COIN CALL STATUS -->
       <div class="flex flex-wrap items-center gap-6">
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold text-sky-600 uppercase tracking-wide" id="bar-p1-label">Player 1:</span>
@@ -266,27 +252,22 @@
           <span id="p2-status-badge" class="bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">VACANT</span>
         </div>
 
-        <!-- COIN CALL CHOICE STATUS DISPLAY -->
         <div id="coin-status-display" class="hidden flex items-center gap-2 bg-amber-50 px-3 py-1 rounded-lg border border-amber-300 text-xs font-black text-amber-800">
           <span id="coin-call-text">P1 CALL: NONE</span>
         </div>
       </div>
 
-      <!-- ADMIN & PLAYER LOBBY CONTROLS -->
       <div class="flex items-center gap-2">
-        <!-- PLAYER 1 COIN CALL BUTTONS -->
         <div id="p1-call-controls" class="hidden flex items-center gap-1.5">
           <span class="text-xs font-bold text-slate-600">CALL COIN:</span>
           <button onclick="setPlayerCoinCall('HEADS')" class="bg-amber-500 hover:bg-amber-400 text-white text-xs font-black px-3 py-1.5 rounded-lg transition shadow">HEADS</button>
           <button onclick="setPlayerCoinCall('TAILS')" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-black px-3 py-1.5 rounded-lg transition shadow">TAILS</button>
         </div>
 
-        <!-- ADMIN FLIP COIN BUTTON -->
         <button id="admin-flip-coin-btn" onclick="triggerAdminCoinFlip()" class="hidden bg-amber-500 hover:bg-amber-400 text-white text-xs font-black px-4 py-1.5 rounded-lg border border-amber-400 transition cursor-pointer shadow-md tracking-wider glow-halo-gold flex items-center gap-1.5">
           FLIP COIN
         </button>
 
-        <!-- ADMIN START DRAFT BUTTON -->
         <button id="admin-start-btn" onclick="startDraftByAdmin()" disabled class="bg-emerald-50 text-slate-400 cursor-not-allowed text-xs font-black px-4 py-1.5 rounded-lg border border-emerald-200 transition tracking-wider flex items-center gap-1.5 shadow-sm">
           <svg class="w-3.5 h-3.5 fill-current text-slate-400" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7z"/>
@@ -294,7 +275,6 @@
           START DRAFT
         </button>
 
-        <!-- ADMIN RESET BUTTON -->
         <button id="lobby-reset-btn" onclick="resetDraft()" class="hidden bg-white hover:bg-rose-50 text-rose-600 text-xs font-black px-3 py-1.5 rounded-lg border border-rose-200 transition flex items-center gap-1.5 shadow-sm">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -308,7 +288,6 @@
   <!-- MAIN AREA -->
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- TURN STATUS BANNER -->
     <div id="turn-banner" class="schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden transition-all duration-300">
       <div class="text-left flex-1">
         <div class="text-[10px] uppercase tracking-widest font-black text-sky-600 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
@@ -355,7 +334,6 @@
 
     <!-- GAME CARDS CONTAINER -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <!-- GAME 1 -->
       <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
         <div>
           <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-sky-100">
@@ -381,7 +359,6 @@
         </div>
       </div>
 
-      <!-- GAME 2 -->
       <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
         <div>
           <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-rose-100">
@@ -407,7 +384,6 @@
         </div>
       </div>
 
-      <!-- GAME 3 (DECIDER) -->
       <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
         <div>
           <div class="flex justify-between items-center mb-2.5 pb-1.5 border-b border-amber-100">
@@ -464,7 +440,6 @@
       </div>
 
       <div id="selection-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 overflow-y-auto max-h-[480px] p-1">
-        <!-- CARDS RENDERED BY JS -->
       </div>
     </div>
 
@@ -746,31 +721,51 @@
 
         if (p1Sess === clientSessionId) {
           assignedPlayerNum = 1;
+          player1Name = inputVal;
+          player1SessionId = clientSessionId;
+          document.getElementById('room-code-input').value = roomCodeVal;
+          currentRole = 'player';
+          roleConfirmed = true;
+          document.getElementById('role-modal').classList.add('hidden');
+          connectToRoom();
         } else if (p2Sess === clientSessionId) {
           assignedPlayerNum = 2;
+          player2Name = inputVal;
+          player2SessionId = clientSessionId;
+          document.getElementById('room-code-input').value = roomCodeVal;
+          currentRole = 'player';
+          roleConfirmed = true;
+          document.getElementById('role-modal').classList.add('hidden');
+          connectToRoom();
         } else {
           if (p1Sess && p2Sess) {
             alert("Room is full! (2/2 Players occupied). Access rejected.");
             return;
-          } else if (!p1Sess) {
+          }
+
+          const updates = {};
+          if (!p1Sess) {
             assignedPlayerNum = 1;
-            p1Sess = clientSessionId;
-            db.ref('draft_rooms/' + roomCodeVal + '/player1SessionId').set(clientSessionId);
-            db.ref('draft_rooms/' + roomCodeVal + '/player1Name').set(inputVal);
+            player1SessionId = clientSessionId;
+            player1Name = inputVal;
+            updates['player1SessionId'] = clientSessionId;
+            updates['player1Name'] = inputVal;
           } else if (!p2Sess) {
             assignedPlayerNum = 2;
-            p2Sess = clientSessionId;
-            db.ref('draft_rooms/' + roomCodeVal + '/player2SessionId').set(clientSessionId);
-            db.ref('draft_rooms/' + roomCodeVal + '/player2Name').set(inputVal);
+            player2SessionId = clientSessionId;
+            player2Name = inputVal;
+            updates['player2SessionId'] = clientSessionId;
+            updates['player2Name'] = inputVal;
           }
+
+          db.ref('draft_rooms/' + roomCodeVal).update(updates).then(() => {
+            document.getElementById('room-code-input').value = roomCodeVal;
+            currentRole = 'player';
+            roleConfirmed = true;
+            document.getElementById('role-modal').classList.add('hidden');
+            connectToRoom();
+          });
         }
-
-        document.getElementById('room-code-input').value = roomCodeVal;
-        currentRole = 'player';
-        roleConfirmed = true;
-
-        document.getElementById('role-modal').classList.add('hidden');
-        connectToRoom();
       }).catch(err => {
         console.error("Room validation error:", err);
         submitBtn.disabled = false;
@@ -860,7 +855,7 @@
 
     function pushStateToFirebase(newDeadline = null) {
       if (!currentRoomRef) return;
-      currentRoomRef.set({
+      currentRoomRef.update({
         currentStepIndex: currentStepIndex,
         draftStarted: draftStarted,
         hostReady: hostReady,
@@ -880,7 +875,6 @@
       });
     }
 
-    /* INTERACTIVE COIN FLIP HANDLERS */
     function setPlayerCoinCall(callVal) {
       if (assignedPlayerNum !== 1) return;
       coinState.p1Call = callVal;
