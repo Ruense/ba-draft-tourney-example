@@ -137,7 +137,7 @@
           <label class="block text-xs font-black text-sky-700 uppercase tracking-wider mb-1 text-center">
             ROOM CODE (PROVIDED BY ADMIN)
           </label>
-          <input type="text" id="modal-room-code-input" placeholder="e.g. 7X9K2P" class="w-full bg-white border border-sky-300 rounded-lg px-3 py-2 text-sm font-black text-sky-800 text-center outline-none focus:border-sky-500 shadow-inner uppercase">
+          <input type="text" id="modal-room-code-input" value="" placeholder="e.g. 7X9K2P" class="w-full bg-white border border-sky-300 rounded-lg px-3 py-2 text-sm font-black text-sky-800 text-center outline-none focus:border-sky-500 shadow-inner uppercase">
         </div>
       </div>
 
@@ -542,11 +542,6 @@
     let gameData = getEmptyGameData();
 
     window.onload = function() {
-      // INITIALIZE DEFAULT RANDOM ROOM CODE IF NONE
-      if (!document.getElementById('room-code-input').value) {
-        document.getElementById('room-code-input').value = generateRoomCode();
-      }
-
       const raid_boss_promise = fetch("https://schaledb.com/data/en/raids.min.json")
         .then(r => r.json())
         .then(data => {
@@ -582,7 +577,10 @@
 
       Promise.all([raid_boss_promise, student_promise]).then(() => {
         buildDraftSequence();
-        connectToRoom();
+        const existingCode = document.getElementById('room-code-input').value.trim();
+        if (existingCode) {
+          connectToRoom();
+        }
         openRoleModal();
       });
     };
@@ -649,6 +647,7 @@
       const label = document.getElementById('modal-input-label');
       const input = document.getElementById('modal-role-input');
       const roomWrapper = document.getElementById('modal-room-code-wrapper');
+      const roomInput = document.getElementById('modal-room-code-input');
 
       inputSec.classList.remove('hidden');
 
@@ -658,12 +657,14 @@
         input.placeholder = "Player 1 Name...";
         input.value = hostName || '';
         roomWrapper.classList.remove('hidden');
+        if (roomInput) roomInput.value = '';
       } else if (role === 'guest') {
         label.innerText = "ENTER GUEST NAME";
         input.type = "text";
         input.placeholder = "Player 2 Name...";
         input.value = guestName || '';
         roomWrapper.classList.remove('hidden');
+        if (roomInput) roomInput.value = '';
       } else if (role === 'admin') {
         label.innerText = "ENTER ADMIN PASSWORD";
         input.type = "password";
@@ -682,48 +683,85 @@
           alert("Incorrect Admin Password!");
           return;
         }
-      } else {
-        if (!roomCodeVal) {
-          alert("Please enter the Room Code provided by Admin!");
+
+        if (!document.getElementById('room-code-input').value) {
+          document.getElementById('room-code-input').value = generateRoomCode();
+        }
+
+        currentRole = 'admin';
+        roleConfirmed = true;
+        localStorage.setItem('sh_draft_current_role', currentRole);
+        document.getElementById('role-modal').classList.add('hidden');
+        connectToRoom();
+        return;
+      }
+
+      if (!roomCodeVal) {
+        alert("Please enter the Room Code provided by Admin!");
+        return;
+      }
+
+      const submitBtn = document.getElementById('modal-submit-btn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "VERIFYING ROOM...";
+      }
+
+      db.ref('draft_rooms/' + roomCodeVal).once('value').then(snapshot => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "ENTER DRAFT";
+        }
+
+        if (!snapshot.exists()) {
+          alert("Invalid or non-existent Room Code. Please verify with the Admin.");
           return;
         }
+
+        const data = snapshot.val() || {};
+
+        if (modalSelectedRole === 'host') {
+          if (!inputVal) {
+            alert("Please enter a name for Host!");
+            return;
+          }
+          if (data.hostName && data.hostName.toLowerCase() !== inputVal.toLowerCase()) {
+            alert(`Host role is already claimed by "${data.hostName}". You cannot join with a different name!`);
+            return;
+          }
+          hostSessionId = clientSessionId;
+          hostName = inputVal;
+        }
+
+        if (modalSelectedRole === 'guest') {
+          if (!inputVal) {
+            alert("Please enter a name for Guest!");
+            return;
+          }
+          if (data.guestName && data.guestName.toLowerCase() !== inputVal.toLowerCase()) {
+            alert(`Guest role is already claimed by "${data.guestName}". You cannot join with a different name!`);
+            return;
+          }
+          guestSessionId = clientSessionId;
+          guestName = inputVal;
+        }
+
         document.getElementById('room-code-input').value = roomCodeVal;
-      }
+        currentRole = modalSelectedRole;
+        roleConfirmed = true;
+        pendingSelection = null;
 
-      if (modalSelectedRole === 'host') {
-        if (!inputVal) {
-          alert("Please enter a name for Host!");
-          return;
+        localStorage.setItem('sh_draft_current_role', currentRole);
+        document.getElementById('role-modal').classList.add('hidden');
+        connectToRoom();
+      }).catch(err => {
+        console.error("Room validation error:", err);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "ENTER DRAFT";
         }
-        if (hostName && hostName.toLowerCase() !== inputVal.toLowerCase()) {
-          alert(`Host role is already claimed by "${hostName}". You cannot join with a different name!`);
-          return;
-        }
-        hostSessionId = clientSessionId;
-        hostName = inputVal;
-      }
-
-      if (modalSelectedRole === 'guest') {
-        if (!inputVal) {
-          alert("Please enter a name for Guest!");
-          return;
-        }
-        if (guestName && guestName.toLowerCase() !== inputVal.toLowerCase()) {
-          alert(`Guest role is already claimed by "${guestName}". You cannot join with a different name!`);
-          return;
-        }
-        guestSessionId = clientSessionId;
-        guestName = inputVal;
-      }
-
-      currentRole = modalSelectedRole;
-      roleConfirmed = true;
-      pendingSelection = null;
-
-      localStorage.setItem('sh_draft_current_role', currentRole);
-      document.getElementById('role-modal').classList.add('hidden');
-      
-      connectToRoom();
+        alert("Error validating room code. Please try again.");
+      });
     }
 
     /* ADMIN GENERATE NEW ROOM CODE */
@@ -738,8 +776,12 @@
     function connectToRoom() {
       let roomCode = document.getElementById('room-code-input').value.trim().toUpperCase();
       if (!roomCode) {
-        roomCode = generateRoomCode();
-        document.getElementById('room-code-input').value = roomCode;
+        if (currentRole === 'admin') {
+          roomCode = generateRoomCode();
+          document.getElementById('room-code-input').value = roomCode;
+        } else {
+          return;
+        }
       }
       
       if (currentRoomRef) {
