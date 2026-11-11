@@ -677,7 +677,7 @@
     function confirmModalRole() {
       const inputVal = document.getElementById('modal-role-input').value.trim();
       const roomCodeVal = document.getElementById('modal-room-code-input').value.trim().toUpperCase();
-
+    
       if (modalSelectedRole === 'admin') {
         if (inputVal !== ADMIN_PASSWORD) {
           alert("Incorrect Admin Password!");
@@ -692,7 +692,7 @@
         connectToRoom();
         return;
       }
-
+    
       if (!roomCodeVal) {
         alert("Please enter the Room Code provided by Admin!");
         return;
@@ -701,48 +701,33 @@
         alert("Please enter your player name!");
         return;
       }
-
+    
       const submitBtn = document.getElementById('modal-submit-btn');
       submitBtn.disabled = true;
       submitBtn.innerText = "CHECKING ROOM CAPACITY...";
-
+    
       db.ref('draft_rooms/' + roomCodeVal).once('value').then(snapshot => {
         submitBtn.disabled = false;
         submitBtn.innerText = "ENTER DRAFT";
-
-        if (!snapshot.exists()) {
-          alert("Invalid or non-existent Room Code. Please verify with the Admin.");
-          return;
-        }
-
+    
         const data = snapshot.val() || {};
         let p1Sess = data.player1SessionId;
         let p2Sess = data.player2SessionId;
-
+    
         if (p1Sess === clientSessionId) {
           assignedPlayerNum = 1;
           player1Name = inputVal;
           player1SessionId = clientSessionId;
-          document.getElementById('room-code-input').value = roomCodeVal;
-          currentRole = 'player';
-          roleConfirmed = true;
-          document.getElementById('role-modal').classList.add('hidden');
-          connectToRoom();
         } else if (p2Sess === clientSessionId) {
           assignedPlayerNum = 2;
           player2Name = inputVal;
           player2SessionId = clientSessionId;
-          document.getElementById('room-code-input').value = roomCodeVal;
-          currentRole = 'player';
-          roleConfirmed = true;
-          document.getElementById('role-modal').classList.add('hidden');
-          connectToRoom();
         } else {
           if (p1Sess && p2Sess) {
             alert("Room is full! (2/2 Players occupied). Access rejected.");
             return;
           }
-
+    
           const updates = {};
           if (!p1Sess) {
             assignedPlayerNum = 1;
@@ -750,14 +735,14 @@
             player1Name = inputVal;
             updates['player1SessionId'] = clientSessionId;
             updates['player1Name'] = inputVal;
-          } else if (!p2Sess) {
+          } else {
             assignedPlayerNum = 2;
             player2SessionId = clientSessionId;
             player2Name = inputVal;
             updates['player2SessionId'] = clientSessionId;
             updates['player2Name'] = inputVal;
           }
-
+    
           db.ref('draft_rooms/' + roomCodeVal).update(updates).then(() => {
             document.getElementById('room-code-input').value = roomCodeVal;
             currentRole = 'player';
@@ -765,7 +750,15 @@
             document.getElementById('role-modal').classList.add('hidden');
             connectToRoom();
           });
+          return;
         }
+    
+        document.getElementById('room-code-input').value = roomCodeVal;
+        currentRole = 'player';
+        roleConfirmed = true;
+        document.getElementById('role-modal').classList.add('hidden');
+        connectToRoom();
+    
       }).catch(err => {
         console.error("Room validation error:", err);
         submitBtn.disabled = false;
@@ -773,7 +766,102 @@
         alert("Error connecting to room.");
       });
     }
-
+    
+    function connectToRoom() {
+      let roomCode = document.getElementById('room-code-input').value.trim().toUpperCase();
+      if (!roomCode) {
+        if (currentRole === 'admin') {
+          roomCode = generateRoomCode();
+          document.getElementById('room-code-input').value = roomCode;
+        } else {
+          return;
+        }
+      }
+      
+      if (currentRoomRef) currentRoomRef.off();
+      currentRoomRef = db.ref('draft_rooms/' + roomCode);
+    
+      const spectatorBtn = document.getElementById('header-spectator-btn');
+      if (spectatorBtn) spectatorBtn.href = `spectator.html?room=${roomCode}`;
+    
+      currentRoomRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          currentStepIndex = data.currentStepIndex || 0;
+          draftStarted = !!data.draftStarted;
+          hostReady = !!data.hostReady;
+          guestReady = !!data.guestReady;
+          stepDeadline = data.stepDeadline || 0;
+          bannedBosses = data.bannedBosses || [];
+          
+          hostSessionId = data.hostSessionId || null;
+          guestSessionId = data.guestSessionId || null;
+          hostName = data.hostName || '';
+          guestName = data.guestName || '';
+    
+          player1SessionId = data.player1SessionId || null;
+          player2SessionId = data.player2SessionId || null;
+          player1Name = data.player1Name || '';
+          player2Name = data.player2Name || '';
+    
+          coinState = data.coinState || { p1Call: null, flipping: false, result: null, winnerNum: null, roleChoice: null };
+    
+          if (player1SessionId === clientSessionId) assignedPlayerNum = 1;
+          else if (player2SessionId === clientSessionId) assignedPlayerNum = 2;
+    
+          if (assignedPlayerNum && coinState.roleChoice) {
+            if ((coinState.winnerNum === assignedPlayerNum && coinState.roleChoice === 'blue') ||
+                (coinState.winnerNum !== assignedPlayerNum && coinState.roleChoice === 'red')) {
+              currentRole = 'host';
+            } else {
+              currentRole = 'guest';
+            }
+          }
+    
+          const rawGameData = data.gameData || [];
+          gameData = [0, 1, 2].map(idx => {
+            const raw = rawGameData[idx] || {};
+            return {
+              boss: raw.boss || null,
+              terrain: raw.terrain || null,
+              studentBans: raw.studentBans || []
+            };
+          });
+    
+          buildDraftSequence();
+          updateDraftState();
+          handleCoinFlipSync();
+        } else if (currentRole === 'admin') {
+          // Only Admin creates room initial state
+          pushStateToFirebase();
+        }
+      });
+    }
+    
+    function pushStateToFirebase(newDeadline = null) {
+      if (!currentRoomRef) return;
+      
+      const payload = {
+        currentStepIndex: currentStepIndex,
+        draftStarted: draftStarted,
+        hostReady: hostReady,
+        guestReady: guestReady,
+        stepDeadline: newDeadline !== null ? newDeadline : stepDeadline,
+        bannedBosses: bannedBosses,
+        gameData: gameData,
+        hostSessionId: hostSessionId,
+        guestSessionId: guestSessionId,
+        hostName: hostName,
+        guestName: guestName,
+        player1SessionId: player1SessionId,
+        player2SessionId: player2SessionId,
+        player1Name: player1Name,
+        player2Name: player2Name,
+        coinState: coinState
+      };
+    
+      currentRoomRef.update(payload);
+    }
     function adminGenerateNewRoom() {
       if (currentRole !== 'admin') return;
       const newCode = generateRoomCode();
