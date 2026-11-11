@@ -49,6 +49,7 @@
       box-shadow: 0 6px 18px rgba(18, 180, 255, 0.25);
     }
 
+    /* 3D COIN SPIN ANIMATION */
     .coin-perspective { perspective: 1000px; }
     .coin-inner {
       width: 100%;
@@ -468,6 +469,8 @@
       localStorage.setItem('sh_draft_session_id', clientSessionId);
     }
 
+    let savedRoomCode = localStorage.getItem('sh_active_room_code') || '';
+
     let currentRole = 'player';
     let modalSelectedRole = 'player';
     let assignedPlayerNum = null;
@@ -637,6 +640,10 @@
 
     function openRoleModal() {
       document.getElementById('role-modal').classList.remove('hidden');
+      const roomInput = document.getElementById('modal-room-code-input');
+      if (roomInput && savedRoomCode) {
+        roomInput.value = savedRoomCode;
+      }
       selectModalRole(currentRole);
     }
 
@@ -656,7 +663,6 @@
       const nameWrapper = document.getElementById('modal-player-name-wrapper');
       const roomWrapper = document.getElementById('modal-room-code-wrapper');
       const input = document.getElementById('modal-role-input');
-      const roomInput = document.getElementById('modal-room-code-input');
 
       inputSec.classList.remove('hidden');
 
@@ -665,7 +671,6 @@
         roomWrapper.classList.remove('hidden');
         input.type = "text";
         input.placeholder = "Enter your player name...";
-        if (roomInput) roomInput.value = '';
       } else if (role === 'admin') {
         nameWrapper.classList.remove('hidden');
         roomWrapper.classList.add('hidden');
@@ -676,16 +681,26 @@
 
     function confirmModalRole() {
       const inputVal = document.getElementById('modal-role-input').value.trim();
-      const roomCodeVal = document.getElementById('modal-room-code-input').value.trim().toUpperCase();
+      const roomCodeInput = document.getElementById('modal-room-code-input');
+      let roomCodeVal = roomCodeInput ? roomCodeInput.value.trim().toUpperCase() : '';
 
       if (modalSelectedRole === 'admin') {
         if (inputVal !== ADMIN_PASSWORD) {
           alert("Incorrect Admin Password!");
           return;
         }
-        if (!document.getElementById('room-code-input').value) {
-          document.getElementById('room-code-input').value = generateRoomCode();
+
+        if (!roomCodeVal && savedRoomCode) {
+          roomCodeVal = savedRoomCode;
         }
+
+        if (!roomCodeVal) {
+          roomCodeVal = generateRoomCode();
+        }
+
+        document.getElementById('room-code-input').value = roomCodeVal;
+        localStorage.setItem('sh_active_room_code', roomCodeVal);
+        
         currentRole = 'admin';
         roleConfirmed = true;
         document.getElementById('role-modal').classList.add('hidden');
@@ -723,20 +738,10 @@
           assignedPlayerNum = 1;
           player1Name = inputVal;
           player1SessionId = clientSessionId;
-          document.getElementById('room-code-input').value = roomCodeVal;
-          currentRole = 'player';
-          roleConfirmed = true;
-          document.getElementById('role-modal').classList.add('hidden');
-          connectToRoom();
         } else if (p2Sess === clientSessionId) {
           assignedPlayerNum = 2;
           player2Name = inputVal;
           player2SessionId = clientSessionId;
-          document.getElementById('room-code-input').value = roomCodeVal;
-          currentRole = 'player';
-          roleConfirmed = true;
-          document.getElementById('role-modal').classList.add('hidden');
-          connectToRoom();
         } else {
           if (p1Sess && p2Sess) {
             alert("Room is full! (2/2 Players occupied). Access rejected.");
@@ -760,12 +765,22 @@
 
           db.ref('draft_rooms/' + roomCodeVal).update(updates).then(() => {
             document.getElementById('room-code-input').value = roomCodeVal;
+            localStorage.setItem('sh_active_room_code', roomCodeVal);
             currentRole = 'player';
             roleConfirmed = true;
             document.getElementById('role-modal').classList.add('hidden');
             connectToRoom();
           });
+          return;
         }
+
+        document.getElementById('room-code-input').value = roomCodeVal;
+        localStorage.setItem('sh_active_room_code', roomCodeVal);
+        currentRole = 'player';
+        roleConfirmed = true;
+        document.getElementById('role-modal').classList.add('hidden');
+        connectToRoom();
+
       }).catch(err => {
         console.error("Room validation error:", err);
         submitBtn.disabled = false;
@@ -778,20 +793,28 @@
       if (currentRole !== 'admin') return;
       const newCode = generateRoomCode();
       document.getElementById('room-code-input').value = newCode;
+      localStorage.setItem('sh_active_room_code', newCode);
       resetDraft(newCode);
     }
 
     function connectToRoom() {
       let roomCode = document.getElementById('room-code-input').value.trim().toUpperCase();
+      
+      if (!roomCode) {
+        roomCode = localStorage.getItem('sh_active_room_code') || '';
+      }
+
       if (!roomCode) {
         if (currentRole === 'admin') {
           roomCode = generateRoomCode();
-          document.getElementById('room-code-input').value = roomCode;
         } else {
           return;
         }
       }
       
+      document.getElementById('room-code-input').value = roomCode;
+      localStorage.setItem('sh_active_room_code', roomCode);
+
       if (currentRoomRef) currentRoomRef.off();
       currentRoomRef = db.ref('draft_rooms/' + roomCode);
 
@@ -822,8 +845,9 @@
 
           if (player1SessionId === clientSessionId) assignedPlayerNum = 1;
           else if (player2SessionId === clientSessionId) assignedPlayerNum = 2;
+          else if (currentRole !== 'player') assignedPlayerNum = null;
 
-          if (assignedPlayerNum && coinState.roleChoice) {
+          if (currentRole !== 'admin' && assignedPlayerNum && coinState.roleChoice) {
             if ((coinState.winnerNum === assignedPlayerNum && coinState.roleChoice === 'blue') ||
                 (coinState.winnerNum !== assignedPlayerNum && coinState.roleChoice === 'red')) {
               currentRole = 'host';
@@ -988,6 +1012,13 @@
     function resetDraft(overrideRoomCode = null) {
       if (currentRole !== 'admin') return;
       stopTimer();
+
+      const newRoomCode = overrideRoomCode || generateRoomCode();
+
+      if (currentRoomRef) {
+        currentRoomRef.off();
+      }
+
       currentStepIndex = 0;
       draftStarted = false;
       hostReady = false;
@@ -1006,12 +1037,8 @@
       coinState = { p1Call: null, flipping: false, result: null, winnerNum: null, roleChoice: null };
       gameData = getEmptyGameData();
 
-      if (overrideRoomCode) {
-        document.getElementById('room-code-input').value = overrideRoomCode;
-      } else {
-        const newRoomCode = generateRoomCode();
-        document.getElementById('room-code-input').value = newRoomCode;
-      }
+      document.getElementById('room-code-input').value = newRoomCode;
+      localStorage.setItem('sh_active_room_code', newRoomCode);
 
       connectToRoom();
     }
