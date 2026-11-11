@@ -4,13 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- Custom Favicon for Browser Tab -->
   <link rel="icon" type="image/png" href="sh_logo_norm_white.png">
-
   <title>Blue Archive BO3 Draft - Senseihood Tournament</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -52,12 +49,27 @@
       box-shadow: 0 6px 18px rgba(18, 180, 255, 0.25);
     }
 
-    @keyframes pulse-fast {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
+    /* 3D COIN SPIN ANIMATION */
+    .coin-perspective { perspective: 1000px; }
+    .coin-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 3s cubic-bezier(0.15, 0.85, 0.35, 1.2);
     }
-    .animate-pulse-fast { animation: pulse-fast 0.6s infinite; }
-    
+    .coin-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 9999px;
+      display: flex;
+      items-center: center;
+      justify-content: center;
+    }
+    .coin-back { transform: rotateY(180deg); }
+
     @keyframes blink-black {
       0%, 100% {
         background-color: #0f172a;
@@ -72,9 +84,8 @@
         box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
       }
     } 
-    .animate-blink-black {
-      animation: blink-black 0.6s infinite ease-in-out;
-    }
+    .animate-blink-black { animation: blink-black 0.6s infinite ease-in-out; }
+
     @keyframes slot-pulse-cyan {
       0%, 100% { box-shadow: 0 0 16px rgba(18, 180, 255, 0.8); border-color: #00a2ff !important; transform: scale(1.02); }
       50% { box-shadow: 0 0 6px rgba(18, 180, 255, 0.3); border-color: #7dd3fc !important; transform: scale(1); }
@@ -95,42 +106,37 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between">
 
-  <!-- ROLE SELECTION POPUP MODAL -->
+  <!-- ROLE / ROOM ENTRY SELECTION MODAL -->
   <div id="role-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
     <div class="schale-card rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-sky-300 relative">
       <div class="text-center mb-6">
         <div class="w-12 h-12 rounded-2xl bg-sky-500 border border-sky-400 flex items-center justify-center mx-auto mb-2 shadow-md p-1">
           <img src="sh_logo_norm_white.png" alt="Logo" class="w-full h-full object-contain">
         </div>
-        <h2 class="text-xl font-black text-slate-800 tracking-wider">SELECT YOUR ROLE</h2>
+        <h2 class="text-xl font-black text-slate-800 tracking-wider">ENTER DRAFT ROOM</h2>
         <p class="text-xs text-sky-600 font-bold tracking-wide mt-0.5">SENSEIHOOD TOURNAMENT DRAFT</p>
       </div>
 
-      <!-- ROLE GRID BUTTONS -->
-      <div class="grid grid-cols-3 gap-3 mb-5">
-        <button onclick="selectModalRole('host')" id="role-btn-host" class="modal-role-btn border-2 border-sky-200 bg-sky-50/50 hover:bg-sky-100 p-3 rounded-xl flex flex-col items-center justify-center transition">
-          <span class="font-black text-sm text-sky-600">HOST</span>
-          <span class="text-[10px] text-sky-500 font-bold">Team Blue</span>
+      <!-- ROLE CHOICE BUTTONS -->
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <button onclick="selectModalRole('player')" id="role-btn-player" class="modal-role-btn border-2 border-sky-200 bg-sky-50/50 hover:bg-sky-100 p-4 rounded-xl flex flex-col items-center justify-center transition">
+          <span class="font-black text-base text-sky-600">PLAYER</span>
+          <span class="text-[10px] text-sky-500 font-bold">Join Match (Max 2)</span>
         </button>
 
-        <button onclick="selectModalRole('guest')" id="role-btn-guest" class="modal-role-btn border-2 border-rose-200 bg-rose-50/50 hover:bg-rose-100 p-3 rounded-xl flex flex-col items-center justify-center transition">
-          <span class="font-black text-sm text-rose-600">GUEST</span>
-          <span class="text-[10px] text-rose-500 font-bold">Team Red</span>
-        </button>
-
-        <button onclick="selectModalRole('admin')" id="role-btn-admin" class="modal-role-btn border-2 border-amber-200 bg-amber-50/50 hover:bg-amber-100 p-3 rounded-xl flex flex-col items-center justify-center transition">
-          <span class="font-black text-sm text-amber-600">ADMIN</span>
-          <span class="text-[10px] text-amber-500 font-bold">Controls</span>
+        <button onclick="selectModalRole('admin')" id="role-btn-admin" class="modal-role-btn border-2 border-amber-200 bg-amber-50/50 hover:bg-amber-100 p-4 rounded-xl flex flex-col items-center justify-center transition">
+          <span class="font-black text-base text-amber-600">ADMIN</span>
+          <span class="text-[10px] text-amber-500 font-bold">Host & Controls</span>
         </button>
       </div>
 
-      <!-- CONDITIONAL INPUT BOXES -->
+      <!-- CONDITIONAL INPUT FIELDS -->
       <div id="modal-input-section" class="mb-5 hidden flex flex-col gap-3">
-        <div>
-          <label id="modal-input-label" class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1 text-center">
+        <div id="modal-player-name-wrapper">
+          <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1 text-center">
             ENTER YOUR NAME
           </label>
-          <input type="text" id="modal-role-input" placeholder="Enter here..." class="w-full bg-slate-50 border border-sky-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 text-center outline-none focus:border-sky-500 shadow-inner">
+          <input type="text" id="modal-role-input" placeholder="Player Name..." class="w-full bg-slate-50 border border-sky-300 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 text-center outline-none focus:border-sky-500 shadow-inner">
         </div>
 
         <div id="modal-room-code-wrapper">
@@ -148,11 +154,43 @@
     </div>
   </div>
 
+  <!-- COIN FLIP ANIMATION POPUP OVERLAY -->
+  <div id="coin-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[120] hidden flex flex-col items-center justify-center p-4">
+    <div class="schale-card rounded-2xl max-w-sm w-full p-6 text-center flex flex-col items-center gap-4 shadow-2xl border-2 border-amber-300 relative">
+      <h3 id="coin-modal-title" class="text-base font-black text-slate-800 uppercase tracking-widest">COIN FLIPPING...</h3>
+      
+      <!-- 3D COIN CONTAINER -->
+      <div class="coin-perspective w-32 h-32 my-4">
+        <div id="coin-spinner" class="coin-inner">
+          <div class="coin-face border-4 border-amber-500 bg-amber-400 text-amber-900 font-black text-xl shadow-lg">
+            HEADS
+          </div>
+          <div class="coin-face coin-back border-4 border-slate-600 bg-slate-700 text-slate-100 font-black text-xl shadow-lg">
+            TAILS
+          </div>
+        </div>
+      </div>
+
+      <div id="coin-result-label" class="text-sm font-black text-amber-600 tracking-wider">FLIPPING FOR FIRST PICK PRIORITY</div>
+      
+      <!-- WINNER SELECTION BUTTONS (HIDDEN UNTIL FLIP ENDS) -->
+      <div id="coin-winner-actions" class="w-full hidden flex flex-col gap-2 mt-2">
+        <span class="text-xs font-bold text-slate-600 mb-1">CHOOSE YOUR TEAM / DRAFT ORDER:</span>
+        <button onclick="chooseCoinWinnerRole('blue')" class="w-full bg-sky-500 hover:bg-sky-400 text-white font-black text-xs py-2.5 rounded-xl shadow tracking-wider uppercase">
+          HOST (BLUE) - 1ST PICK
+        </button>
+        <button onclick="chooseCoinWinnerRole('red')" class="w-full bg-rose-500 hover:bg-rose-400 text-white font-black text-xs py-2.5 rounded-xl shadow tracking-wider uppercase">
+          GUEST (RED) - 2ND PICK
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- HEADER WITH FIXED CENTER TIMER -->
   <header class="bg-white/90 border-b border-sky-200 px-4 md:px-6 py-2.5 sticky top-0 z-50 backdrop-blur-md shadow-sm relative">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 relative">
       
-      <!-- 1. LEFT BRANDING -->
+      <!-- BRANDING -->
       <div class="flex items-center gap-3 shrink-0 z-10">
         <div class="w-10 h-10 rounded-xl bg-sky-500 border border-sky-400 flex items-center justify-center shadow-md overflow-hidden p-1">
           <img src="sh_logo_norm_white.png" alt="Senseihood Emblem" class="w-full h-full object-contain">
@@ -165,7 +203,7 @@
         </div>
       </div>
 
-      <!-- 2. ABSOLUTE FIXED CENTER TIMER -->
+      <!-- ABSOLUTE FIXED CENTER TIMER -->
       <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
         <div id="header-timer-container" class="pointer-events-auto flex flex-col items-center justify-center schale-card-inner px-4 py-1 rounded-xl border border-sky-300 min-w-[190px] text-center shadow-md transition-all duration-300">
           <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest leading-none">TIME LEFT</span>
@@ -176,7 +214,7 @@
         </div>
       </div>
 
-      <!-- 3. RIGHT CONTROLS GROUP -->
+      <!-- RIGHT CONTROLS GROUP -->
       <div class="flex items-center gap-2 shrink-0 z-10">
         
         <!-- ROOM CODE CONTROLS -->
@@ -212,23 +250,43 @@
     </div>
   </header>
 
-  <!-- LOBBY STATUS BAR -->
+  <!-- LOBBY STATUS & COIN FLIP BAR -->
   <div id="lobby-bar" class="bg-white/80 border-b border-sky-200/60 px-6 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
-      <div class="flex items-center gap-6">
+      
+      <!-- PLAYERS LOBBY & COIN CALL STATUS -->
+      <div class="flex flex-wrap items-center gap-6">
         <div class="flex items-center gap-2">
-          <span class="text-xs font-bold text-sky-600 uppercase tracking-wide" id="bar-host-label">Host (Blue):</span>
-          <span id="host-ready-badge" class="bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">NOT READY</span>
+          <span class="text-xs font-bold text-sky-600 uppercase tracking-wide" id="bar-p1-label">Player 1:</span>
+          <span id="p1-status-badge" class="bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">VACANT</span>
         </div>
 
         <div class="flex items-center gap-2">
-          <span class="text-xs font-bold text-rose-600 uppercase tracking-wide" id="bar-guest-label">Guest (Red):</span>
-          <span id="guest-ready-badge" class="bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">NOT READY</span>
+          <span class="text-xs font-bold text-rose-600 uppercase tracking-wide" id="bar-p2-label">Player 2:</span>
+          <span id="p2-status-badge" class="bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider">VACANT</span>
+        </div>
+
+        <!-- COIN CALL CHOICE STATUS DISPLAY -->
+        <div id="coin-status-display" class="hidden flex items-center gap-2 bg-amber-50 px-3 py-1 rounded-lg border border-amber-300 text-xs font-black text-amber-800">
+          <span id="coin-call-text">P1 CALL: NONE</span>
         </div>
       </div>
 
-      <!-- ADMIN CONTROLS: START DRAFT & RESET SIDE-BY-SIDE -->
+      <!-- ADMIN & PLAYER LOBBY CONTROLS -->
       <div class="flex items-center gap-2">
+        <!-- PLAYER 1 COIN CALL BUTTONS -->
+        <div id="p1-call-controls" class="hidden flex items-center gap-1.5">
+          <span class="text-xs font-bold text-slate-600">CALL COIN:</span>
+          <button onclick="setPlayerCoinCall('HEADS')" class="bg-amber-500 hover:bg-amber-400 text-white text-xs font-black px-3 py-1.5 rounded-lg transition shadow">HEADS</button>
+          <button onclick="setPlayerCoinCall('TAILS')" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-black px-3 py-1.5 rounded-lg transition shadow">TAILS</button>
+        </div>
+
+        <!-- ADMIN FLIP COIN BUTTON -->
+        <button id="admin-flip-coin-btn" onclick="triggerAdminCoinFlip()" class="hidden bg-amber-500 hover:bg-amber-400 text-white text-xs font-black px-4 py-1.5 rounded-lg border border-amber-400 transition cursor-pointer shadow-md tracking-wider glow-halo-gold flex items-center gap-1.5">
+          FLIP COIN
+        </button>
+
+        <!-- ADMIN START DRAFT BUTTON -->
         <button id="admin-start-btn" onclick="startDraftByAdmin()" disabled class="bg-emerald-50 text-slate-400 cursor-not-allowed text-xs font-black px-4 py-1.5 rounded-lg border border-emerald-200 transition tracking-wider flex items-center gap-1.5 shadow-sm">
           <svg class="w-3.5 h-3.5 fill-current text-slate-400" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7z"/>
@@ -236,6 +294,7 @@
           START DRAFT
         </button>
 
+        <!-- ADMIN RESET BUTTON -->
         <button id="lobby-reset-btn" onclick="resetDraft()" class="hidden bg-white hover:bg-rose-50 text-rose-600 text-xs font-black px-3 py-1.5 rounded-lg border border-rose-200 transition flex items-center gap-1.5 shadow-sm">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -249,16 +308,15 @@
   <!-- MAIN AREA -->
   <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 flex flex-col gap-6">
 
-    <!-- TURN STATUS BANNER WITH READY UP BUTTON -->
+    <!-- TURN STATUS BANNER -->
     <div id="turn-banner" class="schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden transition-all duration-300">
       <div class="text-left flex-1">
         <div class="text-[10px] uppercase tracking-widest font-black text-sky-600 mb-1" id="phase-title">PRE-DRAFT LOBBY</div>
-        <div class="text-2xl font-black text-slate-800 tracking-wide" id="turn-label">WAITING FOR PLAYERS & ADMIN START</div>
-        <div class="text-xs text-slate-500 mt-1 font-semibold" id="turn-subtitle">Host and Guest must ready up before Admin can start the draft.</div>
+        <div class="text-2xl font-black text-slate-800 tracking-wide" id="turn-label">WAITING FOR PLAYERS & COIN FLIP</div>
+        <div class="text-xs text-slate-500 mt-1 font-semibold" id="turn-subtitle">Players must join and perform the Coin Flip for side priority before Admin starts the draft.</div>
       </div>
 
       <div class="flex items-center gap-3">
-        <!-- READY UP BUTTONS -->
         <button id="host-ready-btn" onclick="toggleReady('host')" class="hidden bg-sky-500 hover:bg-sky-400 text-white text-xs font-black px-4 py-3 rounded-xl transition shadow tracking-wider glow-halo-cyan">
           READY UP
         </button>
@@ -270,7 +328,6 @@
 
     <!-- TOP BOSS BANS BAR -->
     <div class="schale-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-md">
-      <!-- HOST BOSS BANS -->
       <div class="flex flex-col items-center md:items-start gap-1.5">
         <div class="flex items-center gap-2">
           <span class="text-xs font-black text-sky-600 uppercase tracking-widest" id="host-ban-header-title">Host Boss Bans</span>
@@ -278,7 +335,6 @@
         <div id="host-boss-bans-container" class="flex gap-2"></div>
       </div>
 
-      <!-- CENTER LABEL -->
       <div class="text-center px-4">
         <div class="w-10 h-10 mx-auto mb-1 rounded-full bg-sky-50 border border-sky-200 flex items-center justify-center">
           <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -289,7 +345,6 @@
         <p class="text-[10px] text-sky-600 font-bold">4 HOST • 4 GUEST</p>
       </div>
 
-      <!-- GUEST BOSS BANS -->
       <div class="flex flex-col items-center md:items-end gap-1.5">
         <div class="flex items-center gap-2">
           <span class="text-xs font-black text-rose-600 uppercase tracking-widest" id="guest-ban-header-title">Guest Boss Bans</span>
@@ -300,7 +355,6 @@
 
     <!-- GAME CARDS CONTAINER -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      
       <!-- GAME 1 -->
       <div class="schale-card rounded-2xl p-4 flex flex-col justify-between">
         <div>
@@ -378,7 +432,6 @@
           <div id="g3-bans-container" class="grid grid-cols-4 gap-1 min-h-[64px]"></div>
         </div>
       </div>
-
     </div>
 
     <!-- SELECTION GRID AREA -->
@@ -440,14 +493,9 @@
       localStorage.setItem('sh_draft_session_id', clientSessionId);
     }
 
-    // RESTORE SAVED ROLE ON PAGE LOAD
-    let currentRole = 'host';
-    let modalSelectedRole = 'host';
-    const savedRole = localStorage.getItem('sh_draft_current_role');
-    if (savedRole) {
-      currentRole = savedRole;
-      modalSelectedRole = savedRole;
-    }
+    let currentRole = 'player';
+    let modalSelectedRole = 'player';
+    let assignedPlayerNum = null; // 1 or 2
 
     const ADMIN_PASSWORD = "Senseihood1234";
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwexc3_lsvhadskAmSTKe65PWZnxU65h-xGO_6JlxcKrxse6bB65Bd6zXIDTrc1bqIJqw/exec";
@@ -461,8 +509,48 @@
     let STUDENT_ROSTER = [];
 
     let DRAFT_SEQUENCE = [];
+    const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbarka', 'nightmare'];
+    const PERMA_BANNED_STUDENTS = ['10099', '10144'];
 
-    // RANDOM ALPHANUMERIC ROOM CODE GENERATOR
+    let currentStepIndex = 0;
+    let roleConfirmed = false;
+    let draftStarted = false;
+    let hostReady = false;
+    let guestReady = false;
+    let stepDeadline = 0;
+    let lastNotifiedStep = -1;
+
+    let hostSessionId = null;
+    let guestSessionId = null;
+    let hostName = '';
+    let guestName = '';
+
+    let player1SessionId = null;
+    let player2SessionId = null;
+    let player1Name = '';
+    let player2Name = '';
+
+    let coinState = {
+      p1Call: null,
+      flipping: false,
+      result: null,
+      winnerNum: null,
+      roleChoice: null
+    };
+
+    let bannedBosses = [];
+    let pendingSelection = null;
+    let timerInterval = null;
+
+    function getEmptyGameData() {
+      return [
+        { boss: null, terrain: null, studentBans: [] },
+        { boss: null, terrain: null, studentBans: [] },
+        { boss: null, terrain: null, studentBans: [] }
+      ];
+    }
+    let gameData = getEmptyGameData();
+
     function generateRoomCode(length = 6) {
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       let code = '';
@@ -511,36 +599,6 @@
       ];
     }
 
-    const PERMA_BANNED_BOSSES = ['geburah', 'yesod', 'drumbarka', 'nightmare'];
-    const PERMA_BANNED_STUDENTS = ['10099', '10144'];
-
-    let currentStepIndex = 0;
-    let roleConfirmed = false;
-    let draftStarted = false;
-    let hostReady = false;
-    let guestReady = false;
-    let stepDeadline = 0;
-    let lastNotifiedStep = -1;
-
-    let hostSessionId = null;
-    let guestSessionId = null;
-    let hostName = '';
-    let guestName = '';
-
-    let bannedBosses = [];
-    let pendingSelection = null;
-    let timerInterval = null;
-
-    function getEmptyGameData() {
-      return [
-        { boss: null, terrain: null, studentBans: [] },
-        { boss: null, terrain: null, studentBans: [] },
-        { boss: null, terrain: null, studentBans: [] }
-      ];
-    }
-
-    let gameData = getEmptyGameData();
-
     window.onload = function() {
       const raid_boss_promise = fetch("https://schaledb.com/data/en/raids.min.json")
         .then(r => r.json())
@@ -571,21 +629,15 @@
               image: 'https://schaledb.com/images/student/collection/' + x + '.webp'
             });
           });
-      
           STUDENT_ROSTER.sort((a, b) => a.name.localeCompare(b.name));
         });
 
       Promise.all([raid_boss_promise, student_promise]).then(() => {
         buildDraftSequence();
-        const existingCode = document.getElementById('room-code-input').value.trim();
-        if (existingCode) {
-          connectToRoom();
-        }
         openRoleModal();
       });
     };
 
-    /* WEB AUDIO SYNTHESIZER FOR TURN ALERTS */
     function playTurnChime() {
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -603,74 +655,47 @@
         gain1.connect(ctx.destination);
         osc1.start(now);
         osc1.stop(now + 0.6);
-
-        const osc2 = ctx.createOscillator();
-        const gain2 = ctx.createGain();
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(1318.51, now + 0.08);
-        gain2.gain.setValueAtTime(0.2, now + 0.08);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-        osc2.connect(gain2);
-        gain2.connect(ctx.destination);
-        osc2.start(now + 0.08);
-        osc2.stop(now + 0.8);
       } catch (e) {
         console.log("Audio playback error:", e);
       }
     }
 
-    /* MODAL POPUP ROLE LOGIC */
     function openRoleModal() {
-      if (roleConfirmed && currentRole !== 'admin') {
-        alert("Roles and player names are locked. Only the Admin can reset the session!");
-        return;
-      }
       document.getElementById('role-modal').classList.remove('hidden');
       selectModalRole(currentRole);
     }
 
     function selectModalRole(role) {
       modalSelectedRole = role;
-      
       document.querySelectorAll('.modal-role-btn').forEach(btn => {
-        btn.classList.remove('ring-4', 'ring-sky-400', 'ring-rose-400', 'ring-amber-400');
+        btn.classList.remove('ring-4', 'ring-sky-400', 'ring-amber-400');
       });
 
       const selectedBtn = document.getElementById(`role-btn-${role}`);
       if (selectedBtn) {
-        if (role === 'host') selectedBtn.classList.add('ring-4', 'ring-sky-400');
-        else if (role === 'guest') selectedBtn.classList.add('ring-4', 'ring-rose-400');
+        if (role === 'player') selectedBtn.classList.add('ring-4', 'ring-sky-400');
         else if (role === 'admin') selectedBtn.classList.add('ring-4', 'ring-amber-400');
       }
 
       const inputSec = document.getElementById('modal-input-section');
-      const label = document.getElementById('modal-input-label');
-      const input = document.getElementById('modal-role-input');
+      const nameWrapper = document.getElementById('modal-player-name-wrapper');
       const roomWrapper = document.getElementById('modal-room-code-wrapper');
+      const input = document.getElementById('modal-role-input');
       const roomInput = document.getElementById('modal-room-code-input');
 
       inputSec.classList.remove('hidden');
 
-      if (role === 'host') {
-        label.innerText = "ENTER HOST NAME";
-        input.type = "text";
-        input.placeholder = "Player 1 Name...";
-        input.value = hostName || '';
+      if (role === 'player') {
+        nameWrapper.classList.remove('hidden');
         roomWrapper.classList.remove('hidden');
-        if (roomInput) roomInput.value = '';
-      } else if (role === 'guest') {
-        label.innerText = "ENTER GUEST NAME";
         input.type = "text";
-        input.placeholder = "Player 2 Name...";
-        input.value = guestName || '';
-        roomWrapper.classList.remove('hidden');
+        input.placeholder = "Enter your player name...";
         if (roomInput) roomInput.value = '';
       } else if (role === 'admin') {
-        label.innerText = "ENTER ADMIN PASSWORD";
+        nameWrapper.classList.remove('hidden');
+        roomWrapper.classList.add('hidden');
         input.type = "password";
         input.placeholder = "••••••••";
-        input.value = '';
-        roomWrapper.classList.add('hidden');
       }
     }
 
@@ -683,35 +708,33 @@
           alert("Incorrect Admin Password!");
           return;
         }
-
         if (!document.getElementById('room-code-input').value) {
           document.getElementById('room-code-input').value = generateRoomCode();
         }
-
         currentRole = 'admin';
         roleConfirmed = true;
-        localStorage.setItem('sh_draft_current_role', currentRole);
         document.getElementById('role-modal').classList.add('hidden');
         connectToRoom();
         return;
       }
 
+      // PLAYER ACCESS CHECK & 2-PLAYER MAX ROOM GUARD
       if (!roomCodeVal) {
         alert("Please enter the Room Code provided by Admin!");
         return;
       }
-
-      const submitBtn = document.getElementById('modal-submit-btn');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerText = "VERIFYING ROOM...";
+      if (!inputVal) {
+        alert("Please enter your player name!");
+        return;
       }
 
+      const submitBtn = document.getElementById('modal-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = "CHECKING ROOM CAPACITY...";
+
       db.ref('draft_rooms/' + roomCodeVal).once('value').then(snapshot => {
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerText = "ENTER DRAFT";
-        }
+        submitBtn.disabled = false;
+        submitBtn.innerText = "ENTER DRAFT";
 
         if (!snapshot.exists()) {
           alert("Invalid or non-existent Room Code. Please verify with the Admin.");
@@ -719,52 +742,46 @@
         }
 
         const data = snapshot.val() || {};
+        let p1Sess = data.player1SessionId;
+        let p2Sess = data.player2SessionId;
 
-        if (modalSelectedRole === 'host') {
-          if (!inputVal) {
-            alert("Please enter a name for Host!");
+        // Check if user is already one of the connected players
+        if (p1Sess === clientSessionId) {
+          assignedPlayerNum = 1;
+        } else if (p2Sess === clientSessionId) {
+          assignedPlayerNum = 2;
+        } else {
+          // If new session, check room occupancy (Max 2 Players)
+          if (p1Sess && p2Sess) {
+            alert("Room is full! (2/2 Players occupied). Access rejected.");
             return;
+          } else if (!p1Sess) {
+            assignedPlayerNum = 1;
+            p1Sess = clientSessionId;
+            db.ref('draft_rooms/' + roomCodeVal + '/player1SessionId').set(clientSessionId);
+            db.ref('draft_rooms/' + roomCodeVal + '/player1Name').set(inputVal);
+          } else if (!p2Sess) {
+            assignedPlayerNum = 2;
+            p2Sess = clientSessionId;
+            db.ref('draft_rooms/' + roomCodeVal + '/player2SessionId').set(clientSessionId);
+            db.ref('draft_rooms/' + roomCodeVal + '/player2Name').set(inputVal);
           }
-          if (data.hostName && data.hostName.toLowerCase() !== inputVal.toLowerCase()) {
-            alert(`Host role is already claimed by "${data.hostName}". You cannot join with a different name!`);
-            return;
-          }
-          hostSessionId = clientSessionId;
-          hostName = inputVal;
-        }
-
-        if (modalSelectedRole === 'guest') {
-          if (!inputVal) {
-            alert("Please enter a name for Guest!");
-            return;
-          }
-          if (data.guestName && data.guestName.toLowerCase() !== inputVal.toLowerCase()) {
-            alert(`Guest role is already claimed by "${data.guestName}". You cannot join with a different name!`);
-            return;
-          }
-          guestSessionId = clientSessionId;
-          guestName = inputVal;
         }
 
         document.getElementById('room-code-input').value = roomCodeVal;
-        currentRole = modalSelectedRole;
+        currentRole = 'player';
         roleConfirmed = true;
-        pendingSelection = null;
 
-        localStorage.setItem('sh_draft_current_role', currentRole);
         document.getElementById('role-modal').classList.add('hidden');
         connectToRoom();
       }).catch(err => {
         console.error("Room validation error:", err);
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerText = "ENTER DRAFT";
-        }
-        alert("Error validating room code. Please try again.");
+        submitBtn.disabled = false;
+        submitBtn.innerText = "ENTER DRAFT";
+        alert("Error connecting to room.");
       });
     }
 
-    /* ADMIN GENERATE NEW ROOM CODE */
     function adminGenerateNewRoom() {
       if (currentRole !== 'admin') return;
       const newCode = generateRoomCode();
@@ -772,7 +789,6 @@
       resetDraft(newCode);
     }
 
-    /* FIREBASE ROOM SYNC LOGIC */
     function connectToRoom() {
       let roomCode = document.getElementById('room-code-input').value.trim().toUpperCase();
       if (!roomCode) {
@@ -784,17 +800,11 @@
         }
       }
       
-      if (currentRoomRef) {
-        currentRoomRef.off();
-      }
-
+      if (currentRoomRef) currentRoomRef.off();
       currentRoomRef = db.ref('draft_rooms/' + roomCode);
 
-      // UPDATE DYNAMIC SPECTATOR LINK WITH URL QUERY PARAM
       const spectatorBtn = document.getElementById('header-spectator-btn');
-      if (spectatorBtn) {
-        spectatorBtn.href = `spectator.html?room=${roomCode}`;
-      }
+      if (spectatorBtn) spectatorBtn.href = `spectator.html?room=${roomCode}`;
 
       currentRoomRef.on('value', (snapshot) => {
         const data = snapshot.val();
@@ -810,7 +820,29 @@
           guestSessionId = data.guestSessionId || null;
           hostName = data.hostName || '';
           guestName = data.guestName || '';
-          
+
+          player1SessionId = data.player1SessionId || null;
+          player2SessionId = data.player2SessionId || null;
+          player1Name = data.player1Name || '';
+          player2Name = data.player2Name || '';
+
+          coinState = data.coinState || { p1Call: null, flipping: false, result: null, winnerNum: null, roleChoice: null };
+
+          if (player1SessionId === clientSessionId) assignedPlayerNum = 1;
+          else if (player2SessionId === clientSessionId) assignedPlayerNum = 2;
+
+          // Deduce player role based on coin flip winner choice
+          if (assignedPlayerNum) {
+            if (coinState.roleChoice) {
+              if ((coinState.winnerNum === assignedPlayerNum && coinState.roleChoice === 'blue') ||
+                  (coinState.winnerNum !== assignedPlayerNum && coinState.roleChoice === 'red')) {
+                currentRole = 'host';
+              } else {
+                currentRole = 'guest';
+              }
+            }
+          }
+
           const rawGameData = data.gameData || [];
           gameData = [0, 1, 2].map(idx => {
             const raw = rawGameData[idx] || {};
@@ -821,21 +853,9 @@
             };
           });
 
-          if (!hostSessionId && !guestSessionId && !draftStarted && currentRole !== 'admin') {
-            roleConfirmed = false;
-          }
-
-          if (currentRole === 'host' && hostSessionId && hostSessionId !== clientSessionId && hostName.toLowerCase() !== (hostName || '').toLowerCase()) {
-            alert('Host role has been claimed by another user.');
-            roleConfirmed = false;
-          }
-          if (currentRole === 'guest' && guestSessionId && guestSessionId !== clientSessionId && guestName.toLowerCase() !== (guestName || '').toLowerCase()) {
-            alert('Guest role has been claimed by another user.');
-            roleConfirmed = false;
-          }
-
           buildDraftSequence();
           updateDraftState();
+          handleCoinFlipSync();
         } else {
           pushStateToFirebase();
         }
@@ -855,8 +875,89 @@
         hostSessionId: hostSessionId,
         guestSessionId: guestSessionId,
         hostName: hostName,
-        guestName: guestName
+        guestName: guestName,
+        player1SessionId: player1SessionId,
+        player2SessionId: player2SessionId,
+        player1Name: player1Name,
+        player2Name: player2Name,
+        coinState: coinState
       });
+    }
+
+    /* INTERACTIVE COIN FLIP HANDLERS */
+    function setPlayerCoinCall(callVal) {
+      if (assignedPlayerNum !== 1) return;
+      coinState.p1Call = callVal;
+      pushStateToFirebase();
+    }
+
+    function triggerAdminCoinFlip() {
+      if (currentRole !== 'admin' || !coinState.p1Call) return;
+      
+      const flipResult = Math.random() < 0.5 ? 'HEADS' : 'TAILS';
+      const winnerNum = (flipResult === coinState.p1Call) ? 1 : 2;
+
+      coinState.flipping = true;
+      coinState.result = flipResult;
+      coinState.winnerNum = winnerNum;
+      coinState.roleChoice = null;
+
+      pushStateToFirebase();
+    }
+
+    function handleCoinFlipSync() {
+      const modal = document.getElementById('coin-modal');
+      const spinner = document.getElementById('coin-spinner');
+      const resultLabel = document.getElementById('coin-result-label');
+      const winnerActions = document.getElementById('coin-winner-actions');
+
+      if (coinState.flipping) {
+        modal.classList.remove('hidden');
+        winnerActions.classList.add('hidden');
+        resultLabel.innerText = "COIN IS SPINNING IN REAL-TIME...";
+        
+        // 3D Spin logic
+        const rotations = 10; 
+        const deg = (rotations * 360) + (coinState.result === 'HEADS' ? 0 : 180);
+        spinner.style.transform = `rotateY(${deg}deg)`;
+
+        setTimeout(() => {
+          if (!currentRoomRef) return;
+          const winnerName = coinState.winnerNum === 1 ? player1Name : player2Name;
+          resultLabel.innerText = `RESULT: ${coinState.result}! WINNER: ${winnerName.toUpperCase()}`;
+
+          if (assignedPlayerNum === coinState.winnerNum && !coinState.roleChoice) {
+            winnerActions.classList.remove('hidden');
+          }
+        }, 3100);
+
+      } else if (coinState.roleChoice) {
+        modal.classList.add('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function chooseCoinWinnerRole(choice) {
+      if (assignedPlayerNum !== coinState.winnerNum) return;
+      coinState.roleChoice = choice;
+      coinState.flipping = false;
+
+      const p1IsWinner = (coinState.winnerNum === 1);
+      
+      if (choice === 'blue') {
+        hostName = p1IsWinner ? player1Name : player2Name;
+        hostSessionId = p1IsWinner ? player1SessionId : player2SessionId;
+        guestName = p1IsWinner ? player2Name : player1Name;
+        guestSessionId = p1IsWinner ? player2SessionId : player1SessionId;
+      } else {
+        guestName = p1IsWinner ? player1Name : player2Name;
+        guestSessionId = p1IsWinner ? player1SessionId : player2SessionId;
+        hostName = p1IsWinner ? player2Name : player1Name;
+        hostSessionId = p1IsWinner ? player2SessionId : player1SessionId;
+      }
+
+      pushStateToFirebase();
     }
 
     function toggleReady(role) {
@@ -890,6 +991,11 @@
       guestSessionId = null;
       hostName = '';
       guestName = '';
+      player1SessionId = null;
+      player2SessionId = null;
+      player1Name = '';
+      player2Name = '';
+      coinState = { p1Call: null, flipping: false, result: null, winnerNum: null, roleChoice: null };
       gameData = getEmptyGameData();
 
       if (overrideRoomCode) {
@@ -954,13 +1060,10 @@
         updateTimerDisplay(0);
         return;
       }
-
       updateTimerDisplay(getRemainingSeconds());
-
       timerInterval = setInterval(() => {
         const remaining = getRemainingSeconds();
         updateTimerDisplay(remaining);
-
         if (remaining <= 0) {
           stopTimer();
           autoHandleTimeout();
@@ -1029,7 +1132,6 @@
 
     function autoHandleTimeout() {
       if (!draftStarted || currentStepIndex >= DRAFT_SEQUENCE.length) return;
-
       const step = DRAFT_SEQUENCE[currentStepIndex];
 
       const isMyTurnToCommit = (step.team === 'blue' && currentRole === 'host') || 
@@ -1080,11 +1182,55 @@
     }
 
     function updateDraftState() {
-      const hostDisplay = hostName ? `${hostName} (Blue)` : 'Host (Blue)';
-      const guestDisplay = guestName ? `${guestName} (Red)` : 'Guest (Red)';
+      // Update Player Labels & Badges
+      const p1Badge = document.getElementById('p1-status-badge');
+      const p2Badge = document.getElementById('p2-status-badge');
+      const coinStatusDisp = document.getElementById('coin-status-display');
+      const coinCallText = document.getElementById('coin-call-text');
+      const p1CallCtrl = document.getElementById('p1-call-controls');
+      const adminFlipBtn = document.getElementById('admin-flip-coin-btn');
 
-      document.getElementById('bar-host-label').innerText = hostDisplay + ':';
-      document.getElementById('bar-guest-label').innerText = guestDisplay + ':';
+      document.getElementById('bar-p1-label').innerText = player1Name ? `P1 (${player1Name}):` : 'Player 1:';
+      document.getElementById('bar-p2-label').innerText = player2Name ? `P2 (${player2Name}):` : 'Player 2:';
+
+      if (player1SessionId) {
+        p1Badge.innerText = "CONNECTED";
+        p1Badge.className = "bg-sky-100 text-sky-700 border border-sky-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-cyan";
+      } else {
+        p1Badge.innerText = "VACANT";
+        p1Badge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
+      }
+
+      if (player2SessionId) {
+        p2Badge.innerText = "CONNECTED";
+        p2Badge.className = "bg-rose-100 text-rose-700 border border-rose-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-rose";
+      } else {
+        p2Badge.innerText = "VACANT";
+        p2Badge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
+      }
+
+      // Coin status display
+      if (coinState.p1Call) {
+        coinStatusDisp.classList.remove('hidden');
+        const p2Call = coinState.p1Call === 'HEADS' ? 'TAILS' : 'HEADS';
+        coinCallText.innerText = `COIN CALL — P1: ${coinState.p1Call} | P2: ${p2Call}`;
+      } else {
+        coinStatusDisp.classList.add('hidden');
+      }
+
+      // P1 Call Control
+      if (assignedPlayerNum === 1 && !coinState.p1Call && !draftStarted) {
+        p1CallCtrl.classList.remove('hidden');
+      } else {
+        p1CallCtrl.classList.add('hidden');
+      }
+
+      // Admin Flip Coin Control
+      if (currentRole === 'admin' && coinState.p1Call && !coinState.roleChoice && !draftStarted) {
+        adminFlipBtn.classList.remove('hidden');
+      } else {
+        adminFlipBtn.classList.add('hidden');
+      }
 
       document.getElementById('host-ban-header-title').innerText = hostName ? `${hostName} Boss Bans` : 'Host Boss Bans';
       document.getElementById('guest-ban-header-title').innerText = guestName ? `${guestName} Boss Bans` : 'Guest Boss Bans';
@@ -1095,25 +1241,6 @@
       document.getElementById('g1-bans-label').innerText = guestName ? `${guestName} Student Bans (3):` : 'Guest Student Bans (3):';
       document.getElementById('g2-bans-label').innerText = hostName ? `${hostName} Student Bans (3):` : 'Host Student Bans (3):';
       document.getElementById('g3-bans-label').innerText = `${hostName || 'Host'} (2) & ${guestName || 'Guest'} (2) Bans (4):`;
-
-      const hostBadge = document.getElementById('host-ready-badge');
-      const guestBadge = document.getElementById('guest-ready-badge');
-
-      if (hostReady) {
-        hostBadge.innerText = "READY";
-        hostBadge.className = "bg-sky-100 text-sky-700 border border-sky-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-cyan";
-      } else {
-        hostBadge.innerText = "NOT READY";
-        hostBadge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
-      }
-
-      if (guestReady) {
-        guestBadge.innerText = "READY";
-        guestBadge.className = "bg-rose-100 text-rose-700 border border-rose-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-rose";
-      } else {
-        guestBadge.innerText = "NOT READY";
-        guestBadge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
-      }
 
       const hostReadyBtn = document.getElementById('host-ready-btn');
       if (hostReadyBtn) {
@@ -1146,8 +1273,8 @@
         banner.className = "schale-card rounded-2xl p-4 flex items-center justify-between shadow-md relative overflow-hidden";
         document.getElementById('phase-title').innerText = "PRE-DRAFT LOBBY";
         document.getElementById('turn-label').className = "text-2xl font-black text-slate-800 tracking-wide";
-        document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & ADMIN START";
-        document.getElementById('turn-subtitle').innerText = "Host and Guest must ready up before Admin can start the draft.";
+        document.getElementById('turn-label').innerText = "WAITING FOR PLAYERS & COIN FLIP";
+        document.getElementById('turn-subtitle').innerText = "Players must join and perform the Coin Flip for side priority before Admin starts the draft.";
 
         document.getElementById('header-turn-label').innerText = "LOBBY WAITING";
 
@@ -1219,7 +1346,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
           </svg>
           <h3 class="font-bold text-lg text-slate-800 mb-1 tracking-wide">Lobby In Progress</h3>
-          <p class="text-xs text-slate-500 max-w-md">Host and Guest must click <b>READY UP</b> in their respective roles. The Admin can then initiate Step 1 of the BO3 Draft.</p>
+          <p class="text-xs text-slate-500 max-w-md">Players must complete the Coin Flip and click <b>READY UP</b>. The Admin can then initiate the BO3 Draft.</p>
         </div>
       `;
     }
@@ -1260,7 +1387,6 @@
       currentStepIndex++;
 
       const nextStep = DRAFT_SEQUENCE[currentStepIndex];
-      
       if (nextStep) {
         if (nextStep.target === 'boss' && nextStep.type === 'pick') {
           pushStateToFirebase(Date.now() + 60000);
@@ -1284,11 +1410,8 @@
       searchBox.classList.add('hidden');
       rollBtn.classList.add('hidden');
 
-      if (pendingSelection) {
-        confirmBtn.classList.remove('hidden');
-      } else {
-        confirmBtn.classList.add('hidden');
-      }
+      if (pendingSelection) confirmBtn.classList.remove('hidden');
+      else confirmBtn.classList.add('hidden');
 
       const isAllowedRole = (step.team === 'blue' && currentRole === 'host') || 
                             (step.team === 'red' && currentRole === 'guest') ||
@@ -1296,7 +1419,6 @@
 
       if (step.target === 'boss') {
         document.getElementById('grid-title').innerText = "SELECTABLE BOSS POOL";
-        
         BOSS_ROSTER.forEach(boss => {
           const banRecord = bannedBosses.find(b => b.id === boss.id);
           const isBanned = !!banRecord;
@@ -1344,15 +1466,12 @@
           return;
         }
 
-        if (step.type === 'roll' && currentRole === 'admin') {
-          rollBtn.classList.remove('hidden');
-        }
+        if (step.type === 'roll' && currentRole === 'admin') rollBtn.classList.remove('hidden');
 
         TERRAIN_ROSTER.forEach(terrain => {
           const isAllowed = allowed.includes(terrain.id);
           const isPending = pendingSelection?.id === terrain.id;
           const card = document.createElement('div');
-
           let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (isAllowed ? 'border-sky-200 hover:border-amber-500' : 'border-slate-200 opacity-20 cursor-not-allowed');
 
           card.className = `slot-card schale-card-inner border rounded-xl p-2 text-center relative ${borderStyle}`;
@@ -1364,9 +1483,7 @@
             ${isPending ? '<span class="absolute top-1 left-1 bg-amber-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow">SELECTED</span>' : ''}
           `;
 
-          if (isAllowed && step.type !== 'roll' && isAllowedRole) {
-            card.onclick = () => handleCardClick(terrain);
-          }
+          if (isAllowed && step.type !== 'roll' && isAllowedRole) card.onclick = () => handleCardClick(terrain);
           grid.appendChild(card);
         });
 
@@ -1381,7 +1498,6 @@
           const isBanned = activeGameBans.some(s => s.id === student.id);
           const isPending = pendingSelection?.id === student.id;
           const card = document.createElement('div');
-
           let borderStyle = isPending ? 'border-amber-500 ring-2 ring-amber-400 scale-105' : (!isBanned ? 'border-sky-200 hover:border-rose-500' : 'border-slate-200 opacity-40 cursor-not-allowed');
 
           card.className = `student-card slot-card schale-card-inner border rounded-xl p-2 text-center relative ${borderStyle}`;
@@ -1395,15 +1511,11 @@
             ${isPending ? '<span class="absolute top-1 left-1 bg-amber-500 text-white text-[8px] font-black px-1 rounded">SELECTED</span>' : ''}
           `;
 
-          if (!isBanned && isAllowedRole) {
-            card.onclick = () => handleCardClick(student);
-          }
+          if (!isBanned && isAllowedRole) card.onclick = () => handleCardClick(student);
           grid.appendChild(card);
         });
 
-        if (searchInput && searchInput.value) {
-          filterStudents(searchInput.value);
-        }
+        if (searchInput && searchInput.value) filterStudents(searchInput.value);
       }
     }
 
@@ -1493,7 +1605,6 @@
 
       for (let g = 1; g <= 3; g++) {
         const data = gameData[g - 1] || { boss: null, terrain: null, studentBans: [] };
-
         const bossSlot = document.getElementById(`g${g}-boss-slot`);
         const isBossActive = (step?.game === g && step?.target === 'boss' && step?.type === 'pick');
         const bossPulseClass = isBossActive ? (step.team === 'blue' ? 'active-slot-blue' : 'active-slot-red') : '';
@@ -1616,68 +1727,41 @@
       `;
     }
 
-    /* MANUAL SUBMIT FUNCTION FOR ADMIN WITH STUDENT ATTRIBUTION */
     function submitResultsToSheet() {
       if (currentRole !== 'admin') return;
-    
       const submitBtn = document.getElementById('submit-sheet-btn');
       const statusMsg = document.getElementById('submit-status-msg');
-    
+
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
         submitBtn.innerHTML = `SUBMITTING...`;
       }
-    
-      const hostBannedBosses = bannedBosses
-        .filter(b => b.team === 'blue')
-        .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
-    
-      const guestBannedBosses = bannedBosses
-        .filter(b => b.team === 'red')
-        .map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
-    
+
+      const hostBannedBosses = bannedBosses.filter(b => b.team === 'blue').map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
+      const guestBannedBosses = bannedBosses.filter(b => b.team === 'red').map(b => BOSS_ROSTER.find(x => x.id === b.id)?.name || b.id);
+
       const formattedGames = gameData.map((g, idx) => {
         const gameNum = idx + 1;
         let studentBans = [];
-    
         if (g.studentBans && Array.isArray(g.studentBans)) {
           studentBans = g.studentBans.map((s, banIdx) => {
             let bannedByRole = '';
             let bannedByName = '';
-    
             if (gameNum === 1) {
-              bannedByRole = 'Guest';
-              bannedByName = guestName || 'Guest';
+              bannedByRole = 'Guest'; bannedByName = guestName || 'Guest';
             } else if (gameNum === 2) {
-              bannedByRole = 'Host';
-              bannedByName = hostName || 'Host';
+              bannedByRole = 'Host'; bannedByName = hostName || 'Host';
             } else if (gameNum === 3) {
-              if (banIdx < 2) {
-                bannedByRole = 'Host';
-                bannedByName = hostName || 'Host';
-              } else {
-                bannedByRole = 'Guest';
-                bannedByName = guestName || 'Guest';
-              }
+              if (banIdx < 2) { bannedByRole = 'Host'; bannedByName = hostName || 'Host'; }
+              else { bannedByRole = 'Guest'; bannedByName = guestName || 'Guest'; }
             }
-    
-            return {
-              name: s.name,
-              bannedByRole: bannedByRole,
-              bannedByName: bannedByName
-            };
+            return { name: s.name, bannedByRole: bannedByRole, bannedByName: bannedByName };
           });
         }
-    
-        return {
-          gameNumber: gameNum,
-          boss: g.boss,
-          terrain: g.terrain,
-          studentBans: studentBans
-        };
+        return { gameNumber: gameNum, boss: g.boss, terrain: g.terrain, studentBans: studentBans };
       });
-    
+
       fetch(WEB_APP_URL, {
         method: 'POST',
         mode: 'no-cors',
