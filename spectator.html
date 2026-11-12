@@ -106,12 +106,10 @@
       </div>
 
       <div class="flex items-center gap-2 shrink-0 z-10">
-        <div class="flex items-center bg-sky-50/80 px-2.5 py-1 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
+        <div class="flex items-center bg-sky-50/80 px-3 py-1.5 rounded-lg border border-sky-200 text-xs gap-2 shadow-inner">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span class="text-sky-700 font-bold uppercase tracking-wider text-[10px]">ROOM:</span>
-          <input type="text" id="room-code-input" value="" placeholder="CODE" class="bg-white px-2 py-0.5 rounded text-sky-800 font-black border border-sky-300 w-24 text-center outline-none focus:border-sky-500 shadow-sm uppercase text-xs">
-          <button onclick="connectToRoom()" class="bg-sky-500 hover:bg-sky-400 text-white font-black px-2.5 py-0.5 rounded transition tracking-wider shadow text-[11px]">
-            WATCH
-          </button>
+          <span id="active-room-display" class="text-sky-800 font-black tracking-widest text-xs">AUTO-SYNCING...</span>
         </div>
       </div>
     </div>
@@ -135,7 +133,7 @@
 
       <div class="flex items-center gap-2">
         <span id="spectator-room-status" class="text-[11px] font-black text-sky-700 uppercase tracking-wider bg-sky-50 px-3 py-1 rounded-lg border border-sky-200">
-          ENTER ROOM CODE TO SYNC
+          CONNECTING TO ACTIVE ROOM...
         </span>
       </div>
     </div>
@@ -289,6 +287,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let currentRoomRef = null;
+    let currentConnectedRoom = '';
 
     const BOSS_ROSTER = [];
     const TERRAIN_ROSTER = [
@@ -381,28 +380,40 @@
           updateGameCardsUI();
           renderBossOverviewGrid();
 
-          // Check URL query param ?room=XXXXXX or saved room code
+          // 1. If ?room=CODE is passed in the URL, lock onto that specific room
           const urlParams = new URLSearchParams(window.location.search);
-          const urlRoom = urlParams.get('room');
-          const savedCode = localStorage.getItem('sh_active_room_code');
-          const initialRoom = (urlRoom || savedCode || '').trim().toUpperCase();
+          const urlRoom = (urlParams.get('room') || '').trim().toUpperCase();
 
-          if (initialRoom) {
-            document.getElementById('room-code-input').value = initialRoom;
-            connectToRoom();
+          if (urlRoom) {
+            connectToRoom(urlRoom);
+          } else {
+            // 2. Otherwise automatically listen to the Admin's active room
+            db.ref('active_room').on('value', (snap) => {
+              const activeData = snap.val();
+              if (activeData && activeData.roomCode) {
+                connectToRoom(activeData.roomCode);
+              } else {
+                const roomDisplay = document.getElementById('active-room-display');
+                const statusBadge = document.getElementById('spectator-room-status');
+                if (roomDisplay) roomDisplay.innerText = 'WAITING';
+                if (statusBadge) statusBadge.innerText = 'WAITING FOR ADMIN TO OPEN ROOM';
+              }
+            });
           }
         });
     };
 
-    function connectToRoom() {
-      const roomCode = document.getElementById('room-code-input').value.trim().toUpperCase();
-      if (!roomCode) return;
+    function connectToRoom(roomCode) {
+      if (!roomCode || roomCode === currentConnectedRoom) return;
+      currentConnectedRoom = roomCode;
 
       if (currentRoomRef) currentRoomRef.off();
       currentRoomRef = db.ref('draft_rooms/' + roomCode);
 
+      const roomDisplay = document.getElementById('active-room-display');
       const statusBadge = document.getElementById('spectator-room-status');
-      if (statusBadge) statusBadge.innerText = `LIVE SYNC: ${roomCode}`;
+      if (roomDisplay) roomDisplay.innerText = roomCode;
+      if (statusBadge) statusBadge.innerText = `LIVE BROADCAST: ${roomCode}`;
 
       currentRoomRef.on('value', (snapshot) => {
         const data = snapshot.val();
@@ -429,8 +440,6 @@
 
           buildDraftSequence();
           updateDraftState();
-        } else {
-          if (statusBadge) statusBadge.innerText = `ROOM ${roomCode} NOT FOUND`;
         }
       });
     }
