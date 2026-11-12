@@ -1551,7 +1551,10 @@
         if (allowed.length === 1 && step.type !== 'roll') {
           gameData[step.game - 1].terrain = TERRAIN_ROSTER.find(t => t.id === allowed[0]);
           currentStepIndex++;
-          pushStateToFirebase(stepDeadline);
+
+          const nextStep = DRAFT_SEQUENCE[currentStepIndex];
+          const nextDuration = (nextStep && nextStep.target === 'boss' && nextStep.type === 'pick') ? 60000 : 30000;
+          pushStateToFirebase(Date.now() + nextDuration);
           return;
         }
 
