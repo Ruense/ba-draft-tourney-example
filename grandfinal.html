@@ -85,6 +85,23 @@
     .active-slot-blue { animation: slot-pulse-cyan 1.2s infinite ease-in-out; border-width: 2px !important; z-index: 20; }
     .active-slot-red { animation: slot-pulse-rose 1.2s infinite ease-in-out; border-width: 2px !important; z-index: 20; }
     .active-slot-yellow { animation: slot-pulse-yellow 1.2s infinite ease-in-out; border-width: 2px !important; z-index: 20; }
+
+    @keyframes slide-in-slot {
+      0% { opacity: 0; transform: translateY(14px) scale(0.92); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes slide-in-left {
+      0% { opacity: 0; transform: translateX(-18px) scale(0.95); }
+      100% { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    @keyframes slide-in-right {
+      0% { opacity: 0; transform: translateX(18px) scale(0.95); }
+      100% { opacity: 1; transform: translateX(0) scale(1); }
+    }
+
+    .animate-slide-slot { animation: slide-in-slot 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    .animate-slide-left { animation: slide-in-left 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    .animate-slide-right { animation: slide-in-right 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
@@ -130,38 +147,40 @@
     </div>
   </div>
 
-  <!-- HEADER WITH TOP-CENTER TIMER & TURN TEXT -->
-  <header class="bg-white/90 border-b border-sky-200 px-6 py-3 sticky top-0 z-50 backdrop-blur-md shadow-sm">
+  <!-- HEADER WITH FIXED CENTER TIMER & TURN TEXT -->
+  <header class="bg-white/90 border-b border-sky-200 px-4 md:px-6 py-2.5 sticky top-0 z-50 backdrop-blur-md shadow-sm relative">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 relative">
       
       <!-- LEFT BRANDING -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 shrink-0 z-10">
         <div class="w-10 h-10 rounded-xl bg-amber-500 border border-amber-400 flex items-center justify-center shadow-md overflow-hidden p-1">
           <img src="sh_logo_norm_white.png" alt="Senseihood Emblem" class="w-full h-full object-contain">
         </div>
         <div>
-          <h1 class="text-lg font-black text-slate-800 tracking-widest uppercase flex items-center gap-2">
+          <h1 class="text-sm md:text-base font-black text-slate-800 tracking-widest uppercase flex items-center gap-2">
             GRAND FINAL <span class="text-amber-500">BO5 DRAFT</span>
           </h1>
-          <p class="text-[11px] text-sky-600 font-bold tracking-wider">UPPER BRACKET ADVANTAGE FLOW</p>
+          <p class="text-[10px] text-sky-600 font-bold tracking-wider">UPPER BRACKET ADVANTAGE FLOW</p>
         </div>
       </div>
 
-      <!-- CENTERED TIMER & TURN TEXT -->
-      <div id="header-timer-container" class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center schale-card-inner px-5 py-1 rounded-xl border border-sky-300 min-w-[220px] text-center shadow-inner">
-        <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest leading-none">TIME LEFT</span>
-        <span id="timer-text" class="text-2xl font-black text-slate-400 tracking-wider leading-tight">--:--</span>
-        <span id="header-turn-label" class="text-[10px] font-black text-slate-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]">
-          LOBBY WAITING
-        </span>
+      <!-- FIXED CENTER TIMER & TURN TEXT -->
+      <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+        <div id="header-timer-container" class="pointer-events-auto flex flex-col items-center justify-center schale-card-inner px-4 py-1 rounded-xl border border-sky-300 min-w-[190px] text-center shadow-md transition-all duration-300">
+          <span class="text-[9px] font-black text-sky-600 uppercase tracking-widest leading-none">TIME LEFT</span>
+          <span id="timer-text" class="text-2xl font-black text-slate-400 tracking-wider leading-tight">--:--</span>
+          <span id="header-turn-label" class="text-[10px] font-black text-slate-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[170px]">
+            LOBBY WAITING
+          </span>
+        </div>
       </div>
 
       <!-- ROOM & ROLE CONTROLS -->
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center gap-2 shrink-0 z-10">
         <div class="flex items-center bg-sky-50/80 px-2.5 py-1.5 rounded-lg border border-sky-200 text-xs gap-1.5 shadow-inner">
           <span class="text-sky-700 font-bold uppercase tracking-wider text-[10px]">ROOM:</span>
-          <input type="text" id="room-code-input" value="grand-final" class="bg-white px-2 py-1 rounded text-sky-800 font-black border border-sky-300 w-28 text-center outline-none focus:border-sky-500 shadow-sm">
-          <button onclick="connectToRoom()" class="bg-sky-500 hover:bg-sky-400 text-white font-black px-3 py-1 rounded transition tracking-wider shadow">
+          <input type="text" id="room-code-input" value="grand-final" class="bg-white px-2 py-1 rounded text-sky-800 font-black border border-sky-300 w-24 md:w-28 text-center outline-none focus:border-sky-500 shadow-sm">
+          <button onclick="connectToRoom()" class="bg-sky-500 hover:bg-sky-400 text-white font-black px-2.5 py-1 rounded transition tracking-wider shadow">
             SYNC
           </button>
         </div>
@@ -382,7 +401,7 @@
           <div class="grid grid-cols-3 gap-1.5 mb-2">
             <div id="g5-boss-slot" class="col-span-2 schale-card-inner rounded-xl p-1.5 text-center min-h-[90px] flex flex-col items-center justify-center">
               <span class="text-[8px] text-amber-600 uppercase font-black">Boss</span>
-              <span class="text-[10px] font-bold text-slate-500">Guest Pick</span>
+              <span class="text-[10px] font-bold text-slate-500">Last Remaining</span>
             </div>
             <div id="g5-terrain-slot" class="col-span-1 schale-card-inner rounded-xl p-1.5 text-center min-h-[90px] flex flex-col items-center justify-center">
               <span class="text-[8px] text-amber-600 uppercase font-black">Terrain</span>
@@ -555,6 +574,11 @@
     let pendingSelection = null;
     let timerInterval = null;
 
+    let prevHostBossBans = [];
+    let prevGuestBossBans = [];
+    let prevGameBosses = [null, null, null, null, null];
+    let prevGameStudentBans = [[], [], [], [], []];
+
     function getEmptyGameData() {
       return [
         { boss: null, terrain: null, studentBans: [] },
@@ -720,6 +744,11 @@
       const roomCode = document.getElementById('room-code-input').value.trim() || 'grand-final';
       if (currentRoomRef) currentRoomRef.off();
 
+      prevHostBossBans = [];
+      prevGuestBossBans = [];
+      prevGameBosses = [null, null, null, null, null];
+      prevGameStudentBans = [[], [], [], [], []];
+
       currentRoomRef = db.ref('draft_rooms/' + roomCode);
 
       currentRoomRef.on('value', (snapshot) => {
@@ -797,6 +826,10 @@
       guestSessionId = null;
       hostName = '';
       guestName = '';
+      prevHostBossBans = [];
+      prevGuestBossBans = [];
+      prevGameBosses = [null, null, null, null, null];
+      prevGameStudentBans = [[], [], [], [], []];
       gameData = getEmptyGameData();
 
       localStorage.removeItem('sh_draft_current_role');
@@ -812,7 +845,7 @@
       if (currentRole === 'admin') {
         if (changeBtn) { changeBtn.classList.remove('hidden'); changeBtn.disabled = false; }
         if (resetBtn) { resetBtn.classList.remove('hidden'); resetBtn.disabled = false; }
-        if (spectatorBtn) spectatorBtn.classList.add('hidden');
+        if (spectatorBtn) spectatorBtn.classList.remove('hidden');
       } else {
         if (changeBtn) changeBtn.classList.add('hidden');
         if (resetBtn) resetBtn.classList.add('hidden');
@@ -869,12 +902,14 @@
       const timerHeaderLabel = timerContainer ? timerContainer.querySelector('span:first-child') : null;
       const turnLabel = document.getElementById('header-turn-label');
 
+      const baseContainerStyle = "pointer-events-auto flex flex-col items-center justify-center px-4 py-1 rounded-xl min-w-[190px] text-center shadow-md transition-all duration-300 ";
+
       if (!draftStarted) {
         timerText.innerText = "--:--";
         timerText.className = "text-2xl font-black text-slate-400 leading-tight";
         if (timerHeaderLabel) timerHeaderLabel.className = "text-[9px] font-black text-sky-600 uppercase tracking-widest leading-none";
-        if (turnLabel) turnLabel.className = "text-[10px] font-black text-slate-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]";
-        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center schale-card-inner px-5 py-1 rounded-xl border border-sky-300 min-w-[220px] text-center shadow-inner";
+        if (turnLabel) turnLabel.className = "text-[10px] font-black text-slate-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[170px]";
+        timerContainer.className = baseContainerStyle + "schale-card-inner border border-sky-300";
         return;
       }
 
@@ -887,27 +922,27 @@
 
       if (sec <= 10) {
         timerText.className = "text-2xl font-black leading-tight inherit";
-        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center px-5 py-1 rounded-xl border-2 min-w-[220px] text-center shadow-inner animate-blink-black";
+        timerContainer.className = baseContainerStyle + "border-2 animate-blink-black";
         if (timerHeaderLabel) timerHeaderLabel.className = "text-[9px] font-black uppercase tracking-widest leading-none opacity-80";
-        if (turnLabel) turnLabel.className = "text-[10px] font-black tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]";
+        if (turnLabel) turnLabel.className = "text-[10px] font-black tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[170px]";
         return;
       }
 
       if (team === 'blue') {
         timerText.className = "text-2xl font-black text-sky-600 leading-tight";
-        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-sky-50/90 px-5 py-1 rounded-xl border-2 border-sky-400 min-w-[220px] text-center shadow-inner glow-halo-cyan";
+        timerContainer.className = baseContainerStyle + "bg-sky-50/90 border-2 border-sky-400 glow-halo-cyan";
         if (timerHeaderLabel) timerHeaderLabel.className = "text-[9px] font-black text-sky-600 uppercase tracking-widest leading-none";
-        if (turnLabel) turnLabel.className = "text-[10px] font-black text-sky-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]";
+        if (turnLabel) turnLabel.className = "text-[10px] font-black text-sky-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[170px]";
       } else if (team === 'red') {
         timerText.className = "text-2xl font-black text-rose-600 leading-tight";
-        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-rose-50/90 px-5 py-1 rounded-xl border-2 border-rose-400 min-w-[220px] text-center shadow-inner glow-halo-rose";
+        timerContainer.className = baseContainerStyle + "bg-rose-50/90 border-2 border-rose-400 glow-halo-rose";
         if (timerHeaderLabel) timerHeaderLabel.className = "text-[9px] font-black text-rose-600 uppercase tracking-widest leading-none";
-        if (turnLabel) turnLabel.className = "text-[10px] font-black text-rose-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]";
+        if (turnLabel) turnLabel.className = "text-[10px] font-black text-rose-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[170px]";
       } else {
         timerText.className = "text-2xl font-black text-amber-600 leading-tight";
-        timerContainer.className = "absolute left-1/2 -translate-x-1/2 flex flex-col items-center justify-center bg-amber-50/90 px-5 py-1 rounded-xl border-2 border-amber-400 min-w-[220px] text-center shadow-inner glow-halo-gold";
+        timerContainer.className = baseContainerStyle + "bg-amber-50/90 border-2 border-amber-400 glow-halo-gold";
         if (timerHeaderLabel) timerHeaderLabel.className = "text-[9px] font-black text-amber-600 uppercase tracking-widest leading-none";
-        if (turnLabel) turnLabel.className = "text-[10px] font-black text-amber-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[200px]";
+        if (turnLabel) turnLabel.className = "text-[10px] font-black text-amber-700 tracking-wider uppercase whitespace-nowrap overflow-hidden truncate max-w-[170px]";
       }
     }
 
@@ -956,13 +991,19 @@
       document.getElementById('bar-host-label').innerText = hostDisplay + ':';
       document.getElementById('bar-guest-label').innerText = guestDisplay + ':';
 
-      document.getElementById('host-ban-header-title').innerText = hostName ? `${hostName} Bans (4)` : 'Host Bans (4)';
-      document.getElementById('guest-ban-header-title').innerText = guestName ? `${guestName} Bans (2)` : 'Guest Bans (2)';
+      document.getElementById('host-ban-header-title').innerText = hostName ? `${hostName} Bans (4)` : 'Host Boss Bans (4)';
+      document.getElementById('guest-ban-header-title').innerText = guestName ? `${guestName} Bans (2)` : 'Guest Boss Bans (2)';
 
       document.getElementById('g1-title').innerText = hostName ? `G1 (${hostName.toUpperCase()})` : 'G1 (HOST)';
       document.getElementById('g2-title').innerText = guestName ? `G2 (${guestName.toUpperCase()})` : 'G2 (GUEST)';
       document.getElementById('g3-title').innerText = hostName ? `G3 (${hostName.toUpperCase()})` : 'G3 (HOST)';
       document.getElementById('g4-title').innerText = guestName ? `G4 (${guestName.toUpperCase()})` : 'G4 (GUEST)';
+
+      document.getElementById('g1-bans-label').innerText = `${guestName || 'Guest'} Bans (3):`;
+      document.getElementById('g2-bans-label').innerText = `${hostName || 'Host'} Bans (3):`;
+      document.getElementById('g3-bans-label').innerText = `${guestName || 'Guest'} Bans (3):`;
+      document.getElementById('g4-bans-label').innerText = `${hostName || 'Host'} Bans (3):`;
+      document.getElementById('g5-bans-label').innerText = `${hostName || 'Host'}(2) & ${guestName || 'Guest'}(2) Bans (4):`;
 
       const hostBadge = document.getElementById('host-ready-badge');
       const guestBadge = document.getElementById('guest-ready-badge');
@@ -1176,12 +1217,14 @@
 
       if (step.target === 'boss') {
         document.getElementById('grid-title').innerText = "SELECTABLE BOSS POOL";
+        let availCount = 0;
         
         BOSS_ROSTER.forEach(boss => {
           const banRecord = bannedBosses.find(b => b.id === boss.id);
           const isBanned = !!banRecord;
           const isPicked = gameData.some(g => g.boss?.id === boss.id);
           const isAvailable = !isBanned && !isPicked;
+          if (isAvailable) availCount++;
           const isPending = pendingSelection?.id === boss.id;
 
           const card = document.createElement('div');
@@ -1200,6 +1243,7 @@
               <img src="${boss.image}" class="w-full h-full object-cover">
             </div>
             <span class="font-bold text-xs text-slate-800">${boss.name}</span>
+            <span class="text-[10px] text-sky-600 font-semibold">${boss.terrains.length} Terrains</span>
             ${banBadge}
             ${isPicked ? '<span class="absolute top-1 right-1 bg-emerald-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow">PICKED</span>' : ''}
           `;
@@ -1207,11 +1251,23 @@
           if (isAvailable && isAllowedRole) card.onclick = () => handleCardClick(boss);
           grid.appendChild(card);
         });
+        document.getElementById('grid-count').innerText = `${availCount} Available`;
 
       } else if (step.target === 'terrain') {
         document.getElementById('grid-title').innerText = "SELECT TERRAIN";
         const activeBoss = gameData[step.game - 1].boss;
         const allowed = activeBoss ? activeBoss.terrains : ['street', 'outdoor', 'indoor'];
+        document.getElementById('grid-count').innerText = `${allowed.length} Available`;
+
+        // Auto-select terrain if boss only has 1 allowed terrain and reset timer for the next step
+        if (allowed.length === 1 && step.type !== 'roll') {
+          gameData[step.game - 1].terrain = TERRAIN_ROSTER.find(t => t.id === allowed[0]);
+          currentStepIndex++;
+
+          const nextStep = DRAFT_SEQUENCE[currentStepIndex];
+          pushStateToFirebase(Date.now() + getStepDuration(nextStep));
+          return;
+        }
 
         if (step.type === 'roll' && currentRole === 'admin') rollBtn.classList.remove('hidden');
 
@@ -1241,6 +1297,7 @@
         const activeQuery = searchInput ? searchInput.value.trim() : '';
       
         const activeGameBans = gameData[step.game - 1].studentBans || [];
+        document.getElementById('grid-count').innerText = `${STUDENT_ROSTER.length - activeGameBans.length} Available`;
       
         STUDENT_ROSTER.forEach(student => {
           const isBanned = activeGameBans.some(s => s.id === student.id);
@@ -1301,11 +1358,14 @@
 
         if (banned) {
           const bossObj = BOSS_ROSTER.find(x => x.id === banned.id);
+          const isNew = prevHostBossBans[i] !== banned.id;
+          const animClass = isNew ? 'animate-slide-left' : '';
+
           hostHTML += `
-            <div class="relative w-16 h-16 schale-card-inner border border-sky-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
+            <div class="relative w-16 h-16 schale-card-inner border border-sky-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between ${animClass}">
               <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-75">
-              <div class="absolute inset-x-0 bottom-0 bg-slate-900/80 p-0.5 text-center">
-                <span class="text-[8px] font-black text-sky-200 truncate block">${bossObj ? bossObj.name : ''}</span>
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-3 pb-0.5 px-0.5 text-center z-10">
+                <span class="text-[8.5px] font-black text-sky-200 truncate block tracking-wide">${bossObj ? bossObj.name : ''}</span>
               </div>
             </div>
           `;
@@ -1314,28 +1374,35 @@
         }
       }
       document.getElementById('host-boss-bans-container').innerHTML = hostHTML;
+      prevHostBossBans = hostBans.map(b => b.id);
 
       let guestHTML = '';
+      const guestLabels = [2, 1];
       for (let i = 0; i < 2; i++) {
-        const banned = guestBans[i];
-        const isActiveSlot = (step?.target === 'boss' && step?.type === 'ban' && step?.team === 'red' && guestBans.length === i);
+        const banIndex = 1 - i;
+        const banned = guestBans[banIndex];
+        const isActiveSlot = (step?.target === 'boss' && step?.type === 'ban' && step?.team === 'red' && guestBans.length === banIndex);
         const activeClass = isActiveSlot ? 'active-slot-red' : '';
 
         if (banned) {
           const bossObj = BOSS_ROSTER.find(x => x.id === banned.id);
+          const isNew = prevGuestBossBans[i] !== banned.id;
+          const animClass = isNew ? 'animate-slide-right' : '';
+
           guestHTML += `
-            <div class="relative w-16 h-16 schale-card-inner border border-rose-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
+            <div class="relative w-16 h-16 schale-card-inner border border-rose-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between ${animClass}">
               <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-75">
-              <div class="absolute inset-x-0 bottom-0 bg-slate-900/80 p-0.5 text-center">
-                <span class="text-[8px] font-black text-rose-200 truncate block">${bossObj ? bossObj.name : ''}</span>
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-3 pb-0.5 px-0.5 text-center z-10">
+                <span class="text-[8.5px] font-black text-rose-200 truncate block tracking-wide">${bossObj ? bossObj.name : ''}</span>
               </div>
             </div>
           `;
         } else {
-          guestHTML += `<div class="w-16 h-16 schale-card-inner border border-rose-200 rounded-xl flex items-center justify-center text-rose-600 font-black text-xs ${activeClass}">${i + 1}</div>`;
+          guestHTML += `<div class="w-16 h-16 schale-card-inner border border-rose-200 rounded-xl flex items-center justify-center text-rose-600 font-black text-xs ${activeClass}">${guestLabels[i]}</div>`;
         }
       }
       document.getElementById('guest-boss-bans-container').innerHTML = guestHTML;
+      prevGuestBossBans = [0, 1].map(i => guestBans[1 - i]?.id || null);
     }
 
     function updateGameCardsUI() {
@@ -1348,11 +1415,21 @@
         const bossPulseClass = isBossActive ? (step.team === 'blue' ? 'active-slot-blue' : 'active-slot-red') : '';
 
         if (data.boss) {
-          bossSlot.className = "col-span-2 schale-card-inner border border-sky-300 rounded-xl p-1.5 text-center min-h-[90px] flex flex-col items-center justify-center relative";
-          bossSlot.innerHTML = `<img src="${data.boss.image}" class="w-full h-12 object-cover rounded mb-1"><span class="text-[10px] font-bold text-sky-700 truncate w-full">${data.boss.name}</span>`;
+          const isNewBoss = prevGameBosses[g - 1] !== data.boss.id;
+          const bossAnimClass = isNewBoss ? 'animate-slide-slot' : '';
+
+          bossSlot.className = "col-span-2 schale-card-inner border border-sky-300 rounded-xl p-1.5 text-center min-h-[90px] flex flex-col items-center justify-center relative overflow-hidden";
+          bossSlot.innerHTML = `
+            <div class="w-full h-full flex flex-col items-center justify-center ${bossAnimClass}">
+              <img src="${data.boss.image}" class="w-full h-12 object-cover rounded mb-1">
+              <span class="text-[10px] font-bold text-sky-700 truncate w-full text-center">${data.boss.name}</span>
+            </div>
+          `;
+          prevGameBosses[g - 1] = data.boss.id;
         } else {
+          prevGameBosses[g - 1] = null;
           bossSlot.className = `col-span-2 schale-card-inner border border-sky-200 rounded-xl p-1.5 text-center min-h-[90px] flex flex-col items-center justify-center relative ${bossPulseClass}`;
-          bossSlot.innerHTML = `<span class="text-[8px] text-sky-600 uppercase font-black">Boss</span><span class="text-[10px] font-bold text-slate-500">Pending</span>`;
+          bossSlot.innerHTML = `<span class="text-[8px] text-sky-600 uppercase font-black">Boss</span><span class="text-[10px] font-bold text-slate-500">${g === 5 ? 'Last Remaining' : 'Pending'}</span>`;
         }
 
         const terrainSlot = document.getElementById(`g${g}-terrain-slot`);
@@ -1371,6 +1448,7 @@
         const bansContainer = document.getElementById(`g${g}-bans-container`);
         let slotsHTML = '';
         const currentBans = data.studentBans || [];
+        const prevBans = prevGameStudentBans[g - 1] || [];
 
         for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
           const bannedStudent = currentBans[slotIndex];
@@ -1378,10 +1456,13 @@
           const studentPulseClass = isStudentSlotActive ? (step.team === 'blue' ? 'active-slot-blue' : 'active-slot-red') : '';
 
           if (bannedStudent) {
+            const isNewStudent = prevBans[slotIndex] !== bannedStudent.id;
+            const studentAnimClass = isNewStudent ? 'animate-slide-slot' : '';
+
             slotsHTML += `
-              <div class="relative w-full h-14 schale-card-inner border border-rose-300 rounded-lg overflow-hidden shadow-sm">
+              <div class="relative w-full h-14 schale-card-inner border border-rose-300 rounded-lg overflow-hidden shadow-sm ${studentAnimClass}">
                 <img src="${bannedStudent.image}" class="w-full h-full object-cover grayscale opacity-75">
-                <div class="absolute inset-x-0 bottom-0 bg-slate-900/80 p-0.5 text-center">
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-3 pb-0.5 px-0.5 text-center z-10">
                   <span class="text-[8px] font-black text-rose-200 truncate block">${bannedStudent.name}</span>
                 </div>
               </div>
@@ -1391,6 +1472,7 @@
           }
         }
         bansContainer.innerHTML = slotsHTML;
+        prevGameStudentBans[g - 1] = currentBans.map(s => s.id);
       }
     }
 
