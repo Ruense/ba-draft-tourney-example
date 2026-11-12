@@ -101,6 +101,49 @@
     .active-slot-blue { animation: slot-pulse-cyan 1.2s infinite ease-in-out; border-width: 2px !important; z-index: 20; }
     .active-slot-red { animation: slot-pulse-rose 1.2s infinite ease-in-out; border-width: 2px !important; z-index: 20; }
     .active-slot-yellow { animation: slot-pulse-yellow 1.2s infinite ease-in-out; border-width: 2px !important; z-index: 20; }
+
+    @keyframes slide-in-slot {
+      0% {
+        opacity: 0;
+        transform: translateY(14px) scale(0.92);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes slide-in-left {
+      0% {
+        opacity: 0;
+        transform: translateX(-18px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    @keyframes slide-in-right {
+      0% {
+        opacity: 0;
+        transform: translateX(18px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    .animate-slide-slot {
+      animation: slide-in-slot 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .animate-slide-left {
+      animation: slide-in-left 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .animate-slide-right {
+      animation: slide-in-right 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
@@ -511,6 +554,11 @@
     let pendingSelection = null;
     let timerInterval = null;
 
+    let prevHostBossBans = [];
+    let prevGuestBossBans = [];
+    let prevGameBosses = [null, null, null];
+    let prevGameStudentBans = [[], [], []];
+
     function getEmptyGameData() {
       return [
         { boss: null, terrain: null, studentBans: [] },
@@ -806,7 +854,6 @@
       document.getElementById('room-code-input').value = roomCode;
       localStorage.setItem('sh_active_room_code', roomCode);
 
-      // Broadcast active room globally so spectators auto-connect without entering a code
       if (currentRole === 'admin') {
         db.ref('active_room').set({
           roomCode: roomCode,
@@ -1022,6 +1069,11 @@
       player2Name = '';
       coinState = { p1Call: null, flipping: false, result: null, winnerNum: null, roleChoice: null };
       gameData = getEmptyGameData();
+
+      prevHostBossBans = [];
+      prevGuestBossBans = [];
+      prevGameBosses = [null, null, null];
+      prevGameStudentBans = [[], [], []];
 
       document.getElementById('room-code-input').value = newRoomCode;
       localStorage.setItem('sh_active_room_code', newRoomCode);
@@ -1591,8 +1643,11 @@
 
         if (banned) {
           const bossObj = BOSS_ROSTER.find(x => x.id === banned.id);
+          const isNew = prevHostBossBans[i] !== banned.id;
+          const animClass = isNew ? 'animate-slide-left' : '';
+
           hostHTML += `
-            <div class="relative w-20 h-20 schale-card-inner border border-sky-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
+            <div class="relative w-20 h-20 schale-card-inner border border-sky-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between ${animClass}">
               <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-75">
               <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
                 <span class="text-[9.5px] font-black text-sky-200 truncate block tracking-wide">${bossObj ? bossObj.name : ''}</span>
@@ -1608,6 +1663,7 @@
         }
       }
       document.getElementById('host-boss-bans-container').innerHTML = hostHTML;
+      prevHostBossBans = hostBans.map(b => b.id);
 
       let guestHTML = '';
       const guestLabels = [4, 3, 2, 1];
@@ -1618,8 +1674,11 @@
 
         if (banned) {
           const bossObj = BOSS_ROSTER.find(x => x.id === banned.id);
+          const isNew = prevGuestBossBans[i] !== banned.id;
+          const animClass = isNew ? 'animate-slide-right' : '';
+
           guestHTML += `
-            <div class="relative w-20 h-20 schale-card-inner border border-rose-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between">
+            <div class="relative w-20 h-20 schale-card-inner border border-rose-400 rounded-xl overflow-hidden shadow-md flex flex-col justify-between ${animClass}">
               <img src="${bossObj ? bossObj.image : ''}" class="w-full h-full object-cover grayscale opacity-75">
               <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
                 <span class="text-[9.5px] font-black text-rose-200 truncate block tracking-wide">${bossObj ? bossObj.name : ''}</span>
@@ -1635,6 +1694,7 @@
         }
       }
       document.getElementById('guest-boss-bans-container').innerHTML = guestHTML;
+      prevGuestBossBans = guestBans.map(b => b.id);
     }
 
     function updateGameCardsUI() {
@@ -1647,14 +1707,19 @@
         const bossPulseClass = isBossActive ? (step.team === 'blue' ? 'active-slot-blue' : 'active-slot-red') : '';
 
         if (data.boss) {
-          bossSlot.className = "col-span-2 schale-card-inner border border-sky-300 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative";
+          const isNewBoss = prevGameBosses[g - 1] !== data.boss.id;
+          const bossAnimClass = isNewBoss ? 'animate-slide-slot' : '';
+
+          bossSlot.className = "col-span-2 schale-card-inner border border-sky-300 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative overflow-hidden";
           bossSlot.innerHTML = `
-            <div class="w-full h-full flex flex-col items-center justify-center">
+            <div class="w-full h-full flex flex-col items-center justify-center ${bossAnimClass}">
               <img src="${data.boss.image}" class="w-full h-16 object-cover rounded-lg mb-1">
               <span class="text-xs font-bold text-sky-700 truncate w-full text-center">${data.boss.name}</span>
             </div>
           `;
+          prevGameBosses[g - 1] = data.boss.id;
         } else {
+          prevGameBosses[g - 1] = null;
           bossSlot.className = `col-span-2 schale-card-inner border border-sky-200 rounded-xl p-2 text-center min-h-[105px] flex flex-col items-center justify-center relative ${bossPulseClass}`;
           bossSlot.innerHTML = `
             <span class="text-[9px] text-sky-600 uppercase font-black tracking-widest">Boss</span>
@@ -1686,6 +1751,7 @@
         const bansContainer = document.getElementById(`g${g}-bans-container`);
         let slotsHTML = '';
         const currentBans = data.studentBans || [];
+        const prevBans = prevGameStudentBans[g - 1] || [];
 
         for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
           const bannedStudent = currentBans[slotIndex];
@@ -1693,8 +1759,11 @@
           const studentPulseClass = isStudentSlotActive ? (step.team === 'blue' ? 'active-slot-blue' : 'active-slot-red') : '';
 
           if (bannedStudent) {
+            const isNewStudent = prevBans[slotIndex] !== bannedStudent.id;
+            const studentAnimClass = isNewStudent ? 'animate-slide-slot' : '';
+
             slotsHTML += `
-              <div class="relative w-full h-20 schale-card-inner border border-rose-300 rounded-xl overflow-hidden shadow-md">
+              <div class="relative w-full h-20 schale-card-inner border border-rose-300 rounded-xl overflow-hidden shadow-md ${studentAnimClass}">
                 <img src="${bannedStudent.image}" class="w-full h-full object-cover grayscale opacity-75">
                 <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pt-4 pb-1 px-1 text-center z-10">
                   <span class="text-[10px] font-black text-rose-200 truncate block tracking-wide">${bannedStudent.name}</span>
@@ -1711,6 +1780,7 @@
         }
 
         bansContainer.innerHTML = slotsHTML;
+        prevGameStudentBans[g - 1] = currentBans.map(s => s.id);
       }
     }
 
