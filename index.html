@@ -1668,8 +1668,9 @@
       let guestHTML = '';
       const guestLabels = [4, 3, 2, 1];
       for (let i = 0; i < 4; i++) {
-        const banned = guestBans[i];
-        const isActiveSlot = (step?.target === 'boss' && step?.type === 'ban' && step?.team === 'red' && guestBans.length === i);
+        const banIndex = 3 - i;
+        const banned = guestBans[banIndex];
+        const isActiveSlot = (step?.target === 'boss' && step?.type === 'ban' && step?.team === 'red' && guestBans.length === banIndex);
         const activeClass = isActiveSlot ? 'active-slot-red' : '';
 
         if (banned) {
@@ -1694,7 +1695,7 @@
         }
       }
       document.getElementById('guest-boss-bans-container').innerHTML = guestHTML;
-      prevGuestBossBans = guestBans.map(b => b.id);
+      prevGuestBossBans = [0, 1, 2, 3].map(i => guestBans[3 - i]?.id || null);
     }
 
     function updateGameCardsUI() {
