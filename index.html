@@ -49,7 +49,7 @@
       box-shadow: 0 6px 18px rgba(18, 180, 255, 0.25);
     }
 
-    /* 3D COIN SPIN ANIMATION */
+    /* INSTANT 3D COIN DISPLAY */
     .coin-perspective { perspective: 1000px; }
     .coin-inner {
       width: 100%;
@@ -150,10 +150,10 @@
     </div>
   </div>
 
-  <!-- COIN FLIP ANIMATION POPUP OVERLAY -->
+  <!-- INSTANT COIN FLIP POPUP OVERLAY -->
   <div id="coin-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[120] hidden flex flex-col items-center justify-center p-4">
     <div class="schale-card rounded-2xl max-w-sm w-full p-6 text-center flex flex-col items-center gap-4 shadow-2xl border-2 border-amber-300 relative">
-      <h3 id="coin-modal-title" class="text-base font-black text-slate-800 uppercase tracking-widest">COIN FLIPPING...</h3>
+      <h3 id="coin-modal-title" class="text-base font-black text-slate-800 uppercase tracking-widest">COIN FLIP RESULT</h3>
       
       <div class="coin-perspective w-32 h-32 my-4">
         <div id="coin-spinner" class="coin-inner">
@@ -225,14 +225,6 @@
             CHANGE
           </button>
         </div>
-
-        <a id="header-spectator-btn" href="spectator.html" target="_blank" class="hidden bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-sky-200 transition flex items-center gap-1 shadow-sm">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-          </svg>
-          SPECTATOR
-        </a>
       </div>
     </div>
   </header>
@@ -814,11 +806,16 @@
       document.getElementById('room-code-input').value = roomCode;
       localStorage.setItem('sh_active_room_code', roomCode);
 
+      // Broadcast active room globally so spectators auto-connect without entering a code
+      if (currentRole === 'admin') {
+        db.ref('active_room').set({
+          roomCode: roomCode,
+          updatedAt: Date.now()
+        });
+      }
+
       if (currentRoomRef) currentRoomRef.off();
       currentRoomRef = db.ref('draft_rooms/' + roomCode);
-
-      const spectatorBtn = document.getElementById('header-spectator-btn');
-      if (spectatorBtn) spectatorBtn.href = `spectator.html?room=${roomCode}`;
 
       currentRoomRef.on('value', (snapshot) => {
         const data = snapshot.val();
@@ -1037,18 +1034,15 @@
 
       const changeBtn = document.getElementById('change-role-btn');
       const resetBtn = document.getElementById('lobby-reset-btn');
-      const spectatorBtn = document.getElementById('header-spectator-btn');
       const adminGenBtn = document.getElementById('admin-gen-code-btn');
 
       if (currentRole === 'admin') {
         if (changeBtn) changeBtn.classList.remove('hidden');
         if (resetBtn) resetBtn.classList.remove('hidden');
         if (adminGenBtn) adminGenBtn.classList.remove('hidden');
-        if (spectatorBtn) spectatorBtn.classList.add('hidden');
       } else {
         if (changeBtn) changeBtn.classList.add('hidden');
         if (resetBtn) resetBtn.classList.add('hidden');
-        if (spectatorBtn) spectatorBtn.classList.add('hidden');
         if (adminGenBtn) adminGenBtn.classList.add('hidden');
       }
 
@@ -1216,7 +1210,6 @@
       const adminFlipBtn = document.getElementById('admin-flip-coin-btn');
 
       if (coinState.roleChoice) {
-        // Side selection complete: Switch bar to HOST (Blue) & GUEST (Red)
         p1Label.innerText = hostName ? `HOST (${hostName}):` : 'HOST:';
         p2Label.innerText = guestName ? `GUEST (${guestName}):` : 'GUEST:';
 
@@ -1236,7 +1229,6 @@
           p2Badge.className = "bg-rose-100 text-rose-700 border border-rose-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-rose";
         }
       } else {
-        // Pre-coin flip: Show P1 & P2 connection status
         p1Label.innerText = player1Name ? `P1 (${player1Name}):` : 'Player 1:';
         p2Label.innerText = player2Name ? `P2 (${player2Name}):` : 'Player 2:';
 
