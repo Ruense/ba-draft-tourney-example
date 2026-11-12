@@ -1206,6 +1206,8 @@
     }
 
     function updateDraftState() {
+      const p1Label = document.getElementById('bar-p1-label');
+      const p2Label = document.getElementById('bar-p2-label');
       const p1Badge = document.getElementById('p1-status-badge');
       const p2Badge = document.getElementById('p2-status-badge');
       const coinStatusDisp = document.getElementById('coin-status-display');
@@ -1213,23 +1215,46 @@
       const p1CallCtrl = document.getElementById('p1-call-controls');
       const adminFlipBtn = document.getElementById('admin-flip-coin-btn');
 
-      document.getElementById('bar-p1-label').innerText = player1Name ? `P1 (${player1Name}):` : 'Player 1:';
-      document.getElementById('bar-p2-label').innerText = player2Name ? `P2 (${player2Name}):` : 'Player 2:';
+      if (coinState.roleChoice) {
+        // Side selection complete: Switch bar to HOST (Blue) & GUEST (Red)
+        p1Label.innerText = hostName ? `HOST (${hostName}):` : 'HOST:';
+        p2Label.innerText = guestName ? `GUEST (${guestName}):` : 'GUEST:';
 
-      if (player1SessionId) {
-        p1Badge.innerText = "CONNECTED";
-        p1Badge.className = "bg-sky-100 text-sky-700 border border-sky-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-cyan";
-      } else {
-        p1Badge.innerText = "VACANT";
-        p1Badge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
-      }
+        if (hostReady) {
+          p1Badge.innerText = "READY";
+          p1Badge.className = "bg-emerald-100 text-emerald-700 border border-emerald-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-emerald";
+        } else {
+          p1Badge.innerText = "CONNECTED";
+          p1Badge.className = "bg-sky-100 text-sky-700 border border-sky-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-cyan";
+        }
 
-      if (player2SessionId) {
-        p2Badge.innerText = "CONNECTED";
-        p2Badge.className = "bg-rose-100 text-rose-700 border border-rose-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-rose";
+        if (guestReady) {
+          p2Badge.innerText = "READY";
+          p2Badge.className = "bg-emerald-100 text-emerald-700 border border-emerald-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-emerald";
+        } else {
+          p2Badge.innerText = "CONNECTED";
+          p2Badge.className = "bg-rose-100 text-rose-700 border border-rose-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-rose";
+        }
       } else {
-        p2Badge.innerText = "VACANT";
-        p2Badge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
+        // Pre-coin flip: Show P1 & P2 connection status
+        p1Label.innerText = player1Name ? `P1 (${player1Name}):` : 'Player 1:';
+        p2Label.innerText = player2Name ? `P2 (${player2Name}):` : 'Player 2:';
+
+        if (player1SessionId) {
+          p1Badge.innerText = "CONNECTED";
+          p1Badge.className = "bg-sky-100 text-sky-700 border border-sky-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-cyan";
+        } else {
+          p1Badge.innerText = "VACANT";
+          p1Badge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
+        }
+
+        if (player2SessionId) {
+          p2Badge.innerText = "CONNECTED";
+          p2Badge.className = "bg-rose-100 text-rose-700 border border-rose-300 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider glow-halo-rose";
+        } else {
+          p2Badge.innerText = "VACANT";
+          p2Badge.className = "bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase tracking-wider";
+        }
       }
 
       if (coinState.p1Call) {
