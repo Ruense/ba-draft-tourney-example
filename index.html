@@ -56,7 +56,6 @@
       height: 100%;
       position: relative;
       transform-style: preserve-3d;
-      transition: transform 3s cubic-bezier(0.15, 0.85, 0.35, 1.2);
     }
     .coin-face {
       position: absolute;
@@ -924,43 +923,33 @@
 
     function handleCoinFlipSync() {
       const modal = document.getElementById('coin-modal');
+      const modalTitle = document.getElementById('coin-modal-title');
       const spinner = document.getElementById('coin-spinner');
       const resultLabel = document.getElementById('coin-result-label');
       const winnerActions = document.getElementById('coin-winner-actions');
 
       if (coinState.flipping) {
         modal.classList.remove('hidden');
-        winnerActions.classList.add('hidden');
-        resultLabel.innerText = "COIN IS SPINNING IN REAL-TIME...";
-        
-        const rotations = 10; 
-        const deg = (rotations * 360) + (coinState.result === 'HEADS' ? 0 : 180);
+        if (modalTitle) modalTitle.innerText = "COIN FLIP RESULT";
+
+        const deg = coinState.result === 'HEADS' ? 0 : 180;
         spinner.style.transform = `rotateY(${deg}deg)`;
 
-        setTimeout(() => {
-          if (!currentRoomRef) return;
-          
-          const winnerName = coinState.winnerNum === 1 
-            ? (player1Name || 'Player 1') 
-            : (player2Name || 'Player 2');
+        const winnerName = coinState.winnerNum === 1 
+          ? (player1Name || 'Player 1') 
+          : (player2Name || 'Player 2');
 
+        if (assignedPlayerNum && assignedPlayerNum === coinState.winnerNum) {
           resultLabel.innerText = `RESULT: ${coinState.result}! WINNER: ${winnerName.toUpperCase()}`;
-
-          if (assignedPlayerNum && assignedPlayerNum === coinState.winnerNum) {
-            if (!coinState.roleChoice) {
-              winnerActions.classList.remove('hidden');
-            }
-          } else {
-            winnerActions.classList.add('hidden');
-            if (!coinState.roleChoice) {
-              resultLabel.innerText = `RESULT: ${coinState.result}! WINNER: ${winnerName.toUpperCase()} — WAITING FOR SIDE SELECTION...`;
-            }
+          if (!coinState.roleChoice) {
+            winnerActions.classList.remove('hidden');
           }
-        }, 3100);
-
-      } else if (coinState.roleChoice) {
-        modal.classList.add('hidden');
-        winnerActions.classList.add('hidden');
+        } else {
+          winnerActions.classList.add('hidden');
+          if (!coinState.roleChoice) {
+            resultLabel.innerText = `RESULT: ${coinState.result}! WINNER: ${winnerName.toUpperCase()} — WAITING FOR SIDE SELECTION...`;
+          }
+        }
       } else {
         modal.classList.add('hidden');
         winnerActions.classList.add('hidden');
